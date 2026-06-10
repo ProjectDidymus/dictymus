@@ -18,6 +18,7 @@ fn fold_final(c: char) -> char {
 /// Strip diacritics/points and fold case so an unpointed query matches a
 /// pointed lemma.
 pub fn normalize_for_search(word: &str) -> String {
+	// icu 2.x: const-fn singletons over baked data; constructing per call is free.
 	let nfd = DecomposingNormalizer::new_nfd();
 	let nfc = ComposingNormalizer::new_nfc();
 	let gc = CodePointMapData::<GeneralCategory>::new();

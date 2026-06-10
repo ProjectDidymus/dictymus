@@ -32,12 +32,14 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 		});
 	}
 
-	// Filtering: recompute on every text change
-	let tab_for_text = Rc::clone(tab);
+	// Filtering: recompute on every text change.
+	// Weak capture: bail if the tab is being closed (see TabManager::close_tab).
+	let tab_for_text = Rc::downgrade(tab);
 	let last_count: Cell<usize> = Cell::new(usize::MAX);
 	tab.search.on_text_updated(move |_event| {
-		let query = normalize_for_search(&tab_for_text.search.get_value());
-		let words = tab_for_text.dict.normalized_words();
+		let Some(tab) = tab_for_text.upgrade() else { return };
+		let query = normalize_for_search(&tab.search.get_value());
+		let words = tab.dict.normalized_words();
 		let mut filtered = Vec::new();
 		for (i, w) in words.iter().enumerate() {
 			if query.is_empty() || w.starts_with(&query) {
@@ -45,16 +47,12 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 			}
 		}
 		let count = filtered.len();
-		*tab_for_text.filtered.borrow_mut() = filtered;
-		lemma_list::repopulate(&tab_for_text);
+		*tab.filtered.borrow_mut() = filtered;
+		lemma_list::repopulate(&tab);
 		if count != last_count.get() {
 			last_count.set(count);
 			let msg = if count == 1 { "1 result".to_string() } else { format!("{count} results") };
-			crate::accessibility::announce_status(
-				tab_for_text.frame,
-				tab_for_text.status_bar,
-				&msg,
-			);
+			crate::accessibility::announce_status(tab.frame, tab.status_bar, &msg);
 		}
 	});
 }

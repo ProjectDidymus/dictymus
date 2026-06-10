@@ -8,7 +8,12 @@ pub fn render_row(tab: &DictionaryTab, row: usize) {
 	let Some(&word_idx) = filtered.get(row) else { return };
 	let title = tab.dict.words().get(word_idx).cloned().unwrap_or_else(|| "Article".to_string());
 	drop(filtered);
-	let html = tab.dict.article_html(word_idx).unwrap_or_default();
+	// Render a readable message rather than a blank page — real page content,
+	// so a screen reader arrowing into the article reads it.
+	let html = tab
+		.dict
+		.article_html(word_idx)
+		.unwrap_or_else(|| "<p>Article unavailable.</p>".to_string());
 	let page = wrap_html(&html, &title);
 	*tab.article_html.borrow_mut() = page;
 	tab.article.load_url("assets:///article");
@@ -17,9 +22,11 @@ pub fn render_row(tab: &DictionaryTab, row: usize) {
 /// Navigate within the tab to the given word (used for bword:// cross-refs).
 pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 	let key = normalize_for_search(word);
-	let words = tab.dict.words();
 
-	let Some(word_idx) = words.iter().position(|w| normalize_for_search(w).starts_with(&key)) else {
+	// Match against the precomputed normalized list — re-normalizing every
+	// word here made each cross-ref click O(n · normalize).
+	let normalized = tab.dict.normalized_words();
+	let Some(word_idx) = normalized.iter().position(|w| w.starts_with(&key)) else {
 		crate::accessibility::announce_status(
 			tab.frame,
 			tab.status_bar,

@@ -1,6 +1,7 @@
 use icu_properties::{props::Script, CodePointMapData};
 
 pub fn detect<S: AsRef<str>>(words: &[S]) -> &'static str {
+	// icu 2.x: const-fn singleton over baked data; constructing per call is free.
 	let script = CodePointMapData::<Script>::new();
 	for word in words {
 		for ch in word.as_ref().chars() {

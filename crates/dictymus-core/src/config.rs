@@ -25,20 +25,44 @@ impl AppConfig {
 		Some(dir.join("config.toml"))
 	}
 
-	/// Load from the OS app-data dir; missing/invalid file → default.
-	pub fn load() -> Self {
-		let Some(p) = Self::path() else { return Self::default() };
-		std::fs::read_to_string(&p).ok().and_then(|s| Self::from_toml(&s).ok()).unwrap_or_default()
+	/// Load from the OS app-data dir. A missing file is a normal first run
+	/// → `(default, None)`. Any other IO error or corrupt TOML → defaults
+	/// plus a warning the caller should surface; never aborts.
+	pub fn load() -> (Self, Option<String>) {
+		let Some(p) = Self::path() else { return (Self::default(), None) };
+		let text = match std::fs::read_to_string(&p) {
+			Ok(text) => text,
+			Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+				return (Self::default(), None);
+			}
+			Err(e) => {
+				return (
+					Self::default(),
+					Some(format!("Could not read settings ({}): {e}", p.display())),
+				);
+			}
+		};
+		match Self::from_toml(&text) {
+			Ok(cfg) => (cfg, None),
+			Err(e) => (
+				Self::default(),
+				Some(format!("Settings file is invalid ({}): {e}", p.display())),
+			),
+		}
 	}
 
 	/// Save to the OS app-data dir, creating parent dirs.
-	pub fn save(&self) {
-		if let Some(p) = Self::path() {
-			if let Some(parent) = p.parent() {
-				let _ = std::fs::create_dir_all(parent);
-			}
-			let _ = std::fs::write(&p, self.to_toml());
+	pub fn save(&self) -> Result<(), std::io::Error> {
+		let Some(p) = Self::path() else {
+			return Err(std::io::Error::new(
+				std::io::ErrorKind::NotFound,
+				"no application data directory available",
+			));
+		};
+		if let Some(parent) = p.parent() {
+			std::fs::create_dir_all(parent)?;
 		}
+		std::fs::write(&p, self.to_toml())
 	}
 }
 
@@ -60,5 +84,10 @@ mod tests {
 	fn empty_toml_is_default() {
 		let cfg = AppConfig::from_toml("").unwrap();
 		assert!(cfg.open_dictionaries.is_empty());
+	}
+
+	#[test]
+	fn corrupt_toml_is_an_error() {
+		assert!(AppConfig::from_toml("open_dictionaries = \"not a list").is_err());
 	}
 }

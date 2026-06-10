@@ -42,16 +42,24 @@ fn font_path_from_embedded() -> Option<String> {
 
 /// Register the bundled font with the OS and build a base Font.
 /// Used for native widgets (TextCtrl, ListCtrl). The WebView uses CSS @font-face separately.
-pub fn load_base_font() -> Font {
+/// Returns the font plus a warning when the bundled font is unavailable —
+/// degradation worth telling the user about, not a failure.
+pub fn load_base_font() -> (Font, Option<String>) {
 	let path = font_path();
-	Font::add_private_font(&path);
-	Font::new_with_details(
+	let registered = Font::add_private_font(&path);
+	let font = Font::new_with_details(
 		14,
 		FontFamily::Default as i32,
 		FontStyle::Normal as i32,
 		FontWeight::Normal as i32,
 		false,
 		FACE,
-	)
-	.unwrap_or_default()
+	);
+	match font {
+		Some(font) if registered => (font, None),
+		Some(font) => {
+			(font, Some("Bundled font could not be registered; using system font".to_string()))
+		}
+		None => (Font::default(), Some("Bundled font unavailable; using system font".to_string())),
+	}
 }

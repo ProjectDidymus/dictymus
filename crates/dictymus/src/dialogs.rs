@@ -1,5 +1,14 @@
 use wxdragon::prelude::*;
 
+/// Modal error dialog — the single error surface of the app. Modal so focus
+/// moves into the dialog and screen readers read the message text.
+pub fn show_error(parent: &Frame, message: &str) {
+	MessageDialog::builder(parent, message, "Dictymus - Error")
+		.with_style(MessageDialogStyle::OK | MessageDialogStyle::IconError | MessageDialogStyle::Centre)
+		.build()
+		.show_modal();
+}
+
 pub fn show_about(parent: &Frame) {
 	let mut info = AboutDialogInfo::new();
 	info.set_name("Dictymus");
