@@ -9,6 +9,13 @@ serde = { version = "1", features = ["derive"] }
 toml = "1.1"
 dirs = "6"
 
+[profile.release]
+strip = "debuginfo"
+opt-level = "s"
+lto = true
+panic = "abort"
+codegen-units = 1
+
 [patch.crates-io]
 wxdragon = { git = "https://github.com/AllenDang/wxDragon" }
 opendict-rs = { git = "https://github.com/ProjectDidymus/opendict-rs", branch = "feat/lookup-by-index" }
