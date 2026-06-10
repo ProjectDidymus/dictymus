@@ -49,6 +49,8 @@ impl TabManager {
 	pub fn build_tab_panel(&self, dict: Rc<DictHandle>) -> Rc<DictionaryTab> {
 		let language = dict.language();
 		let (panel, search, list, article) = self.build_layout();
+		panel.set_name(dict.title());
+		crate::accessibility::set_tab_page_accessible(&panel, dict.title());
 		let filtered: Vec<usize> = (0..dict.word_count()).collect();
 		let rc = Rc::new(DictionaryTab {
 			panel,

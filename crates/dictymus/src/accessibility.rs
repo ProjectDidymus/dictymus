@@ -1,5 +1,33 @@
+use wxdragon::accessible::{AccessibleImpl, AccRole, AccStatus};
 use wxdragon::prelude::*;
 use wxdragon::widgets::statusbar::StatusBar;
+
+struct TabPageAccessible {
+	name: String,
+}
+
+impl AccessibleImpl for TabPageAccessible {
+	fn get_name(&self, child_id: i32) -> (AccStatus, Option<String>) {
+		if child_id == 0 {
+			(wxdragon::ffi::wxd_AccStatus_WXD_ACC_OK, Some(self.name.clone()))
+		} else {
+			(wxdragon::ffi::wxd_AccStatus_WXD_ACC_NOT_IMPLEMENTED, None)
+		}
+	}
+
+	fn get_role(&self, _child_id: i32) -> (AccStatus, AccRole) {
+		(
+			wxdragon::ffi::wxd_AccStatus_WXD_ACC_OK,
+			wxdragon::ffi::wxd_AccRole_WXD_ROLE_SYSTEM_PROPERTYPAGE,
+		)
+	}
+}
+
+/// Attach a custom accessible to a notebook tab panel, reporting role=property page
+/// and name=the dictionary title. Without this, screen readers see "panel".
+pub fn set_tab_page_accessible(panel: &Panel, title: &str) {
+	panel.set_accessible(Accessible::new(panel, TabPageAccessible { name: title.to_string() }));
+}
 
 /// Register the status bar's first pane (child ID 1) as a polite live region
 /// via IAccPropServices. Call once at startup after creating the status bar.
