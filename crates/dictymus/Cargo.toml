@@ -1,0 +1,25 @@
+[package]
+name = "dictymus"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "dictymus"
+path = "src/main.rs"
+
+[dependencies]
+dictymus-core = { path = "../dictymus-core" }
+wxdragon = { version = "0.9.16", features = ["webview"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+    "Win32_UI_Accessibility",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[build-dependencies]
+embed-manifest = "1.5.0"
