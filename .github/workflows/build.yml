@@ -61,7 +61,7 @@ jobs:
             artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-arm64
           - name: macos-x64
-            os: macos-13
+            os: macos-latest
             target: x86_64-apple-darwin
             artifact: target/x86_64-apple-darwin/release/dictymus
             artifact-name: dictymus-macos-x64
