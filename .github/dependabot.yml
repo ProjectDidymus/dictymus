@@ -17,12 +17,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    versioning-strategy: increase
-    groups:
-      npm:
-        patterns:
-          - "*"

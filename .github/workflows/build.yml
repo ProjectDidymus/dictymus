@@ -1,42 +1,146 @@
-name: Build
+name: CI
 
 on:
   push:
     branches: [master]
+    tags: ["v*.*.*"]
   pull_request:
     branches: [master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  check:
+    name: Check
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
+          components: rustfmt, clippy
+      - uses: swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy -p dictymus-core -- -D warnings
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-
-      - name: Build
-        run: |
-          $env:WXWIDGETS_DIR = "${{ github.workspace }}\external\wxWidgets"
-          cargo build --release -p dictymus
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
         with:
-          name: dictymus-windows
-          path: target/release/dictymus.exe
+          toolchain: stable
+      - uses: swatinem/rust-cache@v2
+      - run: cargo test -p dictymus-core
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: [check, test]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-2025
+            target: x86_64-pc-windows-msvc
+            msvc-arch: x64
+            artifact: target/x86_64-pc-windows-msvc/release/dictymus.exe
+            artifact-name: dictymus-windows-x64
+          - name: windows-arm64
+            os: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            msvc-arch: arm64
+            artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
+            artifact-name: dictymus-windows-arm64
+          - name: macos-x64
+            os: macos-13
+            target: x86_64-apple-darwin
+            artifact: target/x86_64-apple-darwin/release/dictymus
+            artifact-name: dictymus-macos-x64
+          - name: macos-arm64
+            os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: target/aarch64-apple-darwin/release/dictymus
+            artifact-name: dictymus-macos-arm64
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup MSVC
+        if: startsWith(matrix.name, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc-arch }}
+      - name: Install build tools
+        if: startsWith(matrix.name, 'macos')
+        run: brew install cmake ninja
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
+      - name: Install cargo-edit
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-edit
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: cargo set-version "${GITHUB_REF_NAME#v}"
+      - run: cargo build --release -p dictymus --target ${{ matrix.target }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact }}
           retention-days: 30
+
+  release:
+    name: Release
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dictymus-windows-x64
+          path: artifacts/windows-x64
+      - uses: actions/download-artifact@v8
+        with:
+          name: dictymus-windows-arm64
+          path: artifacts/windows-arm64
+      - uses: actions/download-artifact@v8
+        with:
+          name: dictymus-macos-x64
+          path: artifacts/macos-x64
+      - uses: actions/download-artifact@v8
+        with:
+          name: dictymus-macos-arm64
+          path: artifacts/macos-arm64
+      - name: Rename for release
+        run: |
+          cp artifacts/windows-x64/dictymus.exe dictymus-windows-x64.exe
+          cp artifacts/windows-arm64/dictymus.exe dictymus-windows-arm64.exe
+          cp artifacts/macos-x64/dictymus dictymus-macos-x64
+          cp artifacts/macos-arm64/dictymus dictymus-macos-arm64
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dictymus-windows-x64.exe
+            dictymus-windows-arm64.exe
+            dictymus-macos-x64
+            dictymus-macos-arm64
+          generate_release_notes: true
+          name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
