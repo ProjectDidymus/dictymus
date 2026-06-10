@@ -4,7 +4,9 @@ use wxdragon::prelude::*;
 /// moves into the dialog and screen readers read the message text.
 pub fn show_error(parent: &Frame, message: &str) {
 	MessageDialog::builder(parent, message, "Dictymus - Error")
-		.with_style(MessageDialogStyle::OK | MessageDialogStyle::IconError | MessageDialogStyle::Centre)
+		.with_style(
+			MessageDialogStyle::OK | MessageDialogStyle::IconError | MessageDialogStyle::Centre,
+		)
 		.build()
 		.show_modal();
 }

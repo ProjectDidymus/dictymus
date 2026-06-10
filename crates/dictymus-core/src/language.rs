@@ -1,4 +1,4 @@
-use icu_properties::{props::Script, CodePointMapData};
+use icu_properties::{CodePointMapData, props::Script};
 
 pub fn detect<S: AsRef<str>>(words: &[S]) -> &'static str {
 	// icu 2.x: const-fn singleton over baked data; constructing per call is free.

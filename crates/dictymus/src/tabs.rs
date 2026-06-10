@@ -106,7 +106,9 @@ impl TabManager {
 			Some(article_box) => {
 				WebView::builder(&article_box).with_url(Some("about:blank".to_string())).build()
 			}
-			None => WebView::builder(&article_panel).with_url(Some("about:blank".to_string())).build(),
+			None => {
+				WebView::builder(&article_panel).with_url(Some("about:blank".to_string())).build()
+			}
 		};
 		article_sizer.add(&article, 1, SizerFlag::Expand | SizerFlag::All, 4);
 		article_panel.set_sizer(article_sizer, true);
@@ -230,6 +232,10 @@ impl TabManager {
 		} else {
 			self.notebook.set_focus();
 		}
-		crate::accessibility::announce_status(self.frame, self.status_bar, &format!("Closed {title}"));
+		crate::accessibility::announce_status(
+			self.frame,
+			self.status_bar,
+			&format!("Closed {title}"),
+		);
 	}
 }

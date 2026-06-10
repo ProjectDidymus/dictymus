@@ -44,10 +44,9 @@ impl AppConfig {
 		};
 		match Self::from_toml(&text) {
 			Ok(cfg) => (cfg, None),
-			Err(e) => (
-				Self::default(),
-				Some(format!("Settings file is invalid ({}): {e}", p.display())),
-			),
+			Err(e) => {
+				(Self::default(), Some(format!("Settings file is invalid ({}): {e}", p.display())))
+			}
 		}
 	}
 

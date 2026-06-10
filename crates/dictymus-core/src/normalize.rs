@@ -1,5 +1,5 @@
 use icu_normalizer::{ComposingNormalizer, DecomposingNormalizer};
-use icu_properties::{props::GeneralCategory, CodePointMapData};
+use icu_properties::{CodePointMapData, props::GeneralCategory};
 
 // Final-form folding: no Unicode property covers this; it's script-specific
 // orthography (Hebrew sofit letters, Greek final sigma).
@@ -26,18 +26,16 @@ pub fn normalize_for_search(word: &str) -> String {
 	let decomposed = nfd.normalize(word);
 	let stripped: String = decomposed
 		.chars()
-		.filter(|&c| !matches!(
-			gc.get(c),
-			GeneralCategory::NonspacingMark
-				| GeneralCategory::SpacingMark
-				| GeneralCategory::EnclosingMark
-		))
+		.filter(|&c| {
+			!matches!(
+				gc.get(c),
+				GeneralCategory::NonspacingMark
+					| GeneralCategory::SpacingMark
+					| GeneralCategory::EnclosingMark
+			)
+		})
 		.collect();
-	nfc.normalize(&stripped)
-		.to_lowercase()
-		.chars()
-		.map(fold_final)
-		.collect()
+	nfc.normalize(&stripped).to_lowercase().chars().map(fold_final).collect()
 }
 
 #[cfg(test)]

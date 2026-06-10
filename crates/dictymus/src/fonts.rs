@@ -39,7 +39,6 @@ fn font_path_from_embedded() -> Option<String> {
 	Some(path.to_string_lossy().into_owned())
 }
 
-
 /// Register the bundled font with the OS and build a base Font.
 /// Used for native widgets (TextCtrl, ListCtrl). The WebView uses CSS @font-face separately.
 /// Returns the font plus a warning when the bundled font is unavailable —

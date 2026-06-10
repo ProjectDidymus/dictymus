@@ -102,7 +102,10 @@ impl App {
 			};
 			// Inform the user the session was lost, but always let the app exit.
 			if let Err(e) = cfg.save() {
-				crate::dialogs::show_error(&frame_for_close, &format!("Could not save session: {e}"));
+				crate::dialogs::show_error(
+					&frame_for_close,
+					&format!("Could not save session: {e}"),
+				);
 			}
 			event.skip(true);
 		});
