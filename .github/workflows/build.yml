@@ -54,12 +54,6 @@ jobs:
             msvc-arch: x64
             artifact: target/x86_64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-x64
-          - name: windows-arm64
-            os: windows-11-arm
-            target: aarch64-pc-windows-msvc
-            msvc-arch: arm64
-            artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
-            artifact-name: dictymus-windows-arm64
           - name: macos-x64
             os: macos-latest
             target: x86_64-apple-darwin
@@ -117,10 +111,6 @@ jobs:
           path: artifacts/windows-x64
       - uses: actions/download-artifact@v8
         with:
-          name: dictymus-windows-arm64
-          path: artifacts/windows-arm64
-      - uses: actions/download-artifact@v8
-        with:
           name: dictymus-macos-x64
           path: artifacts/macos-x64
       - uses: actions/download-artifact@v8
@@ -129,15 +119,13 @@ jobs:
           path: artifacts/macos-arm64
       - name: Rename for release
         run: |
-          cp artifacts/windows-x64/dictymus.exe dictymus-windows-x64.exe
-          cp artifacts/windows-arm64/dictymus.exe dictymus-windows-arm64.exe
+          cp artifacts/windows-x64/dictymus.exe dictymus.exe
           cp artifacts/macos-x64/dictymus dictymus-macos-x64
           cp artifacts/macos-arm64/dictymus dictymus-macos-arm64
       - uses: softprops/action-gh-release@v3
         with:
           files: |
-            dictymus-windows-x64.exe
-            dictymus-windows-arm64.exe
+            dictymus.exe
             dictymus-macos-x64
             dictymus-macos-arm64
           generate_release_notes: true
