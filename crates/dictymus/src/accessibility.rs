@@ -1,4 +1,4 @@
-use wxdragon::accessible::{AccessibleImpl, AccRole, AccStatus};
+use wxdragon::accessible::{AccRole, AccStatus, AccessibleImpl};
 use wxdragon::prelude::*;
 use wxdragon::widgets::statusbar::StatusBar;
 
