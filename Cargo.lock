@@ -63,9 +63,9 @@ checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
 name = "block-buffer"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdd35008169921d80bc60d3d0ab416eecb028c4cd653352907921d95084790be"
+checksum = "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
 dependencies = [
  "hybrid-array",
 ]
@@ -753,9 +753,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.8.1"
+version = "2.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
+checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
 
 [[package]]
 name = "memmap2"
@@ -1207,9 +1207,9 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "smallvec"
-version = "1.15.1"
+version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 
 [[package]]
 name = "socket2"
@@ -1848,7 +1848,7 @@ checksum = "1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4"
 [[package]]
 name = "wxdragon"
 version = "0.9.16"
-source = "git+https://github.com/AllenDang/wxDragon#a71801e2c34f451ff60a14e027fe5c5159733fff"
+source = "git+https://github.com/AllenDang/wxDragon#c9738f1bf9dc9f89fe9446d9e4fe658380988565"
 dependencies = [
  "bitflags",
  "log",
@@ -1860,7 +1860,7 @@ dependencies = [
 [[package]]
 name = "wxdragon-macros"
 version = "0.9.16"
-source = "git+https://github.com/AllenDang/wxDragon#a71801e2c34f451ff60a14e027fe5c5159733fff"
+source = "git+https://github.com/AllenDang/wxDragon#c9738f1bf9dc9f89fe9446d9e4fe658380988565"
 dependencies = [
  "proc-macro2",
  "quick-xml",
@@ -1871,7 +1871,7 @@ dependencies = [
 [[package]]
 name = "wxdragon-sys"
 version = "0.9.16"
-source = "git+https://github.com/AllenDang/wxDragon#a71801e2c34f451ff60a14e027fe5c5159733fff"
+source = "git+https://github.com/AllenDang/wxDragon#c9738f1bf9dc9f89fe9446d9e4fe658380988565"
 dependencies = [
  "bindgen",
  "cmake",
