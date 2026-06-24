@@ -9,7 +9,8 @@ It is built from the ground up for blind and visually impaired users, with first
 - Native desktop UI via [wxDragon](https://github.com/AllenDang/wxDragon) (wxWidgets), with full screen reader accessibility
 - Reads StarDict dictionaries through [opendict-rs](https://github.com/callum-gander/opendict-rs)
 - Tabbed interface for working with multiple dictionaries at once
-- Live, incremental lemma search with on-the-fly transliteration: type with the Logos Biblical keyboard layout and get Hebrew or Greek glyphs
+- Live, incremental lemma search with on-the-fly transliteration: type with the
+  Logos Biblical keyboard layout and get Hebrew or Greek glyphs
 - Diacritic-insensitive matching: unpointed Hebrew and unaccented Greek queries match pointed/accented lemmas
 - Automatic language detection per dictionary (Hebrew vs. Greek)
 - Articles rendered in an embedded WebView with cross-reference links (`bword://` scheme)
@@ -21,8 +22,8 @@ It is built from the ground up for blind and visually impaired users, with first
 This is a Cargo workspace. The main crates are:
 
 | Crate | Description |
-|---|---|
-| `dictymus-core` | Pure logic: dictionary loading, language detection, normalization, transliteration, config (library) |
+| --- | --- |
+| `dictymus-core` | Pure logic: dictionary loading, language detection, normalization, transliteration, config |
 | `dictymus` | The GUI application (wxWidgets via wxDragon) |
 
 ## Requirements
@@ -30,42 +31,44 @@ This is a Cargo workspace. The main crates are:
 - Rust (stable, edition 2024). Install via [rustup](https://rustup.rs).
 - **MSVC toolchain** plus **CMake** and **Ninja** — required to compile wxWidgets via wxDragon.
 
-> **All `cargo` commands must run inside a Visual Studio Developer Command Prompt** (or a shell where `vcvars64.bat` has been sourced), because `wxdragon-sys` builds wxWidgets with MSVC and Ninja through CMake.
+> **All `cargo` commands must run inside a Visual Studio Developer Command
+> Prompt** (or a shell where `vcvars64.bat` has been sourced), because
+> `wxdragon-sys` builds wxWidgets with MSVC and Ninja through CMake.
 
 ## Building
 
-```
+```sh
 cargo build --release
 ```
 
 This produces the binary in `target/release/`. For a debug build of just the GUI:
 
-```
+```sh
 cargo build -p dictymus
 ```
 
 ## Running
 
-```
+```sh
 cargo run -p dictymus
 ```
 
 Pass a dictionary's `.ifo` file to open it on startup:
 
-```
+```sh
 cargo run -p dictymus -- <path/to/dictionary.ifo>
 ```
 
 ## Testing
 
-```
+```sh
 cargo test                      # all unit tests
 cargo test -p dictymus-core     # core logic only
 ```
 
 UI smoke test (requires the winapp CLI):
 
-```
+```sh
 pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path/to/dictionary.ifo>
 ```
 
@@ -75,7 +78,7 @@ This project uses [prek](https://github.com/j178/prek), a Rust-based pre-commit 
 
 Install prek and set up the hooks:
 
-```
+```sh
 cargo install prek
 prek install
 ```
@@ -84,4 +87,8 @@ prek install
 
 Dictymus is licensed under the [MIT License](LICENSE).
 
-The bundled SBL BibLit font is **not** covered by that license. It is distributed by the [Society of Biblical Literature](https://www.sbl-site.org/resources/fonts/) under the [SBL Font End User License Agreement](https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf), which permits free non-commercial use and unmodified redistribution. Commercial use requires a separate license from SBL.
+The bundled SBL BibLit font is **not** covered by that license. It is
+distributed by the [Society of Biblical Literature](https://www.sbl-site.org/resources/fonts/)
+under the [SBL Font End User License Agreement](https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf),
+which permits free non-commercial use and unmodified redistribution.
+Commercial use requires a separate license from SBL.
