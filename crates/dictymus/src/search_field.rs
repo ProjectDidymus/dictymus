@@ -15,16 +15,16 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 		tab.search.on_char(move |event| {
 			if let WindowEventData::Keyboard(kbd) = &event {
 				// Use get_unicode_key for the actual typed character
-				if let Some(code) = kbd.get_unicode_key() {
-					if let Some(ch) = char::from_u32(code as u32) {
-						if ch.is_ascii() && !ch.is_control() {
-							let mapped = transliterate_char(ch, lang);
-							if mapped != ch {
-								search_for_char.write_text(&mapped.to_string());
-								kbd.event.skip(false);
-								return;
-							}
-						}
+				if let Some(code) = kbd.get_unicode_key()
+					&& let Some(ch) = char::from_u32(code as u32)
+					&& ch.is_ascii()
+					&& !ch.is_control()
+				{
+					let mapped = transliterate_char(ch, lang);
+					if mapped != ch {
+						search_for_char.write_text(&mapped.to_string());
+						kbd.event.skip(false);
+						return;
 					}
 				}
 			}

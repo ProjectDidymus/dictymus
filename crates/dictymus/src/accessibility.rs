@@ -1,6 +1,7 @@
 use wxdragon::accessible::{AccRole, AccStatus, Accessible, AccessibleImpl};
 use wxdragon::ffi::{
-	wxd_AccStatus_WXD_ACC_NOT_IMPLEMENTED as ACC_NOT_IMPLEMENTED, wxd_AccStatus_WXD_ACC_OK as ACC_OK,
+	wxd_AccStatus_WXD_ACC_NOT_IMPLEMENTED as ACC_NOT_IMPLEMENTED,
+	wxd_AccStatus_WXD_ACC_OK as ACC_OK,
 };
 use wxdragon::prelude::*;
 use wxdragon::widgets::statusbar::StatusBar;

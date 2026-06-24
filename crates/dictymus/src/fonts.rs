@@ -13,12 +13,12 @@ pub fn font_path() -> String {
 		return path;
 	}
 	// Fallback: exe-relative
-	if let Ok(exe) = std::env::current_exe() {
-		if let Some(dir) = exe.parent() {
-			let p = dir.join("assets/fonts/SBL_BLit.ttf");
-			if p.exists() {
-				return p.to_string_lossy().into_owned();
-			}
+	if let Ok(exe) = std::env::current_exe()
+		&& let Some(dir) = exe.parent()
+	{
+		let p = dir.join("assets/fonts/SBL_BLit.ttf");
+		if p.exists() {
+			return p.to_string_lossy().into_owned();
 		}
 	}
 	// Fallback: cwd-relative (cargo run from workspace root)
