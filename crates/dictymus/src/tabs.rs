@@ -1,3 +1,4 @@
+use crate::accessibility::{AccProps, AccessibleExt, ROLE_PROPERTYPAGE};
 use dictymus_core::dictionary::DictHandle;
 use std::cell::RefCell;
 use std::path::Path;
@@ -49,8 +50,10 @@ impl TabManager {
 	pub fn build_tab_panel(&self, dict: Rc<DictHandle>) -> Rc<DictionaryTab> {
 		let language = dict.language();
 		let (panel, search, list, article) = self.build_layout();
-		panel.set_name(dict.title());
-		crate::accessibility::set_tab_page_accessible(&panel, dict.title());
+		panel.set_accessible_props(AccProps {
+			name: Some(dict.title().to_string()),
+			role: Some(ROLE_PROPERTYPAGE),
+		});
 		let filtered: Vec<usize> = (0..dict.word_count()).collect();
 		let rc = Rc::new(DictionaryTab {
 			panel,
