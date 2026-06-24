@@ -10,3 +10,18 @@ hooks = [
 	{ id = "check-merge-conflict" },
 	{ id = "check-toml" },
 ]
+
+[[repos]]
+repo = "https://github.com/rhysd/actionlint"
+rev = "v1.7.12"
+hooks = [
+    { id = "actionlint" },
+]
+
+[[repos]]
+repo = "https://github.com/doublify/pre-commit-rust"
+rev = "v1.0"
+hooks = [
+    { id = "fmt" },
+    { id = "clippy" },
+]
