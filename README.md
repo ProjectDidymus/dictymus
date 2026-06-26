@@ -1,13 +1,14 @@
 # Dictymus
 
-Dictymus is a fast, native, fully accessible StarDict  dictionary reader.
+Dictymus is a fast, native, fully accessible StarDict and MDict dictionary reader.
 Its primary goal is to support dictionaries for the biblical languages — Hebrew and Greek.
 It is built from the ground up for blind and visually impaired users, with first-class screen reader support.
 
 ## Features
 
 - Native desktop UI via [wxDragon](https://github.com/AllenDang/wxDragon) (wxWidgets), with full screen reader accessibility
-- Reads StarDict dictionaries through [opendict-rs](https://github.com/callum-gander/opendict-rs)
+- Reads StarDict and MDict dictionaries through [opendict-rs](https://github.com/callum-gander/opendict-rs);
+  `.dict.dz` is read via random access (no full decompression, no side-by-side `.dict` file)
 - Tabbed interface for working with multiple dictionaries at once
 - Live, incremental lemma search with on-the-fly transliteration: type with the
   Logos Biblical keyboard layout and get Hebrew or Greek glyphs
@@ -53,10 +54,11 @@ cargo build -p dictymus
 cargo run -p dictymus
 ```
 
-Pass a dictionary's `.ifo` file to open it on startup:
+Pass a dictionary's `.ifo` (StarDict) or `.mdx` (MDict) file to open it on startup:
 
 ```sh
 cargo run -p dictymus -- <path/to/dictionary.ifo>
+cargo run -p dictymus -- <path/to/dictionary.mdx>
 ```
 
 ## Testing

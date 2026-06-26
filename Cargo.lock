@@ -829,7 +829,7 @@ checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 [[package]]
 name = "opendict-rs"
 version = "0.1.0"
-source = "git+https://github.com/ProjectDidymus/opendict-rs?branch=feat%2Flookup-by-index#1e5fa343a0e5441c29785491c40e3df2fa125a70"
+source = "git+https://github.com/leonardder/opendict-rs?branch=dictymus#1304c4bfa0a0eb361901273f9e85c6cec8ddeb6d"
 dependencies = [
  "adler2",
  "encoding_rs",

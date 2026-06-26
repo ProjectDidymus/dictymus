@@ -46,9 +46,12 @@ pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 		tab.filtered.borrow().iter().position(|&i| i == word_idx).unwrap_or(0)
 	};
 
-	tab.list.set_item_state(row as i64, ListItemState::Selected, ListItemState::Selected);
+	// Mark the row selected+focused in the list (so it tracks the article), but
+	// do NOT pull widget focus to the list — the user clicked a link in the
+	// article and should keep reading there.
+	let sel_focused = ListItemState::Selected | ListItemState::Focused;
+	tab.list.set_item_state(row as i64, sel_focused, sel_focused);
 	tab.list.ensure_visible(row as i64);
-	tab.list.set_focus();
 	render_row(tab, row);
 }
 

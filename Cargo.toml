@@ -18,4 +18,4 @@ codegen-units = 1
 
 [patch.crates-io]
 wxdragon = { git = "https://github.com/AllenDang/wxDragon" }
-opendict-rs = { git = "https://github.com/ProjectDidymus/opendict-rs", branch = "feat/lookup-by-index" }
+opendict-rs = { git = "https://github.com/leonardder/opendict-rs", branch = "dictymus" }

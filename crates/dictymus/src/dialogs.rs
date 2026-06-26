@@ -23,7 +23,7 @@ pub fn pick_dictionary(parent: &Frame) -> Option<String> {
 	use wxdragon::id::ID_OK;
 	let dialog = FileDialog::builder(parent)
 		.with_message("Open dictionary")
-		.with_wildcard("StarDict info (*.ifo)|*.ifo|All files (*.*)|*.*")
+		.with_wildcard("Dictionaries (*.ifo;*.mdx)|*.ifo;*.mdx|StarDict info (*.ifo)|*.ifo|MDict (*.mdx)|*.mdx|All files (*.*)|*.*")
 		.with_style(FileDialogStyle::Open | FileDialogStyle::FileMustExist)
 		.build();
 	if dialog.show_modal() == ID_OK { dialog.get_path() } else { None }

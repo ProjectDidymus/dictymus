@@ -11,10 +11,15 @@ pub fn repopulate(tab: &DictionaryTab) {
 }
 
 /// Select and focus the first visible item if list is non-empty.
+///
+/// Programmatic `set_item_state` does NOT fire `EVT_LIST_ITEM_SELECTED`, so the
+/// article is rendered explicitly here — otherwise the row highlights but the
+/// lemma never loads.
 pub fn select_first(tab: &DictionaryTab) {
 	if tab.list.get_item_count() > 0 {
 		let sel_focused = ListItemState::Selected | ListItemState::Focused;
 		tab.list.set_item_state(0, sel_focused, sel_focused);
 		tab.list.ensure_visible(0);
+		crate::article_pane::render_row(tab, 0);
 	}
 }
