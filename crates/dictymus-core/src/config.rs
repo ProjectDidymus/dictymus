@@ -1,11 +1,24 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+fn default_log_level() -> String {
+	"warn".into()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
 	/// Dictionaries to reopen on startup, in tab order.
 	pub open_dictionaries: Vec<PathBuf>,
+	/// Default tracing level when `RUST_LOG` is unset
+	/// (`trace`|`debug`|`info`|`warn`|`error`).
+	pub log_level: String,
+}
+
+impl Default for AppConfig {
+	fn default() -> Self {
+		Self { open_dictionaries: Vec::new(), log_level: default_log_level() }
+	}
 }
 
 impl AppConfig {
@@ -23,6 +36,12 @@ impl AppConfig {
 	fn path() -> Option<PathBuf> {
 		let dir = dirs::data_dir()?.join("dictymus");
 		Some(dir.join("config.toml"))
+	}
+
+	/// Directory for rotated log files, alongside the config in the OS app-data
+	/// dir. `None` when no app-data dir is available.
+	pub fn log_dir() -> Option<PathBuf> {
+		Some(dirs::data_dir()?.join("dictymus").join("logs"))
 	}
 
 	/// Load from the OS app-data dir. A missing file is a normal first run
@@ -88,5 +107,25 @@ mod tests {
 	#[test]
 	fn corrupt_toml_is_an_error() {
 		assert!(AppConfig::from_toml("open_dictionaries = \"not a list").is_err());
+	}
+
+	#[test]
+	fn default_log_level_is_warn() {
+		assert_eq!(AppConfig::default().log_level, "warn");
+	}
+
+	#[test]
+	fn old_config_without_log_level_loads_with_default() {
+		// Configs written before the field existed must still deserialize.
+		let cfg = AppConfig::from_toml("open_dictionaries = [\"/a/x.ifo\"]").unwrap();
+		assert_eq!(cfg.open_dictionaries, vec![PathBuf::from("/a/x.ifo")]);
+		assert_eq!(cfg.log_level, "warn");
+	}
+
+	#[test]
+	fn log_level_round_trips() {
+		let cfg = AppConfig { log_level: "debug".into(), ..Default::default() };
+		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
+		assert_eq!(back.log_level, "debug");
 	}
 }

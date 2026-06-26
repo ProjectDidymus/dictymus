@@ -25,7 +25,7 @@ pub struct DictionaryTab {
 #[cfg(debug_assertions)]
 impl Drop for DictionaryTab {
 	fn drop(&mut self) {
-		eprintln!("DictionaryTab dropped: {}", self.dict.title());
+		tracing::debug!("DictionaryTab dropped: {}", self.dict.title());
 	}
 }
 
@@ -219,6 +219,7 @@ impl TabManager {
 	}
 
 	pub fn open_dictionary(&mut self, path: &Path) -> Result<Rc<DictionaryTab>, String> {
+		tracing::debug!("opening dictionary: {}", path.display());
 		let dict = Rc::new(
 			DictHandle::open(path).map_err(|e| format!("Cannot open {}: {e}", path.display()))?,
 		);
@@ -227,6 +228,7 @@ impl TabManager {
 		self.notebook.add_page(&tab.panel, &title, true, None);
 		crate::lemma_list::repopulate(&tab);
 		self.tabs.push(Rc::clone(&tab));
+		tracing::info!(title, "dictionary tab opened");
 		Ok(tab)
 	}
 

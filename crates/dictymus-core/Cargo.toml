@@ -10,3 +10,4 @@ icu_properties = { workspace = true }
 serde = { workspace = true }
 toml = { workspace = true }
 dirs = { workspace = true }
+tracing = { workspace = true }

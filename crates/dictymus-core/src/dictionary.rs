@@ -15,6 +15,7 @@ pub struct DictHandle {
 }
 
 impl DictHandle {
+	#[tracing::instrument(skip_all, fields(path = %path.display()))]
 	pub fn open(path: &Path) -> Result<Self, opendict::Error> {
 		let dir =
 			path.parent().ok_or_else(|| opendict::Error::InvalidFormat("no parent dir".into()))?;
@@ -37,6 +38,7 @@ impl DictHandle {
 		let normalized_words = words.iter().map(|w| normalize_for_search(w)).collect();
 		let language = language::detect(&words);
 		let title = dict.info().name.clone();
+		tracing::info!(title, language, entries = words.len(), "dictionary loaded");
 		Ok(Self { dict, words, normalized_words, language, title, path: path.to_path_buf() })
 	}
 
@@ -71,6 +73,8 @@ impl DictHandle {
 		for e in &entries {
 			out.push_str(&String::from_utf8_lossy(&e.data));
 		}
+		let word = self.words.get(index).map(String::as_str).unwrap_or("");
+		tracing::debug!(index, word, bytes = out.len(), "rendered article");
 		Some(out)
 	}
 }

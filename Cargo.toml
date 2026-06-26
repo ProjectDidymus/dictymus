@@ -8,6 +8,9 @@ icu_properties = { version = "2", features = ["compiled_data"] }
 serde = { version = "1", features = ["derive"] }
 toml = "1.1"
 dirs = "6"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "parking_lot", "tracing-log"] }
+tracing-appender = { version = "0.2", features = ["parking_lot"] }
 
 [profile.release]
 strip = "debuginfo"

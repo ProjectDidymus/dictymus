@@ -47,6 +47,7 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 			}
 		}
 		let count = filtered.len();
+		tracing::debug!(query = %query, results = count, "search");
 		*tab.filtered.borrow_mut() = filtered;
 		lemma_list::repopulate(&tab);
 		if count != last_count.get() {
