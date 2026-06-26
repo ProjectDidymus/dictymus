@@ -69,6 +69,11 @@ b, strong { font-weight:bold; } i, em { font-style:italic; }";
 /// swallows keyboard input when it has focus, so wx's accelerator table never
 /// sees these chords — we catch them in JS and post the target menu id back,
 /// where `process_menu_command` runs the same handler the menu does.
+///
+/// Everything goes over the single `bword` channel: the wxWidgets Edge backend
+/// only honours the first registered script-message handler, so a second
+/// `window.*` object never exists. Menu commands are tagged with a `menu:`
+/// prefix; bare strings are cross-ref words.
 pub fn article_js() -> String {
 	use crate::menu::ids;
 	format!(
@@ -83,7 +88,7 @@ document.addEventListener('keydown',function(e){{
   if(e.key==='F4') id={close};
   else if(k==='o') id={open};
   else if(k==='q') id={exit};
-  if(id){{ e.preventDefault(); window.cmd.postMessage(''+id); }}
+  if(id){{ e.preventDefault(); window.bword.postMessage('menu:'+id); }}
 }});",
 		close = ids::CLOSE,
 		open = ids::OPEN,

@@ -197,18 +197,24 @@ impl TabManager {
 			}
 		});
 		rc.article.add_script_message_handler("bword");
-		// Forward menu-accelerator chords the WebView swallows (see article_js).
-		rc.article.add_script_message_handler("cmd");
 		let tab_for_msg = Rc::downgrade(rc);
 		rc.article.on_script_message_received(move |event| {
 			let Some(tab) = tab_for_msg.upgrade() else { return };
 			let Some(msg) = event.get_string() else { return };
-			// A "cmd" channel message is a menu id; bword messages are words.
-			if let Ok(menu_id) = msg.parse::<i32>() {
-				tab.frame.process_menu_command(menu_id);
-			} else {
-				crate::article_pane::navigate_to(&tab, &msg);
+			// A `menu:<id>` message is a forwarded accelerator (the WebView
+			// swallows the chord); bare strings are bword cross-ref words.
+			if let Some(rest) = msg.strip_prefix("menu:") {
+				if let Ok(menu_id) = rest.parse::<i32>() {
+					// Post (queue) rather than process: we are inside the
+					// WebView's own script-message callback, and the CLOSE
+					// command tears down this very WebView. Synchronous
+					// teardown mid-dispatch crashes the app; queueing lets the
+					// callback return first.
+					tab.frame.post_menu_command(menu_id);
+				}
+				return;
 			}
+			crate::article_pane::navigate_to(&tab, &msg);
 		});
 	}
 
