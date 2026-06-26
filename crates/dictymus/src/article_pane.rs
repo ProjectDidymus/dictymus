@@ -62,11 +62,34 @@ a { color:#2a6bbf; text-decoration:underline; cursor:pointer; }
 ol { padding-left:1.4em; } li { margin:.2em 0; }
 b, strong { font-weight:bold; } i, em { font-style:italic; }";
 
-pub const ARTICLE_JS: &str = "\
-document.addEventListener('click',function(e){
+/// JS injected into every article page.
+///
+/// Besides the bword cross-ref click handler, this forwards menu-accelerator
+/// keystrokes (Ctrl+O / Ctrl+F4 / Ctrl+Q) to the host. The WebView2 control
+/// swallows keyboard input when it has focus, so wx's accelerator table never
+/// sees these chords — we catch them in JS and post the target menu id back,
+/// where `process_menu_command` runs the same handler the menu does.
+pub fn article_js() -> String {
+	use crate::menu::ids;
+	format!(
+		"\
+document.addEventListener('click',function(e){{
   var a=e.target.closest('[data-ref-word]');
-  if(a){ e.preventDefault(); window.bword.postMessage(a.getAttribute('data-ref-word')); }
-});";
+  if(a){{ e.preventDefault(); window.bword.postMessage(a.getAttribute('data-ref-word')); }}
+}});
+document.addEventListener('keydown',function(e){{
+  if(!e.ctrlKey||e.altKey||e.shiftKey||e.metaKey) return;
+  var id=0, k=e.key.toLowerCase();
+  if(e.key==='F4') id={close};
+  else if(k==='o') id={open};
+  else if(k==='q') id={exit};
+  if(id){{ e.preventDefault(); window.cmd.postMessage(''+id); }}
+}});",
+		close = ids::CLOSE,
+		open = ids::OPEN,
+		exit = ids::EXIT,
+	)
+}
 
 pub fn wrap_html(body: &str, title: &str) -> String {
 	let title = title.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;");

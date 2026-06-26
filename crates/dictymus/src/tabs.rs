@@ -162,7 +162,7 @@ impl TabManager {
 				})
 			} else if uri.ends_with("/script.js") {
 				Some(WebViewHandlerResponse {
-					data: crate::article_pane::ARTICLE_JS.as_bytes().to_vec(),
+					data: crate::article_pane::article_js().into_bytes(),
 					mime_type: Some("text/javascript".to_string()),
 				})
 			} else if uri.ends_with("/article") {
@@ -197,11 +197,17 @@ impl TabManager {
 			}
 		});
 		rc.article.add_script_message_handler("bword");
+		// Forward menu-accelerator chords the WebView swallows (see article_js).
+		rc.article.add_script_message_handler("cmd");
 		let tab_for_msg = Rc::downgrade(rc);
 		rc.article.on_script_message_received(move |event| {
 			let Some(tab) = tab_for_msg.upgrade() else { return };
-			if let Some(word) = event.get_string() {
-				crate::article_pane::navigate_to(&tab, &word);
+			let Some(msg) = event.get_string() else { return };
+			// A "cmd" channel message is a menu id; bword messages are words.
+			if let Ok(menu_id) = msg.parse::<i32>() {
+				tab.frame.process_menu_command(menu_id);
+			} else {
+				crate::article_pane::navigate_to(&tab, &msg);
 			}
 		});
 	}
