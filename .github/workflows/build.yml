@@ -80,6 +80,8 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           key: ${{ matrix.name }}
+          cache-all-crates: true
+          cache-workspace-crates: true
       - name: Install cargo-edit
         if: startsWith(github.ref, 'refs/tags/v')
         uses: taiki-e/install-action@v2
