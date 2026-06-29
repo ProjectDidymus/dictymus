@@ -25,10 +25,6 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
-      - uses: swatinem/rust-cache@v2
-        with:
-          cache-all-crates: true
-          cache-workspace-crates: true
       - run: cargo fmt --all -- --check
       - run: cargo clippy -p dictymus-core -- -D warnings
 
