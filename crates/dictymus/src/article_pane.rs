@@ -89,7 +89,25 @@ document.addEventListener('keydown',function(e){{
   else if(k==='o') id={open};
   else if(k==='q') id={exit};
   if(id){{ e.preventDefault(); window.bword.postMessage('menu:'+id); }}
-}});",
+}});
+// The SBL face finishes loading ~15ms after the first paint, but on a
+// re-navigation WebView2 doesn't repaint already-laid-out text, so the glyphs
+// stay in the serif fallback even though the face is loaded and the computed
+// font-family is correct. Only tearing the body out of the render tree and
+// rebuilding it forces WebView2 to re-shape the text against the now-loaded
+// face — sub-property nudges (font-family, letter-spacing) just get repainted
+// with the cached fallback glyph run. So toggle display off/on, forcing a
+// synchronous relayout in between via offsetHeight. Because paint happens on
+// the next frame (after we have already restored display), the hidden state is
+// computed but never painted, so there is no visible flicker.
+if(document.fonts && document.fonts.ready){{
+  document.fonts.ready.then(function(){{
+    var b=document.body; if(!b) return;
+    b.style.display='none';
+    void b.offsetHeight;
+    b.style.display='';
+  }});
+}}",
 		close = ids::CLOSE,
 		open = ids::OPEN,
 		exit = ids::EXIT,
