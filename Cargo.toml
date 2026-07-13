@@ -21,3 +21,4 @@ codegen-units = 1
 
 [patch.crates-io]
 opendict-rs = { git = "https://github.com/leonardder/opendict-rs", branch = "dictymus" }
+wxdragon = { git = "https://github.com/AllenDang/wxDragon", branch = "main" }
