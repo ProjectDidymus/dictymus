@@ -1,53 +1,5 @@
-use wxdragon::accessible::{AccRole, AccStatus, Accessible, AccessibleImpl};
-use wxdragon::ffi::{
-	wxd_AccStatus_WXD_ACC_NOT_IMPLEMENTED as ACC_NOT_IMPLEMENTED,
-	wxd_AccStatus_WXD_ACC_OK as ACC_OK,
-};
 use wxdragon::prelude::*;
 use wxdragon::widgets::statusbar::StatusBar;
-
-/// Notebook tab page role. Pass as `AccProps { role: Some(ROLE_PROPERTYPAGE), .. }`
-/// so screen readers announce a page (not a bare "panel") on Ctrl+Tab.
-pub use wxdragon::ffi::wxd_AccRole_WXD_ROLE_SYSTEM_PROPERTYPAGE as ROLE_PROPERTYPAGE;
-
-/// Accessible properties to expose on a window. Leave a field `None` to report
-/// NOT_IMPLEMENTED for it (screen reader falls back to wx defaults).
-#[derive(Default)]
-pub struct AccProps {
-	pub name: Option<String>,
-	pub role: Option<AccRole>,
-}
-
-struct PropsAccessible {
-	props: AccProps,
-}
-
-impl AccessibleImpl for PropsAccessible {
-	fn get_name(&self, child_id: i32) -> (AccStatus, Option<String>) {
-		match (child_id, &self.props.name) {
-			(0, Some(name)) => (ACC_OK, Some(name.clone())),
-			_ => (ACC_NOT_IMPLEMENTED, None),
-		}
-	}
-
-	fn get_role(&self, _child_id: i32) -> (AccStatus, AccRole) {
-		match self.props.role {
-			Some(role) => (ACC_OK, role),
-			None => (ACC_NOT_IMPLEMENTED, wxdragon::ffi::wxd_AccRole_WXD_ROLE_NONE),
-		}
-	}
-}
-
-/// Extension trait: attach accessible name/role to any window in one call.
-pub trait AccessibleExt: WxWidget {
-	fn set_accessible_props(&self, props: AccProps)
-	where
-		Self: Sized,
-	{
-		self.set_accessible(Accessible::new(self, PropsAccessible { props }));
-	}
-}
-impl<T: WxWidget> AccessibleExt for T {}
 
 /// Register the status bar's first pane (child ID 1) as a polite live region
 /// via IAccPropServices. Call once at startup after creating the status bar.
