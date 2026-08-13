@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 dictymus-core = { path = "../dictymus-core" }
-wxdragon = { version = "0.9.17", features = ["webview"] }
+wxdragon = { version = "0.9.18", features = ["webview"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
