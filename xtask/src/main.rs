@@ -212,6 +212,12 @@ fn run_dist(
 	}
 	let staging =
 		staging.map(Path::to_path_buf).unwrap_or_else(|| root.join("target").join("dist"));
+	// makensis resolves relative File paths against the script directory, so
+	// the staging path must reach it absolute and with native separators.
+	let staging: PathBuf = std::path::absolute(&staging)
+		.map_err(|e| format!("absolutize {}: {e}", staging.display()))?
+		.components()
+		.collect();
 
 	// A file already present in the staging layout wins; CI downloads the
 	// built artifacts straight into it.
