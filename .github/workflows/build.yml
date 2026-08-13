@@ -82,18 +82,25 @@ jobs:
           target: ${{ matrix.target }}
       - uses: swatinem/rust-cache@v2
         with:
-          prefix-key: v1-rust
+          prefix-key: v2-rust
           key: ${{ matrix.name }}
           cache-all-crates: true
           cache-workspace-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
-          # Linker inputs that wxdragon-sys emits outside the cached target areas.
-          cache-directories: |
-            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build/lib
-            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build/build/lib
-            target/${{ matrix.target }}/release/wxwidgets_cmake_build/lib
-            target/${{ matrix.target }}/release/wxwidgets_cmake_build/libs/webview/packages
+          # Stash of the wxdragon-sys CMake lib dirs; the rust-cache cleanup
+          # deletes them from the target dir before saving, so they are cached
+          # from outside it (see the stash/unstash steps).
+          cache-directories: ~/wx-stash
+      - name: Unstash wx build libs
+        if: startsWith(matrix.name, 'windows')
+        shell: pwsh
+        run: |
+          $stash = "$env:USERPROFILE\wx-stash"
+          if (Test-Path $stash) {
+            New-Item -ItemType Directory -Force "target\${{ matrix.target }}\release" | Out-Null
+            Copy-Item "$stash\*" -Destination "target\${{ matrix.target }}\release" -Recurse -Force
+          }
       - name: Install cargo-edit
         if: startsWith(github.ref, 'refs/tags/v')
         uses: taiki-e/install-action@v2
@@ -104,6 +111,22 @@ jobs:
         shell: bash
         run: cargo set-version "${GITHUB_REF_NAME#v}"
       - run: cargo build --release -p dictymus --target ${{ matrix.target }}
+      - name: Stash wx build libs
+        if: always() && startsWith(matrix.name, 'windows')
+        shell: pwsh
+        run: |
+          $stash = "$env:USERPROFILE\wx-stash"
+          $base = "target\${{ matrix.target }}\release"
+          Remove-Item $stash -Recurse -Force -ErrorAction SilentlyContinue
+          foreach ($p in "wxdragon_sys_cmake_build\lib",
+                         "wxdragon_sys_cmake_build\build\lib",
+                         "wxwidgets_cmake_build\lib",
+                         "wxwidgets_cmake_build\libs\webview\packages") {
+            if (Test-Path "$base\$p") {
+              New-Item -ItemType Directory -Force (Split-Path "$stash\$p") | Out-Null
+              Copy-Item "$base\$p" -Destination "$stash\$p" -Recurse -Force
+            }
+          }
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
