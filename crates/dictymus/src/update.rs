@@ -7,8 +7,7 @@ use wxdragon::prelude::*;
 const GITHUB_REPO: &str = "ProjectDidymus/dictymus";
 /// Base64 minisign public key; downloaded release assets are verified against
 /// it before anything is executed.
-// TODO: replace with the real public key before the first release that ships the updater.
-const MINISIGN_PUBLIC_KEY: &str = "RWQREPLACEMEREPLACEMEREPLACEMEREPLACEMEREPLACEMEREPLACEME";
+const MINISIGN_PUBLIC_KEY: &str = "RWSIEq1WkvZZ4ZTn4dM16OvD6A/FjX9J0c5FTETolqvixOstZMQ3CK3e";
 const COMMIT_HASH: &str = env!("DICTYMUS_COMMIT_HASH");
 
 /// Suffix of the per-arch installer and portable zip assets published by CI.
