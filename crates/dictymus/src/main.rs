@@ -4,6 +4,7 @@ mod app;
 mod article_pane;
 mod dialogs;
 mod fonts;
+mod ipc;
 mod lemma_list;
 mod logging;
 mod menu;
@@ -23,7 +24,14 @@ fn main() {
 	if let Err(e) = wxdragon::main(move |_| {
 		let app = app::App::new(config.clone(), config_warning.clone());
 		app.show();
-		Box::leak(Box::new(app));
+		let app: &'static app::App = Box::leak(Box::new(app));
+		app::store_app(app);
+		if !ipc::start_server() {
+			dialogs::show_error(
+				&app.frame,
+				"Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window.",
+			);
+		}
 	}) {
 		tracing::error!("wxdragon init failed: {e}");
 		eprintln!("dictymus: {e}"); // echo: visible if launched from a console

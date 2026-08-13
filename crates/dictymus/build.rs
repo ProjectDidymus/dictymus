@@ -11,5 +11,11 @@ fn main() {
 			.active_code_page(ActiveCodePage::Utf8)
 			.dpi_awareness(DpiAwareness::PerMonitorV2);
 		embed_manifest(manifest).expect("unable to embed manifest");
+
+		// Icon only; never call set_manifest* here.
+		let mut res = winresource::WindowsResource::new();
+		res.set_icon("../../assets/icon/dictymus.ico");
+		res.compile().expect("unable to embed icon resource");
+		println!("cargo:rerun-if-changed=../../assets/icon/dictymus.ico");
 	}
 }

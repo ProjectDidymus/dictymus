@@ -1,8 +1,26 @@
-use crate::{menu, tabs};
+use crate::{ipc, menu, tabs};
 use dictymus_core::config::AppConfig;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use wxdragon::prelude::*;
+
+/// Set once from the leaked `App`; read on the main thread by the IPC
+/// dispatch closure, which cannot capture the `Rc`-holding `App` directly.
+static APP_PTR: AtomicUsize = AtomicUsize::new(0);
+
+pub fn store_app(app: &'static App) {
+	APP_PTR.store(app as *const App as usize, Ordering::SeqCst);
+}
+
+pub fn app_from_ptr() -> Option<&'static App> {
+	let ptr = APP_PTR.load(Ordering::SeqCst);
+	if ptr == 0 {
+		return None;
+	}
+	unsafe { (ptr as *const App).as_ref() }
+}
+
 pub struct App {
 	pub frame: Frame,
 	#[allow(dead_code)] // kept alive here; used only via cloned Rc handles in closures
@@ -10,10 +28,22 @@ pub struct App {
 	/// Failures collected during startup, shown modally once the frame is
 	/// visible (a modal without a visible parent confuses screen readers).
 	startup_errors: Vec<String>,
+	#[allow(dead_code)] // holds the instance mutex for the process lifetime
+	single_instance_checker: Option<SingleInstanceChecker>,
 }
 
 impl App {
 	pub fn new(config: AppConfig, config_warning: Option<String>) -> Self {
+		let single_instance_checker = SingleInstanceChecker::new(ipc::SINGLE_INSTANCE_NAME, None);
+		if let Some(checker) = single_instance_checker.as_ref()
+			&& checker.is_another_running()
+		{
+			let cmd = ipc::command_from_cli();
+			tracing::info!(command = ?cmd, "another instance is running, forwarding command and exiting");
+			ipc::send_command(&cmd);
+			std::process::exit(0);
+		}
+
 		let frame = Frame::builder().with_title("Dictymus").with_size(Size::new(900, 650)).build();
 		frame.set_name("Dictionary");
 		frame.set_menu_bar(menu::create_menu_bar());
@@ -38,7 +68,8 @@ impl App {
 		let mut startup_errors = Vec::new();
 		let cli = std::env::args().nth(1);
 		if let Some(path) = cli {
-			if let Err(e) = tabs.borrow_mut().open_dictionary(std::path::Path::new(&path)) {
+			let path = ipc::normalize_cli_path(std::path::Path::new(&path));
+			if let Err(e) = tabs.borrow_mut().open_dictionary(&path) {
 				tracing::error!("startup: {e}");
 				startup_errors.push(e);
 			}
@@ -117,7 +148,7 @@ impl App {
 			event.skip(true);
 		});
 
-		App { frame, tabs, startup_errors }
+		App { frame, tabs, startup_errors, single_instance_checker }
 	}
 
 	pub fn show(&self) {
@@ -125,6 +156,35 @@ impl App {
 		self.frame.centre();
 		if !self.startup_errors.is_empty() {
 			crate::dialogs::show_error(&self.frame, &self.startup_errors.join("\n\n"));
+		}
+	}
+
+	pub fn handle_ipc_command(&self, command: ipc::IpcCommand) {
+		tracing::info!(command = ?command, "received IPC command");
+		self.activate_from_ipc();
+		if let ipc::IpcCommand::OpenFile(path) = command {
+			match self.tabs.borrow_mut().open_dictionary(&path) {
+				Ok(_) => self.frame.set_status_text("Dictionary loaded", 0),
+				Err(e) => {
+					tracing::warn!("open dictionary via IPC failed: {e}");
+					crate::dialogs::show_error(&self.frame, &e);
+				}
+			}
+		}
+	}
+
+	fn activate_from_ipc(&self) {
+		self.frame.show(true);
+		self.frame.iconize(false);
+		self.frame.request_user_attention(UserAttentionFlag::Info);
+		self.frame.raise();
+		#[cfg(windows)]
+		{
+			use windows::Win32::{Foundation::HWND, UI::WindowsAndMessaging::SetForegroundWindow};
+			let handle = self.frame.get_handle();
+			if !handle.is_null() {
+				let _ = unsafe { SetForegroundWindow(HWND(handle)) };
+			}
 		}
 	}
 }
