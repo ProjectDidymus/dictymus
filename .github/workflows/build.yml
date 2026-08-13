@@ -88,19 +88,16 @@ jobs:
           cache-workspace-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
-          # Stash of the wxdragon-sys CMake lib dirs; the rust-cache cleanup
-          # deletes them from the target dir before saving, so they are cached
-          # from outside it (see the stash/unstash steps).
-          cache-directories: ~/wx-stash
-      - name: Unstash wx build libs
+      # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
+      # inside the cached wx CMake tree does not survive the rust-cache cleanup.
+      - name: Install WebView2 SDK
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
         run: |
-          $stash = "$env:USERPROFILE\wx-stash"
-          if (Test-Path $stash) {
-            New-Item -ItemType Directory -Force "target\${{ matrix.target }}\release" | Out-Null
-            Copy-Item "$stash\*" -Destination "target\${{ matrix.target }}\release" -Recurse -Force
-          }
+          nuget install Microsoft.Web.WebView2 -OutputDirectory packages
+          $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
+          $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.msvc-arch }}"
+          echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       - name: Install cargo-edit
         if: startsWith(github.ref, 'refs/tags/v')
         uses: taiki-e/install-action@v2
@@ -111,22 +108,6 @@ jobs:
         shell: bash
         run: cargo set-version "${GITHUB_REF_NAME#v}"
       - run: cargo build --release -p dictymus --target ${{ matrix.target }}
-      - name: Stash wx build libs
-        if: always() && startsWith(matrix.name, 'windows')
-        shell: pwsh
-        run: |
-          $stash = "$env:USERPROFILE\wx-stash"
-          $base = "target\${{ matrix.target }}\release"
-          Remove-Item $stash -Recurse -Force -ErrorAction SilentlyContinue
-          foreach ($p in "wxdragon_sys_cmake_build\lib",
-                         "wxdragon_sys_cmake_build\build\lib",
-                         "wxwidgets_cmake_build\lib",
-                         "wxwidgets_cmake_build\libs\webview\packages") {
-            if (Test-Path "$base\$p") {
-              New-Item -ItemType Directory -Force (Split-Path "$stash\$p") | Out-Null
-              Copy-Item "$base\$p" -Destination "$stash\$p" -Recurse -Force
-            }
-          }
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
