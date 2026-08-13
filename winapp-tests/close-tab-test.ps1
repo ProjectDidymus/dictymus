@@ -4,6 +4,9 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+# Keep the update dialog from stealing focus mid-test.
+$env:DICTYMUS_NO_UPDATE_CHECK = "1"
+
 $stderrFile = Join-Path $env:TEMP "dictymus-close-test-stderr.txt"
 Remove-Item $stderrFile -ErrorAction SilentlyContinue
 

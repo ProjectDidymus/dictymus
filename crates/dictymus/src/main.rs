@@ -10,6 +10,8 @@ mod logging;
 mod menu;
 mod search_field;
 mod tabs;
+#[cfg(windows)]
+mod update;
 
 fn main() {
 	// Load config first so logging can honour its level, then init logging
@@ -31,6 +33,13 @@ fn main() {
 				&app.frame,
 				"Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window.",
 			);
+		}
+		#[cfg(windows)]
+		if config.check_for_updates_on_startup
+			&& std::env::var_os("DICTYMUS_NO_UPDATE_CHECK").is_none()
+		{
+			let channel = config.effective_update_channel(update::default_channel());
+			update::run_update_check(&app.frame, channel, true);
 		}
 	}) {
 		tracing::error!("wxdragon init failed: {e}");

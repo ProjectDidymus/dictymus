@@ -39,7 +39,7 @@ Tests:
 - `language.rs` — `detect()` scanning word list via `unicode-script`
 - `normalize.rs` — `normalize_for_search()`: NFD→strip marks→NFC→lowercase→fold final sigma
 - `transliterate.rs` — `transliterate_char()`: Logos Biblical keyboard maps for Hebrew/Greek
-- `config.rs` — `AppConfig` (open dictionary paths, persisted via TOML in OS app-data dir)
+- `config.rs` — `AppConfig` (open dictionary paths, update settings, persisted via TOML in OS app-data dir) + `UpdateChannel`
 
 **dictymus** — wxdragon UI:
 
@@ -51,6 +51,10 @@ Tests:
 - `article_pane.rs` — `render_row()` + `wrap_html()` (WebView HTML injection) + `navigate_to()` + `percent_decode()`
 - `dialogs.rs` — File Open dialog, About dialog
 - `fonts.rs` — SBL BibLit font loading
+- `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate
+  (GitHub Releases + minisign + silent Inno Setup handoff); channel defaults
+  follow the build type via `DICTYMUS_IS_DEV`, `DICTYMUS_NO_UPDATE_CHECK` skips
+  the startup check; config keys `check_for_updates_on_startup` / `update_channel`
 
 **Article rendering:** `DictHandle::article_html()` returns raw HTML from
 StarDict payload. `article_pane::wrap_html()` adds a CSS wrapper (SBL BibLit via

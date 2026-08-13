@@ -4,6 +4,9 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+# Keep the update dialog from stealing focus mid-test.
+$env:DICTYMUS_NO_UPDATE_CHECK = "1"
+
 # Launch with fixture path (quoted to handle spaces).
 $proc = Start-Process -FilePath $Binary -ArgumentList "`"$Fixture`"" -PassThru
 $appPid = $proc.Id

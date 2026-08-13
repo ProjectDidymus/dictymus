@@ -91,6 +91,8 @@ impl App {
 
 		let frame_for_menu = frame;
 		let tabs_for_menu = Rc::clone(&tabs);
+		#[cfg(windows)]
+		let update_channel = config.effective_update_channel(crate::update::default_channel());
 		frame.on_menu_selected(move |event| match event.get_id() {
 			menu::ids::OPEN => {
 				if let Some(path) = crate::dialogs::pick_dictionary(&frame_for_menu) {
@@ -124,18 +126,26 @@ impl App {
 			menu::ids::ABOUT => {
 				crate::dialogs::show_about(&frame_for_menu);
 			}
+			#[cfg(windows)]
+			menu::ids::CHECK_UPDATES => {
+				crate::update::run_update_check(&frame_for_menu, update_channel, false);
+			}
 			_ => {}
 		});
 
 		let tabs_for_close = Rc::clone(&tabs);
 		let frame_for_close = frame;
 		let log_level = config.log_level.clone();
+		let check_for_updates_on_startup = config.check_for_updates_on_startup;
+		let update_channel_setting = config.update_channel.clone();
 		frame.on_close(move |event| {
 			let mgr = tabs_for_close.borrow();
 			let cfg = AppConfig {
 				open_dictionaries: mgr.tabs.iter().map(|t| t.dict.path().to_path_buf()).collect(),
 				// Preserve the user's level setting across sessions.
 				log_level: log_level.clone(),
+				check_for_updates_on_startup,
+				update_channel: update_channel_setting.clone(),
 			};
 			// Inform the user the session was lost, but always let the app exit.
 			if let Err(e) = cfg.save() {

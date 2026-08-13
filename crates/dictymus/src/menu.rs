@@ -6,6 +6,8 @@ pub mod ids {
 	pub const CLOSE_ALL: i32 = 5003;
 	pub const EXIT: i32 = 5004;
 	pub const ABOUT: i32 = 5005;
+	#[cfg(windows)]
+	pub const CHECK_UPDATES: i32 = 5006;
 }
 
 pub fn create_menu_bar() -> MenuBar {
@@ -17,9 +19,14 @@ pub fn create_menu_bar() -> MenuBar {
 		.append_item(ids::EXIT, "E&xit\tCtrl+Q", "Exit")
 		.build();
 
-	let help = Menu::builder()
-		.append_item(ids::ABOUT, "&About Dictymus", "About this application")
-		.build();
+	let help = Menu::builder();
+	#[cfg(windows)]
+	let help = help.append_item(
+		ids::CHECK_UPDATES,
+		"Check for &Updates...",
+		"Check for a new version of Dictymus",
+	);
+	let help = help.append_item(ids::ABOUT, "&About Dictymus", "About this application").build();
 
 	MenuBar::builder().append(file, "&File").append(help, "&Help").build()
 }

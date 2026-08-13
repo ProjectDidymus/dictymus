@@ -17,6 +17,7 @@ It is built from the ground up for blind and visually impaired users, with first
 - Articles rendered in an embedded WebView with cross-reference links (`bword://` scheme)
 - Bundled SBL BibLit font covering Hebrew, Greek, and Latin in a single face
 - Remembers open dictionaries between sessions
+- Automatic updates on Windows, with minisign-verified downloads
 
 ## Workspace layout
 
@@ -73,6 +74,32 @@ UI smoke test (requires the winapp CLI):
 ```sh
 pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path/to/dictionary.ifo>
 ```
+
+## Automatic updates
+
+On Windows, Dictymus checks for updates silently at startup and on demand via
+**Help → Check for Updates**. Downloads are verified with a
+[minisign](https://jedisct1.github.io/minisign/) signature before anything is
+executed. Installed copies (via the setup program) update through a silent
+reinstall; portable copies swap the executable in place, which requires the
+executable to live in a user-writable folder. macOS builds do not check for
+updates.
+
+Two release channels exist:
+
+- **stable** — tagged releases (the default for installer/release builds)
+- **dev** — a rolling prerelease rebuilt on every push to master (the default
+  for development builds)
+
+Both behaviors are configurable in `%APPDATA%\dictymus\config.toml`:
+
+```toml
+check_for_updates_on_startup = true
+update_channel = ""   # "" = follow the build type, or pin "stable" / "dev"
+```
+
+Setting the `DICTYMUS_NO_UPDATE_CHECK` environment variable suppresses the
+startup check (used by the UI tests).
 
 ## Pre-commit hooks
 

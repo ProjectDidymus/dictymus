@@ -1,5 +1,5 @@
 //! Workspace automation: build Windows release binaries and package the
-//! NSIS installer.
+//! per-architecture Inno Setup installers.
 //!
 //! Usage:
 //!   cargo xtask build-windows [--target <triple>]...
@@ -22,7 +22,7 @@ const WEBVIEW2_EXE: &str = "MicrosoftEdgeWebView2Setup.exe";
 enum Command {
 	/// Build the app in release for each target.
 	BuildWindows { targets: Vec<String> },
-	/// Assemble the installer from a staging directory via makensis.
+	/// Assemble the per-arch installers from a staging directory via ISCC.
 	Dist { staging: Option<PathBuf>, only_native: bool, webview2: Option<PathBuf> },
 }
 
@@ -91,7 +91,7 @@ fn app_version(root: &Path) -> Result<String, String> {
 		.ok_or_else(|| format!("no version in {}", manifest.display()))
 }
 
-/// VIProductVersion accepts only numeric x.y.z.w: strip prerelease/build
+/// VersionInfoVersion accepts only numeric x.y.z.w: strip prerelease/build
 /// metadata and pad ("0.2.0-rc.1" -> "0.2.0.0").
 fn numeric_version(version: &str) -> String {
 	let core = version.split(['-', '+']).next().unwrap_or(version);
@@ -103,6 +103,12 @@ fn numeric_version(version: &str) -> String {
 /// The CPU architecture segment of a target triple ("x86_64", "aarch64").
 fn arch_of(triple: &str) -> &str {
 	triple.split('-').next().unwrap_or(triple)
+}
+
+/// The Windows marketing name for a Rust CPU architecture, used in installer
+/// file names and Inno Setup architecture directives.
+fn win_arch(rust_arch: &str) -> &'static str {
+	if rust_arch == "aarch64" { "arm64" } else { "x64" }
 }
 
 fn native_arch() -> &'static str {
@@ -132,13 +138,13 @@ fn repo_root() -> PathBuf {
 		.to_path_buf()
 }
 
-/// Locate the makensis executable: `$MAKENSIS`, then `PATH`, then well-known
-/// install directories on Windows.
-fn find_makensis() -> Option<PathBuf> {
-	if let Some(p) = std::env::var_os("MAKENSIS") {
+/// Locate the Inno Setup compiler: `$ISCC`, then `PATH`, then well-known
+/// install directories on Windows (per-machine and per-user winget installs).
+fn find_iscc() -> Option<PathBuf> {
+	if let Some(p) = std::env::var_os("ISCC") {
 		return Some(PathBuf::from(p));
 	}
-	let exe = if cfg!(windows) { "makensis.exe" } else { "makensis" };
+	let exe = if cfg!(windows) { "ISCC.exe" } else { "iscc" };
 	if let Some(paths) = std::env::var_os("PATH") {
 		for dir in std::env::split_paths(&paths) {
 			let candidate = dir.join(exe);
@@ -148,17 +154,18 @@ fn find_makensis() -> Option<PathBuf> {
 		}
 	}
 	if cfg!(windows) {
-		for base in ["ProgramFiles(x86)", "ProgramFiles"] {
-			if let Some(pf) = std::env::var_os(base) {
-				let candidate = PathBuf::from(pf).join("NSIS").join("makensis.exe");
+		for base in ["ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA"] {
+			if let Some(root) = std::env::var_os(base) {
+				let mut candidate = PathBuf::from(root);
+				if base == "LOCALAPPDATA" {
+					candidate.push("Programs");
+				}
+				candidate.push("Inno Setup 6");
+				candidate.push("ISCC.exe");
 				if candidate.is_file() {
 					return Some(candidate);
 				}
 			}
-		}
-		let choco = PathBuf::from(r"C:\ProgramData\chocolatey\bin\makensis.exe");
-		if choco.is_file() {
-			return Some(choco);
 		}
 	}
 	None
@@ -206,13 +213,13 @@ fn run_dist(
 	webview2: Option<&Path>,
 ) -> Result<(), String> {
 	let root = repo_root();
-	let script = root.join("dist").join("windows").join("installer.nsi");
+	let script = root.join("dist").join("windows").join("installer.iss");
 	if !script.exists() {
 		return Err(format!("installer script not found at {}", script.display()));
 	}
 	let staging =
 		staging.map(Path::to_path_buf).unwrap_or_else(|| root.join("target").join("dist"));
-	// makensis resolves relative File paths against the script directory, so
+	// ISCC resolves relative Source paths against the script directory, so
 	// the staging path must reach it absolute and with native separators.
 	let staging: PathBuf = std::path::absolute(&staging)
 		.map_err(|e| format!("absolutize {}: {e}", staging.display()))?
@@ -244,41 +251,50 @@ fn run_dist(
 	stage_webview2(&staging, webview2)?;
 
 	let version = app_version(&root)?;
-	let outfile = root.join("target").join(format!("Dictymus-Setup-{version}.exe"));
-	let makensis = find_makensis()
-		.ok_or_else(|| "makensis not found; install NSIS or set MAKENSIS".to_string())?;
+	let outdir = root.join("target");
+	let iscc =
+		find_iscc().ok_or_else(|| "ISCC not found; install Inno Setup or set ISCC".to_string())?;
 
-	let mut defines = nsis_defines(
-		&version,
-		&staging,
-		&outfile,
-		&root.join("assets").join("icon").join("dictymus.ico"),
-	);
-	if only_native {
-		defines.push(format!("-DSINGLEARCH={}", native_arch()));
+	for target in &targets {
+		let arch = win_arch(arch_of(target));
+		let defines = iscc_defines(
+			&version,
+			&staging,
+			&outdir,
+			arch,
+			&root.join("assets").join("icon").join("dictymus.ico"),
+		);
+		eprintln!("xtask: {} {} {}", iscc.display(), defines.join(" "), script.display());
+		let status = Proc::new(&iscc)
+			.arg("/Q")
+			.args(&defines)
+			.arg(&script)
+			.status()
+			.map_err(|e| format!("failed to spawn ISCC: {e}"))?;
+		if !status.success() {
+			return Err(format!("ISCC failed for {arch}"));
+		}
+		eprintln!("xtask: wrote {}", outdir.join(format!("dictymus_setup-{arch}.exe")).display());
 	}
-	eprintln!("xtask: {} {} {}", makensis.display(), defines.join(" "), script.display());
-	let status = Proc::new(&makensis)
-		.args(&defines)
-		.arg(&script)
-		.status()
-		.map_err(|e| format!("failed to spawn makensis: {e}"))?;
-	if !status.success() {
-		return Err("makensis failed".to_string());
-	}
-	eprintln!("xtask: wrote {}", outfile.display());
 	Ok(())
 }
 
-/// The `-D` defines passed to makensis, one argv element each so paths with
+/// The `/D` defines passed to ISCC, one argv element each so paths with
 /// spaces survive. Values must not end in a backslash.
-fn nsis_defines(version: &str, staging: &Path, outfile: &Path, icon: &Path) -> Vec<String> {
+fn iscc_defines(
+	version: &str,
+	staging: &Path,
+	outdir: &Path,
+	arch: &str,
+	icon: &Path,
+) -> Vec<String> {
 	vec![
-		format!("-DVERSION={version}"),
-		format!("-DVERSIONNUM={}", numeric_version(version)),
-		format!("-DSTAGING={}", staging.display()),
-		format!("-DOUTFILE={}", outfile.display()),
-		format!("-DICONFILE={}", icon.display()),
+		format!("/DVERSION={version}"),
+		format!("/DVERSIONNUM={}", numeric_version(version)),
+		format!("/DSTAGING={}", staging.display()),
+		format!("/DOUTDIR={}", outdir.display()),
+		format!("/DARCH={arch}"),
+		format!("/DICONFILE={}", icon.display()),
 	]
 }
 
@@ -374,20 +390,28 @@ mod tests {
 	}
 
 	#[test]
-	fn nsis_defines_carry_version_and_paths() {
+	fn win_arch_maps_rust_arches() {
+		assert_eq!(win_arch("x86_64"), "x64");
+		assert_eq!(win_arch("aarch64"), "arm64");
+	}
+
+	#[test]
+	fn iscc_defines_carry_version_arch_and_paths() {
 		assert_eq!(
-			nsis_defines(
+			iscc_defines(
 				"1.2.3-rc.1",
 				Path::new("stage"),
-				Path::new("out.exe"),
+				Path::new("out"),
+				"arm64",
 				Path::new("app.ico")
 			),
 			vec![
-				"-DVERSION=1.2.3-rc.1".to_string(),
-				"-DVERSIONNUM=1.2.3.0".to_string(),
-				"-DSTAGING=stage".to_string(),
-				"-DOUTFILE=out.exe".to_string(),
-				"-DICONFILE=app.ico".to_string(),
+				"/DVERSION=1.2.3-rc.1".to_string(),
+				"/DVERSIONNUM=1.2.3.0".to_string(),
+				"/DSTAGING=stage".to_string(),
+				"/DOUTDIR=out".to_string(),
+				"/DARCH=arm64".to_string(),
+				"/DICONFILE=app.ico".to_string(),
 			],
 		);
 	}

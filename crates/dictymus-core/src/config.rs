@@ -5,6 +5,37 @@ fn default_log_level() -> String {
 	"warn".into()
 }
 
+/// Which release stream the auto-updater tracks.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum UpdateChannel {
+	/// Tagged GitHub releases.
+	#[default]
+	Stable,
+	/// The rolling `latest` prerelease rebuilt on every push to master.
+	Dev,
+}
+
+impl std::fmt::Display for UpdateChannel {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(match self {
+			Self::Stable => "stable",
+			Self::Dev => "dev",
+		})
+	}
+}
+
+impl std::str::FromStr for UpdateChannel {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_ascii_lowercase().as_str() {
+			"stable" => Ok(Self::Stable),
+			"dev" => Ok(Self::Dev),
+			other => Err(format!("unknown update channel: {other}")),
+		}
+	}
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
@@ -13,17 +44,32 @@ pub struct AppConfig {
 	/// Default tracing level when `RUST_LOG` is unset
 	/// (`trace`|`debug`|`info`|`warn`|`error`).
 	pub log_level: String,
+	/// Check for updates when the app starts.
+	pub check_for_updates_on_startup: bool,
+	/// Auto-update stream: `"stable"`, `"dev"`, or empty to follow the build
+	/// type (release builds track stable, development builds track dev).
+	pub update_channel: String,
 }
 
 impl Default for AppConfig {
 	fn default() -> Self {
-		Self { open_dictionaries: Vec::new(), log_level: default_log_level() }
+		Self {
+			open_dictionaries: Vec::new(),
+			log_level: default_log_level(),
+			check_for_updates_on_startup: true,
+			update_channel: String::new(),
+		}
 	}
 }
 
 impl AppConfig {
 	pub fn to_toml(&self) -> String {
 		toml::to_string_pretty(self).unwrap_or_default()
+	}
+
+	/// The update channel to use: the configured value if it parses, otherwise `default`.
+	pub fn effective_update_channel(&self, default: UpdateChannel) -> UpdateChannel {
+		self.update_channel.parse().unwrap_or(default)
 	}
 
 	pub fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
@@ -86,7 +132,7 @@ impl AppConfig {
 
 #[cfg(test)]
 mod tests {
-	use super::AppConfig;
+	use super::{AppConfig, UpdateChannel};
 	use std::path::PathBuf;
 
 	#[test]
@@ -127,5 +173,53 @@ mod tests {
 		let cfg = AppConfig { log_level: "debug".into(), ..Default::default() };
 		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
 		assert_eq!(back.log_level, "debug");
+	}
+
+	#[test]
+	fn old_config_without_update_fields_loads_with_defaults() {
+		// Configs written before the update fields existed must still deserialize.
+		let cfg = AppConfig::from_toml("open_dictionaries = [\"/a/x.ifo\"]").unwrap();
+		assert!(cfg.check_for_updates_on_startup);
+		assert_eq!(cfg.update_channel, "");
+	}
+
+	#[test]
+	fn update_fields_round_trip() {
+		let cfg = AppConfig {
+			check_for_updates_on_startup: false,
+			update_channel: "dev".into(),
+			..Default::default()
+		};
+		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
+		assert!(!back.check_for_updates_on_startup);
+		assert_eq!(back.update_channel, "dev");
+	}
+
+	#[test]
+	fn effective_update_channel_parses_explicit_values() {
+		let cfg = AppConfig { update_channel: "stable".into(), ..Default::default() };
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Dev), UpdateChannel::Stable);
+		let cfg = AppConfig { update_channel: "dev".into(), ..Default::default() };
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Dev);
+		let cfg = AppConfig { update_channel: "DEV".into(), ..Default::default() };
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Dev);
+	}
+
+	#[test]
+	fn effective_update_channel_falls_back_to_passed_default() {
+		let cfg = AppConfig::default();
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Stable);
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Dev), UpdateChannel::Dev);
+		let cfg = AppConfig { update_channel: "nightly".into(), ..Default::default() };
+		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Stable);
+	}
+
+	#[test]
+	fn update_channel_display_and_from_str_round_trip() {
+		assert_eq!(UpdateChannel::Stable.to_string(), "stable");
+		assert_eq!(UpdateChannel::Dev.to_string(), "dev");
+		assert_eq!("stable".parse::<UpdateChannel>(), Ok(UpdateChannel::Stable));
+		assert_eq!("Dev".parse::<UpdateChannel>(), Ok(UpdateChannel::Dev));
+		assert!("nightly".parse::<UpdateChannel>().is_err());
 	}
 }
