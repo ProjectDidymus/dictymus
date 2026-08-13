@@ -82,11 +82,18 @@ jobs:
           target: ${{ matrix.target }}
       - uses: swatinem/rust-cache@v2
         with:
+          prefix-key: v1-rust
           key: ${{ matrix.name }}
           cache-all-crates: true
           cache-workspace-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
+          # Linker inputs that wxdragon-sys emits outside the cached target areas.
+          cache-directories: |
+            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build/lib
+            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build/build/lib
+            target/${{ matrix.target }}/release/wxwidgets_cmake_build/lib
+            target/${{ matrix.target }}/release/wxwidgets_cmake_build/libs/webview/packages
       - name: Install cargo-edit
         if: startsWith(github.ref, 'refs/tags/v')
         uses: taiki-e/install-action@v2
