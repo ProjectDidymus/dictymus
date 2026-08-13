@@ -160,10 +160,10 @@ SectionEnd
 !macroend
 
 SectionGroup "File associations" SecGrpAssoc
-  Section /o "StarDict (.ifo)" SecAssocIfo
+  Section "StarDict (.ifo)" SecAssocIfo
     !insertmacro Associate ".ifo"
   SectionEnd
-  Section /o "MDict (.mdx)" SecAssocMdx
+  Section "MDict (.mdx)" SecAssocMdx
     !insertmacro Associate ".mdx"
   SectionEnd
 SectionGroupEnd
