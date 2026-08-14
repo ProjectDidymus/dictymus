@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 20:17+0200\n"
-"PO-Revision-Date: 2026-08-14 20:30+0200\n"
+"POT-Creation-Date: 2026-08-14 21:29+0200\n"
+"PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl\n"
@@ -13,24 +13,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. TRANSLATORS: Accessible name of the main window
-msgid "Dictionary"
-msgstr "Woordenboek"
-
-#. TRANSLATORS: Accessible name of the status bar
-msgid "Status"
-msgstr "Status"
+"X-Generator: Poedit 3.9\n"
 
 #. TRANSLATORS: Initial status bar text
 msgid "Ready"
 msgstr "Gereed"
 
-#. TRANSLATORS: Accessible name of the tab list holding the open dictionaries
-msgid "Dictionary tabs"
-msgstr "Woordenboektabbladen"
-
-#. TRANSLATORS: Startup warning; the placeholder is the error that prevented reopening
 msgid "{} — the dictionary was not reopened."
 msgstr "{} — het woordenboek is niet opnieuw geopend."
 
@@ -95,7 +83,6 @@ msgstr ""
 "Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt "
 "gebruikt"
 
-#. TRANSLATORS: Error shown at startup when the channel that lets Explorer reuse the running window cannot be created.
 msgid ""
 "Could not start the single-instance service. Opening dictionary files from "
 "Explorer will start a separate window."
@@ -141,7 +128,7 @@ msgstr "A&fsluiten\tCtrl+Q"
 
 #. TRANSLATORS: Status bar help for the Exit menu item
 msgid "Exit"
-msgstr "Dictymus afsluiten"
+msgstr "Afsluiten"
 
 #. TRANSLATORS: Help menu item
 msgid "Check for &Updates..."
@@ -203,13 +190,12 @@ msgstr "Ontwikkeling"
 msgid "OK"
 msgstr "OK"
 
-#. TRANSLATORS: Label for the cancellation button
 msgid "Cancel"
 msgstr "Annuleren"
 
 #. TRANSLATORS: Error dialog text; the placeholder is the underlying error
 msgid "Could not save settings: {}"
-msgstr "Kan de instellingen niet opslaan: {}"
+msgstr "Kan instellingen niet opslaan: {}"
 
 #. TRANSLATORS: Shown after changing the language in the Options dialog
 msgid "The language change will take full effect after you restart Dictymus."
@@ -246,11 +232,11 @@ msgstr "{} gesloten"
 
 #. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the OS error.
 msgid "Could not read settings ({}): {}"
-msgstr "Kan de instellingen niet lezen ({}): {}"
+msgstr "Kan instellingen niet lezen ({}): {}"
 
 #. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the parse error.
 msgid "Settings file is invalid ({}): {}"
-msgstr "Het instellingenbestand is ongeldig ({}): {}"
+msgstr "Instellingenbestand is ongeldig ({}): {}"
 
 #, c-format
 msgid "Update to %s"

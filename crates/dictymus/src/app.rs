@@ -49,12 +49,8 @@ impl App {
 		}
 
 		let frame = Frame::builder().with_title("Dictymus").with_size(Size::new(900, 650)).build();
-		// TRANSLATORS: Accessible name of the main window
-		frame.set_name(&t("Dictionary"));
 		frame.set_menu_bar(menu::create_menu_bar());
 		let status_bar = frame.create_status_bar(1, 0, -1, "statusbar");
-		// TRANSLATORS: Accessible name of the status bar
-		status_bar.set_name(&t("Status"));
 		// TRANSLATORS: Initial status bar text
 		frame.set_status_text(&t("Ready"), 0);
 		crate::accessibility::init_status_bar_live_region(status_bar);
@@ -64,8 +60,6 @@ impl App {
 		let panel = Panel::builder(&frame).build();
 		let sizer = BoxSizer::builder(Orientation::Vertical).build();
 		let notebook = Notebook::builder(&panel).build();
-		// TRANSLATORS: Accessible name of the tab list holding the open dictionaries
-		notebook.set_name(&t("Dictionary tabs"));
 		sizer.add(&notebook, 1, SizerFlag::Expand | SizerFlag::All, 0);
 		panel.set_sizer(sizer, true);
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 20:24+0200\n"
+"POT-Creation-Date: 2026-08-14 21:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. TRANSLATORS: Accessible name of the main window
-msgid "Dictionary"
-msgstr ""
-
-#. TRANSLATORS: Accessible name of the status bar
-msgid "Status"
-msgstr ""
-
 #. TRANSLATORS: Initial status bar text
 msgid "Ready"
-msgstr ""
-
-#. TRANSLATORS: Accessible name of the tab list holding the open dictionaries
-msgid "Dictionary tabs"
 msgstr ""
 
 msgid "{} — the dictionary was not reopened."
