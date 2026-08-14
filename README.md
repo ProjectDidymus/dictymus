@@ -129,7 +129,7 @@ what CI builds and publishes.
    cargo-release runs fmt, clippy, and the core/xtask tests (the GUI crate is
    built by CI, so no VS Developer Prompt is needed), bumps all three crate
    versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
-   tags `vX.Y.Z`, and pushes.
+   tags `X.Y.Z`, and pushes.
 3. The pushed tag triggers CI, which builds every target, signs the Windows
    updater assets, and publishes the GitHub release with the changelog section
    as its body.

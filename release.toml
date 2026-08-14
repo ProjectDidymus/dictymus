@@ -6,6 +6,6 @@ allow-branch = ["master"]
 # shared-version bumps all members in lockstep; the identical tag name
 # across members collapses into a single tag.
 shared-version = true
-tag-name = "v{{version}}"
+tag-name = "{{version}}"
 tag-message = "Release {{version}}"
 pre-release-commit-message = "chore: release {{version}}"

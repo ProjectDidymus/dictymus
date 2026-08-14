@@ -42,7 +42,7 @@ fn build_translations() {
 
 /// Embeds `DICTYMUS_COMMIT_HASH` (HEAD hash, or `unknown` outside a git
 /// checkout) and `DICTYMUS_IS_DEV` (`false` only when HEAD sits exactly on a
-/// `v*` tag, i.e. a release build).
+/// version tag — bare `X.Y.Z` or `v`-prefixed — i.e. a release build).
 fn embed_commit_info() {
 	let hash = std::process::Command::new("git")
 		.args(["rev-parse", "HEAD"])
@@ -52,7 +52,7 @@ fn embed_commit_info() {
 		.map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
 		.unwrap_or_else(|| "unknown".to_string());
 	let on_tag = std::process::Command::new("git")
-		.args(["describe", "--tags", "--match", "v*", "--exact-match", "HEAD"])
+		.args(["describe", "--tags", "--match", "[0-9]*", "--match", "v*", "--exact-match", "HEAD"])
 		.output()
 		.is_ok_and(|o| o.status.success());
 	println!("cargo:rustc-env=DICTYMUS_COMMIT_HASH={hash}");

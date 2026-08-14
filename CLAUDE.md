@@ -36,8 +36,8 @@ Test fixtures: `dictymus_core::testing` generates tiny StarDict sets
 Releasing:
 
 - `cargo release <level> --execute` — lockstep version bump, `CHANGELOG.md`
-  stamp, commit, tag `v<version>`, push; the tag triggers the CI release
-  (see README "Releasing")
+  stamp, commit, tag `<version>` (no `v` prefix), push; the tag triggers the
+  CI release (see README "Releasing")
 
 ## Architecture
 
