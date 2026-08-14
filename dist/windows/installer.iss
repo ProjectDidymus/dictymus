@@ -38,6 +38,8 @@
 	DefaultDirName={autopf}\Dictymus
 	DisableProgramGroupPage=yes
 	DisableDirPage=no
+	DisableWelcomePage=no
+	LicenseFile=license.txt
 	OutputDir={#OUTDIR}
 	OutputBaseFilename=dictymus_setup-{#ARCH}
 	Compression=lzma2

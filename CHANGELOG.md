@@ -25,3 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Open dictionaries remembered between sessions
 - Automatic updates on Windows (stable and dev channels) with
   minisign-verified downloads
+- Installer welcome page and a license agreement page covering the MIT
+  License and the SBL BibLit font license
