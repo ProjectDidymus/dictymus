@@ -80,8 +80,7 @@ fn parse_dist(rest: &[String]) -> Result<Command, String> {
 	Ok(Command::Dist { staging, only_native, webview2 })
 }
 
-/// The app version, read from crates/dictymus/Cargo.toml at run time so a
-/// `cargo set-version` in CI is picked up without rebuilding xtask.
+/// The app version, read from crates/dictymus/Cargo.toml at run time.
 fn app_version(root: &Path) -> Result<String, String> {
 	let manifest = root.join("crates").join("dictymus").join("Cargo.toml");
 	let text = std::fs::read_to_string(&manifest)

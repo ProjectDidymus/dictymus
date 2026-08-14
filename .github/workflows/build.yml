@@ -102,15 +102,6 @@ jobs:
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
           $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.msvc-arch }}"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
-      - name: Install cargo-edit
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-edit
-      - name: Set version from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: bash
-        run: cargo set-version "${GITHUB_REF_NAME#v}"
       - run: cargo build --release -p dictymus --target ${{ matrix.target }}
       - uses: actions/upload-artifact@v7
         with:
@@ -131,15 +122,6 @@ jobs:
         with:
           key: installer
           save-if: ${{ github.ref == 'refs/heads/master' }}
-      - name: Install cargo-edit
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-edit
-      - name: Set version from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: bash
-        run: cargo set-version "${GITHUB_REF_NAME#v}"
       - uses: actions/download-artifact@v8
         with:
           name: dictymus-windows-x64
@@ -209,9 +191,9 @@ jobs:
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "")
           if [ -z "$PREV_TAG" ]; then
-            COMMITS=$(git log --abbrev=7 --pretty=format:"- %h: %s" -20 HEAD)
+            COMMITS=$(git log --abbrev=7 --pretty=format:"- %h %s" -20 HEAD)
           else
-            COMMITS=$(git log --abbrev=7 --pretty=format:"- %h: %s" "$PREV_TAG"..HEAD)
+            COMMITS=$(git log --abbrev=7 --pretty=format:"- %h %s" "$PREV_TAG"..HEAD)
           fi
           {
             echo "commits<<EOF"
@@ -246,6 +228,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Checkout first: it cleans the workspace directory, and the tagged
+      # tree supplies CHANGELOG.md for the release body.
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: dictymus-windows-setup
@@ -263,6 +248,19 @@ jobs:
           cp artifacts/windows-setup/* .
           cp artifacts/macos-x64/dictymus dictymus-macos-x64
           cp artifacts/macos-arm64/dictymus dictymus-macos-arm64
+      # The body is the CHANGELOG.md section for this version: everything
+      # between its "## [X.Y.Z]" heading and the next "## [" heading.
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            /^## \[/ { if (found) exit; if (index($0, "## [" ver "]") == 1) { found = 1; next } }
+            found { print }
+          ' CHANGELOG.md > release_body.md
+          if ! grep -q '[^[:space:]]' release_body.md; then
+            echo "::error::CHANGELOG.md has no section for version $VERSION"
+            exit 1
+          fi
       - uses: softprops/action-gh-release@v3
         with:
           files: |
@@ -276,7 +274,7 @@ jobs:
             dictymus-arm64.zip.minisig
             dictymus-macos-x64
             dictymus-macos-arm64
-          generate_release_notes: true
+          body_path: release_body.md
           name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

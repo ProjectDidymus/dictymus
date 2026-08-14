@@ -29,6 +29,12 @@ Tests:
 - `pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path.ifo>`
   — UI smoke test (requires winapp CLI)
 
+Releasing:
+
+- `cargo release <level> --execute` — lockstep version bump, `CHANGELOG.md`
+  stamp, commit, tag `v<version>`, push; the tag triggers the CI release
+  (see README "Releasing")
+
 ## Architecture
 
 **Workspace:** `crates/opendict-rs` (vendored, unchanged) + `crates/dictymus-core` + `crates/dictymus`.

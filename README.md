@@ -112,6 +112,28 @@ cargo install prek
 prek install
 ```
 
+## Releasing
+
+Releases are driven by [cargo-release](https://github.com/crate-ci/cargo-release)
+(`cargo install cargo-release`). Nothing is published to crates.io; the tag is
+what CI builds and publishes.
+
+1. Record notable changes under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
+2. From a clean `master`, preview (dry run is the default), then execute:
+
+   ```sh
+   cargo release patch             # or minor | major | <x.y.z>
+   cargo release patch --execute
+   ```
+
+   cargo-release runs fmt, clippy, and the core/xtask tests (the GUI crate is
+   built by CI, so no VS Developer Prompt is needed), bumps all three crate
+   versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
+   tags `vX.Y.Z`, and pushes.
+3. The pushed tag triggers CI, which builds every target, signs the Windows
+   updater assets, and publishes the GitHub release with the changelog section
+   as its body.
+
 ## License
 
 Dictymus is licensed under the [MIT License](LICENSE).
