@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - StarDict and MDict dictionary reading through opendict-rs, including
   random-access `.dict.dz` without a side-by-side `.dict` file
 - Tabbed interface for working with multiple dictionaries at once
-- Live, incremental lemma search with on-the-fly Logos Biblical keyboard
-  transliteration for Hebrew and Greek
+- Live, incremental lemma search with on-the-fly Biblical keyboard
+  transliteration for Hebrew and Greek, based on Logos keyboard layout
 - Diacritic-insensitive matching: unpointed Hebrew and unaccented Greek
   queries match pointed and accented lemmas
 - Automatic per-dictionary language detection (Hebrew or Greek)
