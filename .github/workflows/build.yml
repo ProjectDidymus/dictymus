@@ -67,9 +67,17 @@ jobs:
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
           $libPath = Join-Path $pkg.FullName "build\native\x64"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
-      # msgfmt compiles po/*.po into the catalogs the binary embeds.
+      # msgfmt compiles po/*.po into the catalogs the binary embeds. The
+      # package extends the machine PATH instead of shimming, which later
+      # steps never see, so the bin directory is exported explicitly.
       - name: Install gettext
-        run: choco install gettext -y --no-progress
+        shell: pwsh
+        run: |
+          choco install gettext -y --no-progress
+          $dirs = ([Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';') + 'C:\Program Files\gettext-iconv\bin'
+          $bin = $dirs | Where-Object { $_ -and (Test-Path (Join-Path $_ 'msgfmt.exe')) } | Select-Object -First 1
+          if (-not $bin) { throw 'msgfmt.exe not found after installing gettext' }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
       - run: cargo test -p dictymus -- --ignored
 
   build:
@@ -122,7 +130,13 @@ jobs:
       # msgfmt compiles po/*.po into the catalogs the binary embeds.
       - name: Install gettext
         if: startsWith(matrix.name, 'windows')
-        run: choco install gettext -y --no-progress
+        shell: pwsh
+        run: |
+          choco install gettext -y --no-progress
+          $dirs = ([Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';') + 'C:\Program Files\gettext-iconv\bin'
+          $bin = $dirs | Where-Object { $_ -and (Test-Path (Join-Path $_ 'msgfmt.exe')) } | Select-Object -First 1
+          if (-not $bin) { throw 'msgfmt.exe not found after installing gettext' }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
       - uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.target }}
