@@ -79,15 +79,22 @@ impl AppConfig {
 		toml::from_str(s)
 	}
 
-	fn path() -> Option<PathBuf> {
-		let dir = dirs::data_dir()?.join("dictymus");
-		Some(dir.join("config.toml"))
+	/// App-data root: `DICTYMUS_DATA_DIR` when set, else the OS app-data dir.
+	fn data_dir() -> Option<PathBuf> {
+		match std::env::var_os("DICTYMUS_DATA_DIR") {
+			Some(dir) => Some(PathBuf::from(dir)),
+			None => Some(dirs::data_dir()?.join("dictymus")),
+		}
 	}
 
-	/// Directory for rotated log files, alongside the config in the OS app-data
+	fn path() -> Option<PathBuf> {
+		Some(Self::data_dir()?.join("config.toml"))
+	}
+
+	/// Directory for rotated log files, alongside the config in the app-data
 	/// dir. `None` when no app-data dir is available.
 	pub fn log_dir() -> Option<PathBuf> {
-		Some(dirs::data_dir()?.join("dictymus").join("logs"))
+		Some(Self::data_dir()?.join("logs"))
 	}
 
 	/// Load from the OS app-data dir. A missing file is a normal first run
@@ -134,6 +141,22 @@ impl AppConfig {
 mod tests {
 	use super::{AppConfig, UpdateChannel};
 	use std::path::PathBuf;
+
+	#[test]
+	fn data_dir_env_override_redirects_paths() {
+		let dir = std::env::temp_dir().join(format!("dictymus-cfg-test-{}", std::process::id()));
+		unsafe { std::env::set_var("DICTYMUS_DATA_DIR", &dir) };
+		assert_eq!(AppConfig::log_dir().unwrap(), dir.join("logs"));
+		let mut cfg = AppConfig::default();
+		cfg.open_dictionaries = vec![PathBuf::from("/a/x.ifo")];
+		cfg.save().unwrap();
+		assert!(dir.join("config.toml").is_file());
+		let (loaded, warning) = AppConfig::load();
+		assert!(warning.is_none());
+		assert_eq!(loaded.open_dictionaries, cfg.open_dictionaries);
+		unsafe { std::env::remove_var("DICTYMUS_DATA_DIR") };
+		let _ = std::fs::remove_dir_all(&dir);
+	}
 
 	#[test]
 	fn round_trips_open_paths() {

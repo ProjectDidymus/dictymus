@@ -37,6 +37,38 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - run: cargo test -p dictymus-core -p xtask
 
+  ui-test:
+    name: UI test (Windows)
+    needs: [check, test]
+    runs-on: windows-2025
+    steps:
+      # Tags must be visible so build.rs can tell release builds (HEAD on a
+      # tag) from development builds.
+      - uses: actions/checkout@v7
+        with:
+          fetch-tags: true
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          key: ui-test
+          cache-all-crates: true
+          cache-on-failure: true
+          save-if: ${{ github.ref == 'refs/heads/master' }}
+      # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
+      # inside the cached wx CMake tree does not survive the rust-cache cleanup.
+      - name: Install WebView2 SDK
+        shell: pwsh
+        run: |
+          nuget install Microsoft.Web.WebView2 -OutputDirectory packages
+          $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
+          $libPath = Join-Path $pkg.FullName "build\native\x64"
+          echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
+      - run: cargo test -p dictymus -- --ignored
+
   build:
     name: Build (${{ matrix.name }})
     needs: [check, test]

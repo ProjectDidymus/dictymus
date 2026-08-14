@@ -26,8 +26,12 @@ Tests:
 
 - `cargo test` — all unit tests
 - `cargo test -p dictymus-core` — core logic tests only
-- `pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path.ifo>`
-  — UI smoke test (requires winapp CLI)
+- `cargo test -p dictymus -- --ignored` — UI tests in `crates/dictymus/tests/`
+  (drive the real GUI via the `uiautomation` crate; need an interactive
+  desktop; run in CI; shared harness in `tests/common/`)
+
+Test fixtures: `dictymus_core::testing` generates tiny StarDict sets
+(Greek/Hebrew/Latin, public-domain words) — no real dictionaries needed.
 
 Releasing:
 

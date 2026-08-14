@@ -35,6 +35,9 @@ windows = { version = "0.62", features = [
 embed-manifest = "1.5.0"
 winresource = "0.1"
 
+[dev-dependencies]
+uiautomation = "0.25.0"
+
 [package.metadata.release]
 # cargo-release accepts a single hook command; cmd /c chains the checks.
 pre-release-hook = [

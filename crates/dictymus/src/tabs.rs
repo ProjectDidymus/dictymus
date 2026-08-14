@@ -226,6 +226,7 @@ impl TabManager {
 		let tab = self.build_tab_panel(dict);
 		self.notebook.add_page(&tab.panel, &title, true, None);
 		crate::lemma_list::repopulate(&tab);
+		tab.search.set_focus();
 		self.tabs.push(Rc::clone(&tab));
 		tracing::info!(title, "dictionary tab opened");
 		Ok(tab)
