@@ -68,16 +68,18 @@ jobs:
           $libPath = Join-Path $pkg.FullName "build\native\x64"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       # msgfmt compiles po/*.po into the catalogs the binary embeds. The
-      # package extends the machine PATH instead of shimming, which later
-      # steps never see, so the bin directory is exported explicitly.
+      # static x64 binaries also cover the arm64 runner via emulation.
       - name: Install gettext
         shell: pwsh
         run: |
-          choco install gettext -y --no-progress
-          $dirs = ([Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';') + 'C:\Program Files\gettext-iconv\bin'
-          $bin = $dirs | Where-Object { $_ -and (Test-Path (Join-Path $_ 'msgfmt.exe')) } | Select-Object -First 1
-          if (-not $bin) { throw 'msgfmt.exe not found after installing gettext' }
-          Add-Content -Path $env:GITHUB_PATH -Value $bin
+          $url = 'https://github.com/mlocati/gettext-iconv-windows/releases/download/v1.0-v1.19/gettext1.0-iconv1.19-static-64.zip'
+          $zip = Join-Path $env:RUNNER_TEMP 'gettext.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'gettext'
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir
+          $msgfmt = Get-ChildItem -Path $dir -Recurse -Filter msgfmt.exe | Select-Object -First 1
+          if (-not $msgfmt) { throw 'msgfmt.exe not found in extracted archive' }
+          Add-Content -Path $env:GITHUB_PATH -Value $msgfmt.DirectoryName
       - run: cargo test -p dictymus -- --ignored
 
   build:
@@ -132,11 +134,14 @@ jobs:
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
         run: |
-          choco install gettext -y --no-progress
-          $dirs = ([Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';') + 'C:\Program Files\gettext-iconv\bin'
-          $bin = $dirs | Where-Object { $_ -and (Test-Path (Join-Path $_ 'msgfmt.exe')) } | Select-Object -First 1
-          if (-not $bin) { throw 'msgfmt.exe not found after installing gettext' }
-          Add-Content -Path $env:GITHUB_PATH -Value $bin
+          $url = 'https://github.com/mlocati/gettext-iconv-windows/releases/download/v1.0-v1.19/gettext1.0-iconv1.19-static-64.zip'
+          $zip = Join-Path $env:RUNNER_TEMP 'gettext.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'gettext'
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir
+          $msgfmt = Get-ChildItem -Path $dir -Recurse -Filter msgfmt.exe | Select-Object -First 1
+          if (-not $msgfmt) { throw 'msgfmt.exe not found in extracted archive' }
+          Add-Content -Path $env:GITHUB_PATH -Value $msgfmt.DirectoryName
       - uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.target }}
