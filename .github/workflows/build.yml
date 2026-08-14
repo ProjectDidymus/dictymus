@@ -67,20 +67,22 @@ jobs:
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
           $libPath = Join-Path $pkg.FullName "build\native\x64"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
-      # msgfmt compiles po/*.po into the catalogs the binary embeds. The
-      # static x64 binaries also cover the arm64 runner via emulation.
-      - name: Install gettext
+      # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
+      # directories are appended at the end of PATH inside the cargo step,
+      # keeping MSVC's tools ahead of MSYS2's same-named ones.
+      - name: Install gettext via MSYS2
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: >-
+            gettext
+            mingw-w64-ucrt-x86_64-gettext-tools
+      - name: Run UI tests
         shell: pwsh
         run: |
-          $url = 'https://github.com/mlocati/gettext-iconv-windows/releases/download/v1.0-v1.19/gettext1.0-iconv1.19-static-64.zip'
-          $zip = Join-Path $env:RUNNER_TEMP 'gettext.zip'
-          $dir = Join-Path $env:RUNNER_TEMP 'gettext'
-          Invoke-WebRequest -Uri $url -OutFile $zip
-          Expand-Archive -Path $zip -DestinationPath $dir
-          $msgfmt = Get-ChildItem -Path $dir -Recurse -Filter msgfmt.exe | Select-Object -First 1
-          if (-not $msgfmt) { throw 'msgfmt.exe not found in extracted archive' }
-          Add-Content -Path $env:GITHUB_PATH -Value $msgfmt.DirectoryName
-      - run: cargo test -p dictymus -- --ignored
+          $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
+          cargo test -p dictymus -- --ignored
 
   build:
     name: Build (${{ matrix.name }})
@@ -130,18 +132,18 @@ jobs:
           brew install cmake ninja gettext
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
       # msgfmt compiles po/*.po into the catalogs the binary embeds.
-      - name: Install gettext
+      # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
+      # directories are appended at the end of PATH inside the cargo step,
+      # keeping MSVC's tools ahead of MSYS2's same-named ones.
+      - name: Install gettext via MSYS2
         if: startsWith(matrix.name, 'windows')
-        shell: pwsh
-        run: |
-          $url = 'https://github.com/mlocati/gettext-iconv-windows/releases/download/v1.0-v1.19/gettext1.0-iconv1.19-static-64.zip'
-          $zip = Join-Path $env:RUNNER_TEMP 'gettext.zip'
-          $dir = Join-Path $env:RUNNER_TEMP 'gettext'
-          Invoke-WebRequest -Uri $url -OutFile $zip
-          Expand-Archive -Path $zip -DestinationPath $dir
-          $msgfmt = Get-ChildItem -Path $dir -Recurse -Filter msgfmt.exe | Select-Object -First 1
-          if (-not $msgfmt) { throw 'msgfmt.exe not found in extracted archive' }
-          Add-Content -Path $env:GITHUB_PATH -Value $msgfmt.DirectoryName
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: >-
+            gettext
+            mingw-w64-ucrt-x86_64-gettext-tools
       - uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.target }}
@@ -163,7 +165,15 @@ jobs:
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
           $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.msvc-arch }}"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
-      - run: cargo build --release -p dictymus --target ${{ matrix.target }}
+      - name: Build
+        if: startsWith(matrix.name, 'windows')
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
+          cargo build --release -p dictymus --target ${{ matrix.target }}
+      - name: Build
+        if: startsWith(matrix.name, 'macos')
+        run: cargo build --release -p dictymus --target ${{ matrix.target }}
       # patois-build only warns when msgfmt is missing; fail hard instead of
       # shipping a release that silently lost its translations.
       - name: Assert translations were embedded
