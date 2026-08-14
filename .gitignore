@@ -2,3 +2,5 @@ target
 .claude
 __pycache__
 dictymus-minisign.*
+crates/dictymus/locale/
+po/*.mo

@@ -1,3 +1,4 @@
+use crate::t;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -49,6 +50,9 @@ pub struct AppConfig {
 	/// Auto-update stream: `"stable"`, `"dev"`, or empty to follow the build
 	/// type (release builds track stable, development builds track dev).
 	pub update_channel: String,
+	/// UI language code (e.g. `"en"`, `"nl"`), or empty to follow the system
+	/// language.
+	pub language: String,
 }
 
 impl Default for AppConfig {
@@ -58,6 +62,7 @@ impl Default for AppConfig {
 			log_level: default_log_level(),
 			check_for_updates_on_startup: true,
 			update_channel: String::new(),
+			language: String::new(),
 		}
 	}
 }
@@ -108,16 +113,21 @@ impl AppConfig {
 				return (Self::default(), None);
 			}
 			Err(e) => {
-				return (
-					Self::default(),
-					Some(format!("Could not read settings ({}): {e}", p.display())),
-				);
+				// TRANSLATORS: Startup warning; first placeholder is the settings file path, second the OS error.
+				let msg = t("Could not read settings ({}): {}")
+					.replacen("{}", &p.display().to_string(), 1)
+					.replacen("{}", &e.to_string(), 1);
+				return (Self::default(), Some(msg));
 			}
 		};
 		match Self::from_toml(&text) {
 			Ok(cfg) => (cfg, None),
 			Err(e) => {
-				(Self::default(), Some(format!("Settings file is invalid ({}): {e}", p.display())))
+				// TRANSLATORS: Startup warning; first placeholder is the settings file path, second the parse error.
+				let msg = t("Settings file is invalid ({}): {}")
+					.replacen("{}", &p.display().to_string(), 1)
+					.replacen("{}", &e.to_string(), 1);
+				(Self::default(), Some(msg))
 			}
 		}
 	}
@@ -235,6 +245,20 @@ mod tests {
 		assert_eq!(cfg.effective_update_channel(UpdateChannel::Dev), UpdateChannel::Dev);
 		let cfg = AppConfig { update_channel: "nightly".into(), ..Default::default() };
 		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Stable);
+	}
+
+	#[test]
+	fn old_config_without_language_loads_with_default() {
+		// Configs written before the language field existed must still deserialize.
+		let cfg = AppConfig::from_toml("open_dictionaries = [\"/a/x.ifo\"]").unwrap();
+		assert_eq!(cfg.language, "");
+	}
+
+	#[test]
+	fn language_round_trips() {
+		let cfg = AppConfig { language: "nl".into(), ..Default::default() };
+		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
+		assert_eq!(back.language, "nl");
 	}
 
 	#[test]

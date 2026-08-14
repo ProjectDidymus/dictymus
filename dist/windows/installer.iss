@@ -56,16 +56,35 @@
 
 [Languages]
 	Name: "english"; MessagesFile: "compiler:Default.isl"
+	Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
+
+[CustomMessages]
+	english.StartMenuShortcut=Start Menu Shortcut
+	dutch.StartMenuShortcut=Snelkoppeling in het menu Start
+	english.DesktopShortcut=Desktop Shortcut
+	dutch.DesktopShortcut=Snelkoppeling op het bureaublad
+	english.AssocIfo=Open StarDict dictionaries (*.ifo) with Dictymus by default
+	dutch.AssocIfo=StarDict-woordenboeken (*.ifo) standaard openen met Dictymus
+	english.AssocMdx=Open MDict dictionaries (*.mdx) with Dictymus by default
+	dutch.AssocMdx=MDict-woordenboeken (*.mdx) standaard openen met Dictymus
+	english.DictionaryProgId=Dictymus dictionary
+	dutch.DictionaryProgId=Dictymus-woordenboek
+	english.LaunchApp=Launch Dictymus
+	dutch.LaunchApp=Dictymus starten
+	english.WebView2InstallFailed=Dictymus was installed, but the Microsoft Edge WebView2 Runtime could not be installed (error %1).
+	dutch.WebView2InstallFailed=Dictymus is geïnstalleerd, maar de Microsoft Edge WebView2 Runtime kon niet worden geïnstalleerd (fout %1).
+	english.WebView2ManualInstall=Dictionary articles will not display until it is installed from:
+	dutch.WebView2ManualInstall=Woordenboekartikelen worden pas weergegeven nadat deze is geïnstalleerd vanaf:
 
 [Files]
 	Source: "{#SRCDIR}\dictymus.exe"; DestDir: "{app}"; Flags: ignoreversion
 	Source: "{#STAGING}\MicrosoftEdgeWebView2Setup.exe"; DestDir: "{tmp}"; Check: not WebView2Present
 
 [Tasks]
-	Name: "startmenuicon"; Description: "Start Menu Shortcut"
-	Name: "desktopicon"; Description: "Desktop Shortcut"; Flags: unchecked
-	Name: "assoc_ifo"; Description: "Open StarDict dictionaries (*.ifo) with Dictymus by default"
-	Name: "assoc_mdx"; Description: "Open MDict dictionaries (*.mdx) with Dictymus by default"
+	Name: "startmenuicon"; Description: "{cm:StartMenuShortcut}"
+	Name: "desktopicon"; Description: "{cm:DesktopShortcut}"; Flags: unchecked
+	Name: "assoc_ifo"; Description: "{cm:AssocIfo}"
+	Name: "assoc_mdx"; Description: "{cm:AssocMdx}"
 
 [Icons]
 	Name: "{autoprograms}\Dictymus"; Filename: "{app}\dictymus.exe"; Tasks: startmenuicon
@@ -73,7 +92,7 @@
 
 [Registry]
 	; Shared ProgID for both dictionary types.
-	Root: HKCR; Subkey: "Dictymus.Dictionary"; ValueType: string; ValueName: ""; ValueData: "Dictymus dictionary"; Flags: uninsdeletekey
+	Root: HKCR; Subkey: "Dictymus.Dictionary"; ValueType: string; ValueName: ""; ValueData: "{cm:DictionaryProgId}"; Flags: uninsdeletekey
 	Root: HKCR; Subkey: "Dictymus.Dictionary\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\dictymus.exe,0"
 	Root: HKCR; Subkey: "Dictymus.Dictionary\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\dictymus.exe"" ""%1"""
 	Root: HKCR; Subkey: ".ifo"; ValueType: string; ValueName: ""; ValueData: "Dictymus.Dictionary"; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_ifo
@@ -108,12 +127,11 @@ begin
 		ResultCode := -1;
 	if ResultCode <> 0 then
 		SuppressibleMsgBox(
-			'Dictymus was installed, but the Microsoft Edge WebView2 Runtime could not be installed (error '
-			+ IntToStr(ResultCode) + ').' #13#10
-			+ 'Dictionary articles will not display until it is installed from:' #13#10
+			FmtMessage(CustomMessage('WebView2InstallFailed'), [IntToStr(ResultCode)]) + #13#10
+			+ CustomMessage('WebView2ManualInstall') + #13#10
 			+ 'https://developer.microsoft.com/microsoft-edge/webview2/',
 			mbError, MB_OK, IDOK);
 end;
 
 [Run]
-	Filename: "{app}\dictymus.exe"; Description: "Launch Dictymus"; Flags: nowait postinstall skipifsilent
+	Filename: "{app}\dictymus.exe"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent

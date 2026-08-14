@@ -1,4 +1,8 @@
 #![cfg_attr(not(test), windows_subsystem = "windows")]
+
+patois::embed_domain!();
+patois::embed_wx_translations!();
+
 mod accessibility;
 mod app;
 mod article_pane;
@@ -8,12 +12,20 @@ mod ipc;
 mod lemma_list;
 mod logging;
 mod menu;
+mod options;
 mod search_field;
 mod tabs;
+mod translation_manager;
 #[cfg(windows)]
 mod update;
 
+use patois::t;
+
 fn main() {
+	// Register the translation domain and system locale before the config
+	// loads, so config-load warnings already come out translated. The
+	// wx-side catalog setup follows inside wxdragon::main once wx is up.
+	patois::init_auto("dictymus");
 	// Load config first so logging can honour its level, then init logging
 	// before any UI work. The guard stays in this frame and outlives the
 	// leaked App, so buffered log lines flush on exit.
@@ -24,6 +36,14 @@ fn main() {
 	// If wx itself failed to init there is no toolkit to show a dialog with;
 	// the nonzero exit code is what scripts and smoke tests need.
 	if let Err(e) = wxdragon::main(move |_| {
+		{
+			let mut translations =
+				translation_manager::TranslationManager::instance().lock().unwrap();
+			translations.initialize();
+			if !config.language.is_empty() {
+				translations.set_language(&config.language);
+			}
+		}
 		let app = app::App::new(config.clone(), config_warning.clone());
 		app.show();
 		let app: &'static app::App = Box::leak(Box::new(app));
@@ -31,7 +51,10 @@ fn main() {
 		if !ipc::start_server() {
 			dialogs::show_error(
 				&app.frame,
-				"Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window.",
+				// TRANSLATORS: Error shown at startup when the channel that lets Explorer reuse the running window cannot be created.
+				&t(
+					"Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window.",
+				),
 			);
 		}
 		#[cfg(windows)]

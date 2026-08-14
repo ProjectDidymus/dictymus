@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The user interface is now available in Dutch alongside English, following
+  the Windows display language by default
+- An Options dialog (File menu) with the interface language, whether to
+  check for updates on startup, and the update channel
+- The Windows installer can now also run in Dutch
+
 ### Fixed
 
 - Opening a dictionary now places keyboard focus in the search field instead

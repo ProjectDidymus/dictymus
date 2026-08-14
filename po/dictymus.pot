@@ -1,0 +1,315 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the dictymus package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: dictymus 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-14 20:24+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. TRANSLATORS: Accessible name of the main window
+msgid "Dictionary"
+msgstr ""
+
+#. TRANSLATORS: Accessible name of the status bar
+msgid "Status"
+msgstr ""
+
+#. TRANSLATORS: Initial status bar text
+msgid "Ready"
+msgstr ""
+
+#. TRANSLATORS: Accessible name of the tab list holding the open dictionaries
+msgid "Dictionary tabs"
+msgstr ""
+
+msgid "{} — the dictionary was not reopened."
+msgstr ""
+
+#. TRANSLATORS: Status bar text after opening a dictionary
+msgid "Dictionary loaded"
+msgstr ""
+
+#. TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
+msgid "Could not save session: {}"
+msgstr ""
+
+#. TRANSLATORS: Fallback page title when the entry has no headword
+#. TRANSLATORS: Group label around the dictionary article pane
+msgid "Article"
+msgstr ""
+
+#. TRANSLATORS: Shown in the article pane when the entry has no content
+msgid "Article unavailable."
+msgstr ""
+
+#. TRANSLATORS: Announced when a cross-reference target is not in the dictionary; the placeholder is the word
+msgid "Not found: {}"
+msgstr ""
+
+#. TRANSLATORS: Title of the error dialog
+msgid "Dictymus - Error"
+msgstr ""
+
+#. TRANSLATORS: One-line app description in the About dialog
+msgid "An accessible dictionary for biblical languages"
+msgstr ""
+
+#. TRANSLATORS: Title of the dictionary file picker dialog
+msgid "Open dictionary"
+msgstr ""
+
+#. TRANSLATORS: File picker filter label for all supported dictionary formats
+msgid "Dictionaries (*.ifo;*.mdx)"
+msgstr ""
+
+#. TRANSLATORS: File picker filter label for StarDict dictionaries
+msgid "StarDict info (*.ifo)"
+msgstr ""
+
+#. TRANSLATORS: File picker filter label for MDict dictionaries
+msgid "MDict (*.mdx)"
+msgstr ""
+
+#. TRANSLATORS: File picker filter label for all files
+msgid "All files (*.*)"
+msgstr ""
+
+#. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be registered
+msgid "Bundled font could not be registered; using system font"
+msgstr ""
+
+#. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
+msgid "Bundled font unavailable; using system font"
+msgstr ""
+
+msgid ""
+"Could not start the single-instance service. Opening dictionary files from "
+"Explorer will start a separate window."
+msgstr ""
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "&Open...\tCtrl+O"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Open menu item
+msgid "Open a dictionary"
+msgstr ""
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "&Close\tCtrl+F4"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Close menu item
+msgid "Close current dictionary"
+msgstr ""
+
+#. TRANSLATORS: File menu item
+msgid "Close &All"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Close All menu item
+msgid "Close all dictionaries"
+msgstr ""
+
+#. TRANSLATORS: File menu item opening the Options dialog
+msgid "&Options..."
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Options menu item
+msgid "Change settings"
+msgstr ""
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "E&xit\tCtrl+Q"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Exit menu item
+msgid "Exit"
+msgstr ""
+
+#. TRANSLATORS: Help menu item
+msgid "Check for &Updates..."
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the Check for Updates menu item
+msgid "Check for a new version of Dictymus"
+msgstr ""
+
+#. TRANSLATORS: Help menu item
+msgid "&About Dictymus"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the About menu item
+msgid "About this application"
+msgstr ""
+
+#. TRANSLATORS: Menu bar title
+msgid "&File"
+msgstr ""
+
+#. TRANSLATORS: Menu bar title
+msgid "&Help"
+msgstr ""
+
+#. TRANSLATORS: Title of the Options dialog
+msgid "Options"
+msgstr ""
+
+#. TRANSLATORS: Label of the language selector in the Options dialog
+msgid "&Language:"
+msgstr ""
+
+#. TRANSLATORS: First entry of the language selector: follow the Windows display language
+msgid "System default"
+msgstr ""
+
+#. TRANSLATORS: Option in the Options dialog
+msgid "Check for &updates on startup"
+msgstr ""
+
+#. TRANSLATORS: Label of the update channel selector in the Options dialog
+msgid "Update &channel:"
+msgstr ""
+
+#. TRANSLATORS: Update channel entry: stable releases for release builds, development builds otherwise
+msgid "Default for this build"
+msgstr ""
+
+#. TRANSLATORS: Update channel entry: tagged releases only
+msgid "Stable"
+msgstr ""
+
+#. TRANSLATORS: Update channel entry: rolling development builds
+msgid "Development"
+msgstr ""
+
+#. TRANSLATORS: Label for the confirmation button
+msgid "OK"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+#. TRANSLATORS: Error dialog text; the placeholder is the underlying error
+msgid "Could not save settings: {}"
+msgstr ""
+
+#. TRANSLATORS: Shown after changing the language in the Options dialog
+msgid "The language change will take full effect after you restart Dictymus."
+msgstr ""
+
+#. TRANSLATORS: Announced when a search matches exactly one entry
+msgid "1 result"
+msgstr ""
+
+#. TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
+msgid "{} results"
+msgstr ""
+
+#. TRANSLATORS: Label of the search field
+msgid "Search"
+msgstr ""
+
+#. TRANSLATORS: Label of the list of dictionary entries
+msgid "Lemmas"
+msgstr ""
+
+#. TRANSLATORS: Header of the single column in the list of dictionary entries
+msgid "Lemma"
+msgstr ""
+
+#. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
+msgid "Cannot open {}: {}"
+msgstr ""
+
+#. TRANSLATORS: Announced after closing a tab; the placeholder is the dictionary title
+msgid "Closed {}"
+msgstr ""
+
+#. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the OS error.
+msgid "Could not read settings ({}): {}"
+msgstr ""
+
+#. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the parse error.
+msgid "Settings file is invalid ({}): {}"
+msgstr ""
+
+#, c-format
+msgid "Update to %s"
+msgstr ""
+
+#, c-format
+msgid "A new version of %s is available. Here's what's new:"
+msgstr ""
+
+msgid "&Yes"
+msgstr ""
+
+msgid "&No"
+msgstr ""
+
+msgid "No release notes provided."
+msgstr ""
+
+#, c-format
+msgid "%s Update"
+msgstr ""
+
+msgid "Downloading update..."
+msgstr ""
+
+msgid "No updates available."
+msgstr ""
+
+#, c-format
+msgid "No updates available. Latest version: %s"
+msgstr ""
+
+msgid "Info"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+#, c-format
+msgid ""
+"Security verification failed. The update might have been tampered with: %s"
+msgstr ""
+
+msgid "Security Error"
+msgstr ""
+
+msgid "Update failed"
+msgstr ""
+
+#, c-format
+msgid ""
+"Update downloaded to: %s\n"
+"Please install it manually."
+msgstr ""
+
+msgid "Update Ready"
+msgstr ""
+
+msgid "Failed to get current exe path"
+msgstr ""
+
+msgid "Failed to launch installer script"
+msgstr ""
+
+msgid "Failed to launch update script"
+msgstr ""
+
+msgid "Unknown update file format."
+msgstr ""

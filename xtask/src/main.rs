@@ -4,6 +4,7 @@
 //! Usage:
 //!   cargo xtask build-windows [--target <triple>]...
 //!   cargo xtask dist [--staging <dir>] [--only-native] [--webview2 <path>]
+//!   cargo xtask translate
 
 use std::path::{Path, PathBuf};
 use std::process::{Command as Proc, ExitCode};
@@ -24,10 +25,12 @@ enum Command {
 	BuildWindows { targets: Vec<String> },
 	/// Assemble the per-arch installers from a staging directory via ISCC.
 	Dist { staging: Option<PathBuf>, only_native: bool, webview2: Option<PathBuf> },
+	/// Regenerate the pot from source and msgmerge it into every po file.
+	Translate,
 }
 
 fn usage() -> String {
-	"usage: cargo xtask <build-windows [--target <triple>]... | dist [--staging <dir>] [--only-native] [--webview2 <path>]>"
+	"usage: cargo xtask <build-windows [--target <triple>]... | dist [--staging <dir>] [--only-native] [--webview2 <path>] | translate>"
 		.to_string()
 }
 
@@ -36,6 +39,10 @@ fn parse(args: &[String]) -> Result<Command, String> {
 	match cmd.as_str() {
 		"build-windows" => parse_build_windows(rest),
 		"dist" => parse_dist(rest),
+		"translate" => match rest {
+			[] => Ok(Command::Translate),
+			[other, ..] => Err(format!("unknown translate option: {other}")),
+		},
 		other => Err(format!("unknown command: {other}\n{}", usage())),
 	}
 }
@@ -297,6 +304,35 @@ fn iscc_defines(
 	]
 }
 
+/// Regenerate `po/dictymus.pot` from every translatable crate, then update
+/// each `po/*.po` against it via `msgmerge` so new and changed strings show
+/// up for translation. Requires `xgettext` and `msgmerge` on `PATH`.
+fn run_translate() -> Result<(), String> {
+	let root = repo_root();
+	let po_dir = root.join("po");
+	patois_build::gen_pot(&root, &po_dir, "dictymus").map_err(|e| format!("gen_pot: {e}"))?;
+	let pot = po_dir.join("dictymus.pot");
+	let entries =
+		std::fs::read_dir(&po_dir).map_err(|e| format!("read {}: {e}", po_dir.display()))?;
+	for entry in entries {
+		let path = entry.map_err(|e| e.to_string())?.path();
+		if path.extension().and_then(|e| e.to_str()) != Some("po") {
+			continue;
+		}
+		eprintln!("xtask: merging {}", path.display());
+		let status = Proc::new("msgmerge")
+			.args(["--update", "--backup=off"])
+			.arg(&path)
+			.arg(&pot)
+			.status()
+			.map_err(|e| format!("failed to spawn msgmerge: {e}"))?;
+		if !status.success() {
+			return Err(format!("msgmerge failed for {}", path.display()));
+		}
+	}
+	Ok(())
+}
+
 fn main() -> ExitCode {
 	let args: Vec<String> = std::env::args().skip(1).collect();
 	let cmd = match parse(&args) {
@@ -311,6 +347,7 @@ fn main() -> ExitCode {
 		Command::Dist { staging, only_native, webview2 } => {
 			run_dist(staging.as_deref(), only_native, webview2.as_deref())
 		}
+		Command::Translate => run_translate(),
 	};
 	match result {
 		Ok(()) => ExitCode::SUCCESS,
@@ -340,6 +377,12 @@ mod tests {
 				],
 			},
 		);
+	}
+
+	#[test]
+	fn translate_parses() {
+		assert_eq!(parse(&v(&["translate"])).unwrap(), Command::Translate);
+		assert!(parse(&v(&["translate", "--bogus"])).is_err());
 	}
 
 	#[test]

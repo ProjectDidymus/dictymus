@@ -1,0 +1,325 @@
+# Dutch translations for Dictymus.
+# This file is distributed under the same license as the dictymus package.
+msgid ""
+msgstr ""
+"Project-Id-Version: dictymus 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-14 20:17+0200\n"
+"PO-Revision-Date: 2026-08-14 20:30+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. TRANSLATORS: Accessible name of the main window
+msgid "Dictionary"
+msgstr "Woordenboek"
+
+#. TRANSLATORS: Accessible name of the status bar
+msgid "Status"
+msgstr "Status"
+
+#. TRANSLATORS: Initial status bar text
+msgid "Ready"
+msgstr "Gereed"
+
+#. TRANSLATORS: Accessible name of the tab list holding the open dictionaries
+msgid "Dictionary tabs"
+msgstr "Woordenboektabbladen"
+
+#. TRANSLATORS: Startup warning; the placeholder is the error that prevented reopening
+msgid "{} — the dictionary was not reopened."
+msgstr "{} — het woordenboek is niet opnieuw geopend."
+
+#. TRANSLATORS: Status bar text after opening a dictionary
+msgid "Dictionary loaded"
+msgstr "Woordenboek geladen"
+
+#. TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
+msgid "Could not save session: {}"
+msgstr "Kan de sessie niet opslaan: {}"
+
+#. TRANSLATORS: Fallback page title when the entry has no headword
+#. TRANSLATORS: Group label around the dictionary article pane
+msgid "Article"
+msgstr "Artikel"
+
+#. TRANSLATORS: Shown in the article pane when the entry has no content
+msgid "Article unavailable."
+msgstr "Artikel niet beschikbaar."
+
+#. TRANSLATORS: Announced when a cross-reference target is not in the dictionary; the placeholder is the word
+msgid "Not found: {}"
+msgstr "Niet gevonden: {}"
+
+#. TRANSLATORS: Title of the error dialog
+msgid "Dictymus - Error"
+msgstr "Dictymus - Fout"
+
+#. TRANSLATORS: One-line app description in the About dialog
+msgid "An accessible dictionary for biblical languages"
+msgstr "Een toegankelijk woordenboek voor Bijbelse talen"
+
+#. TRANSLATORS: Title of the dictionary file picker dialog
+msgid "Open dictionary"
+msgstr "Woordenboek openen"
+
+#. TRANSLATORS: File picker filter label for all supported dictionary formats
+msgid "Dictionaries (*.ifo;*.mdx)"
+msgstr "Woordenboeken (*.ifo;*.mdx)"
+
+#. TRANSLATORS: File picker filter label for StarDict dictionaries
+msgid "StarDict info (*.ifo)"
+msgstr "StarDict-info (*.ifo)"
+
+#. TRANSLATORS: File picker filter label for MDict dictionaries
+msgid "MDict (*.mdx)"
+msgstr "MDict (*.mdx)"
+
+#. TRANSLATORS: File picker filter label for all files
+msgid "All files (*.*)"
+msgstr "Alle bestanden (*.*)"
+
+#. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be registered
+msgid "Bundled font could not be registered; using system font"
+msgstr ""
+"Het meegeleverde lettertype kon niet worden geregistreerd; het "
+"systeemlettertype wordt gebruikt"
+
+#. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
+msgid "Bundled font unavailable; using system font"
+msgstr ""
+"Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt "
+"gebruikt"
+
+#. TRANSLATORS: Error shown at startup when the channel that lets Explorer reuse the running window cannot be created.
+msgid ""
+"Could not start the single-instance service. Opening dictionary files from "
+"Explorer will start a separate window."
+msgstr ""
+"Kan de service voor een enkele instantie niet starten. Woordenboekbestanden "
+"die vanuit de Verkenner worden geopend, starten een apart venster."
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "&Open...\tCtrl+O"
+msgstr "&Openen...\tCtrl+O"
+
+#. TRANSLATORS: Status bar help for the Open menu item
+msgid "Open a dictionary"
+msgstr "Een woordenboek openen"
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "&Close\tCtrl+F4"
+msgstr "&Sluiten\tCtrl+F4"
+
+#. TRANSLATORS: Status bar help for the Close menu item
+msgid "Close current dictionary"
+msgstr "Het huidige woordenboek sluiten"
+
+#. TRANSLATORS: File menu item
+msgid "Close &All"
+msgstr "&Alles sluiten"
+
+#. TRANSLATORS: Status bar help for the Close All menu item
+msgid "Close all dictionaries"
+msgstr "Alle woordenboeken sluiten"
+
+#. TRANSLATORS: File menu item opening the Options dialog
+msgid "&Options..."
+msgstr "O&pties..."
+
+#. TRANSLATORS: Status bar help for the Options menu item
+msgid "Change settings"
+msgstr "Instellingen wijzigen"
+
+#. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
+msgid "E&xit\tCtrl+Q"
+msgstr "A&fsluiten\tCtrl+Q"
+
+#. TRANSLATORS: Status bar help for the Exit menu item
+msgid "Exit"
+msgstr "Dictymus afsluiten"
+
+#. TRANSLATORS: Help menu item
+msgid "Check for &Updates..."
+msgstr "Controleren op &updates..."
+
+#. TRANSLATORS: Status bar help for the Check for Updates menu item
+msgid "Check for a new version of Dictymus"
+msgstr "Controleren op een nieuwe versie van Dictymus"
+
+#. TRANSLATORS: Help menu item
+msgid "&About Dictymus"
+msgstr "&Over Dictymus"
+
+#. TRANSLATORS: Status bar help for the About menu item
+msgid "About this application"
+msgstr "Over deze toepassing"
+
+#. TRANSLATORS: Menu bar title
+msgid "&File"
+msgstr "&Bestand"
+
+#. TRANSLATORS: Menu bar title
+msgid "&Help"
+msgstr "&Help"
+
+#. TRANSLATORS: Title of the Options dialog
+msgid "Options"
+msgstr "Opties"
+
+#. TRANSLATORS: Label of the language selector in the Options dialog
+msgid "&Language:"
+msgstr "&Taal:"
+
+#. TRANSLATORS: First entry of the language selector: follow the Windows display language
+msgid "System default"
+msgstr "Systeemstandaard"
+
+#. TRANSLATORS: Option in the Options dialog
+msgid "Check for &updates on startup"
+msgstr "Bij het opstarten controleren op &updates"
+
+#. TRANSLATORS: Label of the update channel selector in the Options dialog
+msgid "Update &channel:"
+msgstr "Update&kanaal:"
+
+#. TRANSLATORS: Update channel entry: stable releases for release builds, development builds otherwise
+msgid "Default for this build"
+msgstr "Standaard voor deze build"
+
+#. TRANSLATORS: Update channel entry: tagged releases only
+msgid "Stable"
+msgstr "Stabiel"
+
+#. TRANSLATORS: Update channel entry: rolling development builds
+msgid "Development"
+msgstr "Ontwikkeling"
+
+#. TRANSLATORS: Label for the confirmation button
+msgid "OK"
+msgstr "OK"
+
+#. TRANSLATORS: Label for the cancellation button
+msgid "Cancel"
+msgstr "Annuleren"
+
+#. TRANSLATORS: Error dialog text; the placeholder is the underlying error
+msgid "Could not save settings: {}"
+msgstr "Kan de instellingen niet opslaan: {}"
+
+#. TRANSLATORS: Shown after changing the language in the Options dialog
+msgid "The language change will take full effect after you restart Dictymus."
+msgstr ""
+"De taalwijziging wordt volledig van kracht nadat Dictymus opnieuw is gestart."
+
+#. TRANSLATORS: Announced when a search matches exactly one entry
+msgid "1 result"
+msgstr "1 resultaat"
+
+#. TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
+msgid "{} results"
+msgstr "{} resultaten"
+
+#. TRANSLATORS: Label of the search field
+msgid "Search"
+msgstr "Zoeken"
+
+#. TRANSLATORS: Label of the list of dictionary entries
+msgid "Lemmas"
+msgstr "Lemma's"
+
+#. TRANSLATORS: Header of the single column in the list of dictionary entries
+msgid "Lemma"
+msgstr "Lemma"
+
+#. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
+msgid "Cannot open {}: {}"
+msgstr "Kan {} niet openen: {}"
+
+#. TRANSLATORS: Announced after closing a tab; the placeholder is the dictionary title
+msgid "Closed {}"
+msgstr "{} gesloten"
+
+#. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the OS error.
+msgid "Could not read settings ({}): {}"
+msgstr "Kan de instellingen niet lezen ({}): {}"
+
+#. TRANSLATORS: Startup warning; first placeholder is the settings file path, second the parse error.
+msgid "Settings file is invalid ({}): {}"
+msgstr "Het instellingenbestand is ongeldig ({}): {}"
+
+#, c-format
+msgid "Update to %s"
+msgstr "Bijwerken naar %s"
+
+#, c-format
+msgid "A new version of %s is available. Here's what's new:"
+msgstr "Er is een nieuwe versie van %s beschikbaar. Dit is er nieuw:"
+
+msgid "&Yes"
+msgstr "&Ja"
+
+msgid "&No"
+msgstr "&Nee"
+
+msgid "No release notes provided."
+msgstr "Geen release-opmerkingen beschikbaar."
+
+#, c-format
+msgid "%s Update"
+msgstr "%s-update"
+
+msgid "Downloading update..."
+msgstr "Update wordt gedownload..."
+
+msgid "No updates available."
+msgstr "Geen updates beschikbaar."
+
+#, c-format
+msgid "No updates available. Latest version: %s"
+msgstr "Geen updates beschikbaar. Nieuwste versie: %s"
+
+msgid "Info"
+msgstr "Info"
+
+msgid "Error"
+msgstr "Fout"
+
+#, c-format
+msgid ""
+"Security verification failed. The update might have been tampered with: %s"
+msgstr ""
+"Beveiligingsverificatie mislukt. Er is mogelijk met de update geknoeid: %s"
+
+msgid "Security Error"
+msgstr "Beveiligingsfout"
+
+msgid "Update failed"
+msgstr "Update mislukt"
+
+#, c-format
+msgid ""
+"Update downloaded to: %s\n"
+"Please install it manually."
+msgstr ""
+"Update gedownload naar: %s\n"
+"Installeer deze handmatig."
+
+msgid "Update Ready"
+msgstr "Update gereed"
+
+msgid "Failed to get current exe path"
+msgstr "Kan het pad van het huidige uitvoerbare bestand niet bepalen"
+
+msgid "Failed to launch installer script"
+msgstr "Kan het installatiescript niet starten"
+
+msgid "Failed to launch update script"
+msgstr "Kan het updatescript niet starten"
+
+msgid "Unknown update file format."
+msgstr "Onbekend bestandsformaat voor de update."

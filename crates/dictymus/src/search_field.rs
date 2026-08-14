@@ -2,6 +2,7 @@ use crate::lemma_list;
 use crate::tabs::DictionaryTab;
 use dictymus_core::normalize::normalize_for_search;
 use dictymus_core::transliterate::transliterate_char;
+use patois::t;
 use std::cell::Cell;
 use std::rc::Rc;
 use wxdragon::prelude::*;
@@ -52,7 +53,13 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 		lemma_list::repopulate(&tab);
 		if count != last_count.get() {
 			last_count.set(count);
-			let msg = if count == 1 { "1 result".to_string() } else { format!("{count} results") };
+			let msg = if count == 1 {
+				// TRANSLATORS: Announced when a search matches exactly one entry
+				t("1 result")
+			} else {
+				// TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
+				t("{} results").replace("{}", &count.to_string())
+			};
 			crate::accessibility::announce_status(tab.frame, tab.status_bar, &msg);
 		}
 	});

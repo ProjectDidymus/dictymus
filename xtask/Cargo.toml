@@ -5,3 +5,4 @@ edition = "2024"
 publish = false
 
 [dependencies]
+patois-build = { workspace = true }

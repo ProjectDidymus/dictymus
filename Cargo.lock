@@ -261,6 +261,8 @@ dependencies = [
  "dictymus-core",
  "dunce",
  "embed-manifest",
+ "patois 0.2.0",
+ "patois-build",
  "ship-shape",
  "tracing",
  "tracing-appender",
@@ -279,6 +281,7 @@ dependencies = [
  "icu_normalizer",
  "icu_properties",
  "opendict-rs",
+ "patois 0.2.0",
  "serde",
  "toml",
  "tracing",
@@ -1082,8 +1085,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "beb58c9b3a6913bb412d2f36592f9945e5fdb984319a3527cb680284bfcdfeea"
 dependencies = [
  "inventory",
- "patois-macros",
+ "patois-macros 0.1.2",
  "sys-locale",
+]
+
+[[package]]
+name = "patois"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "088ec49fdbe6186287d3b4d6601f70dd6fb9a8709664d52e2e76ea908ba03802"
+dependencies = [
+ "inventory",
+ "patois-macros 0.2.0",
+ "sys-locale",
+ "wxdragon",
+]
+
+[[package]]
+name = "patois-build"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b25a0ba527c43de5fadcda66285585abff78edbb2838908a8f3cc84db701f8f"
+dependencies = [
+ "serde_json",
 ]
 
 [[package]]
@@ -1095,6 +1119,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "patois-macros"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d1d2d62df9932eb304bdff8cf9c33e886b95f00a58b5c682ab5b8ef3724b425"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.3",
 ]
 
 [[package]]
@@ -1465,7 +1500,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36ab804bb2af6c4a4902757c87d09a7465ea9453a733a7f26cc456a83c5ba943"
 dependencies = [
  "minisign-verify",
- "patois",
+ "patois 0.1.2",
  "pulldown-cmark",
  "serde",
  "ureq",
@@ -2332,6 +2367,9 @@ dependencies = [
 [[package]]
 name = "xtask"
 version = "0.1.0"
+dependencies = [
+ "patois-build",
+]
 
 [[package]]
 name = "xxhash-rust"

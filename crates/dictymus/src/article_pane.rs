@@ -1,19 +1,22 @@
 use crate::tabs::DictionaryTab;
 use dictymus_core::normalize::normalize_for_search;
+use patois::t;
 use wxdragon::prelude::*;
 
 /// Render the article for the lemma at filtered-row `row` into the WebView.
 pub fn render_row(tab: &DictionaryTab, row: usize) {
 	let filtered = tab.filtered.borrow();
 	let Some(&word_idx) = filtered.get(row) else { return };
-	let title = tab.dict.words().get(word_idx).cloned().unwrap_or_else(|| "Article".to_string());
+	// TRANSLATORS: Fallback page title when the entry has no headword
+	let title = tab.dict.words().get(word_idx).cloned().unwrap_or_else(|| t("Article"));
 	drop(filtered);
 	// Render a readable message rather than a blank page — real page content,
 	// so a screen reader arrowing into the article reads it.
 	let html = tab
 		.dict
 		.article_html(word_idx)
-		.unwrap_or_else(|| "<p>Article unavailable.</p>".to_string());
+		// TRANSLATORS: Shown in the article pane when the entry has no content
+		.unwrap_or_else(|| format!("<p>{}</p>", t("Article unavailable.")));
 	let page = wrap_html(&html, &title);
 	*tab.article_html.borrow_mut() = page;
 	tab.article.load_url("assets:///article");
@@ -30,7 +33,8 @@ pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 		crate::accessibility::announce_status(
 			tab.frame,
 			tab.status_bar,
-			&format!("Not found: {word}"),
+			// TRANSLATORS: Announced when a cross-reference target is not in the dictionary; the placeholder is the word
+			&t("Not found: {}").replace("{}", word),
 		);
 		return;
 	};

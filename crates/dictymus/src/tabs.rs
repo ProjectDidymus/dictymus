@@ -1,4 +1,5 @@
 use dictymus_core::dictionary::DictHandle;
+use patois::t;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::{Rc, Weak};
@@ -77,18 +78,21 @@ impl TabManager {
 	fn build_layout(&self) -> (Panel, TextCtrl, ListCtrl, WebView) {
 		let panel = Panel::builder(&self.notebook).build();
 
-		let search_label = StaticText::builder(&panel).with_label("Search").build();
+		// TRANSLATORS: Label of the search field
+		let search_label = StaticText::builder(&panel).with_label(&t("Search")).build();
 		let search = TextCtrl::builder(&panel).with_style(TextCtrlStyle::ProcessEnter).build();
 		search.set_font(&self.base_font);
 
 		let splitter = SplitterWindow::builder(&panel).build();
 
 		let list_panel = Panel::builder(&splitter).build();
-		let list_label = StaticText::builder(&list_panel).with_label("Lemmas").build();
+		// TRANSLATORS: Label of the list of dictionary entries
+		let list_label = StaticText::builder(&list_panel).with_label(&t("Lemmas")).build();
 		let list = ListCtrl::builder(&list_panel)
 			.with_style(ListCtrlStyle::Report | ListCtrlStyle::SingleSel | ListCtrlStyle::Virtual)
 			.build();
-		list.insert_column(0, "Lemma", ListColumnFormat::Left, -1);
+		// TRANSLATORS: Header of the single column in the list of dictionary entries
+		list.insert_column(0, &t("Lemma"), ListColumnFormat::Left, -1);
 		list.set_font(&self.base_font);
 		let list_sizer = BoxSizer::builder(Orientation::Vertical).build();
 		list_sizer.add(
@@ -101,9 +105,14 @@ impl TabManager {
 		list_panel.set_sizer(list_sizer, true);
 
 		let article_panel = Panel::builder(&splitter).build();
-		let article_sizer =
-			StaticBoxSizerBuilder::new_with_label(Orientation::Vertical, &article_panel, "Article")
-				.build();
+		// TRANSLATORS: Group label around the dictionary article pane
+		let article_label = t("Article");
+		let article_sizer = StaticBoxSizerBuilder::new_with_label(
+			Orientation::Vertical,
+			&article_panel,
+			&article_label,
+		)
+		.build();
 		// Fall back to the plain panel as parent if the sizer has no StaticBox
 		// — degrades the group label rather than crashing.
 		let article = match article_sizer.get_static_box() {
@@ -219,9 +228,14 @@ impl TabManager {
 
 	pub fn open_dictionary(&mut self, path: &Path) -> Result<Rc<DictionaryTab>, String> {
 		tracing::debug!("opening dictionary: {}", path.display());
-		let dict = Rc::new(
-			DictHandle::open(path).map_err(|e| format!("Cannot open {}: {e}", path.display()))?,
-		);
+		let dict = Rc::new(DictHandle::open(path).map_err(|e| {
+			// TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
+			t("Cannot open {}: {}").replacen("{}", &path.display().to_string(), 1).replacen(
+				"{}",
+				&e.to_string(),
+				1,
+			)
+		})?);
 		let title = dict.title().to_string();
 		let tab = self.build_tab_panel(dict);
 		self.notebook.add_page(&tab.panel, &title, true, None);
@@ -254,7 +268,8 @@ impl TabManager {
 		crate::accessibility::announce_status(
 			self.frame,
 			self.status_bar,
-			&format!("Closed {title}"),
+			// TRANSLATORS: Announced after closing a tab; the placeholder is the dictionary title
+			&t("Closed {}").replace("{}", &title),
 		);
 	}
 }

@@ -57,10 +57,15 @@ impl Drop for App {
 pub fn launch(test_name: &str) -> App {
 	let base = std::env::temp_dir().join(format!("dictymus-ui-{test_name}-{}", std::process::id()));
 	let ifo = dictymus_core::testing::write_greek(&base.join("fixture"));
+	// The tests match widgets by their English accessible names, so pin the UI
+	// language regardless of the machine's display language.
+	let data_dir = base.join("data");
+	std::fs::create_dir_all(&data_dir).expect("create data dir");
+	std::fs::write(data_dir.join("config.toml"), "language = \"en\"\n").expect("write config");
 	let child = Command::new(env!("CARGO_BIN_EXE_dictymus"))
 		.arg(&ifo)
 		.env("DICTYMUS_NO_UPDATE_CHECK", "1")
-		.env("DICTYMUS_DATA_DIR", base.join("data"))
+		.env("DICTYMUS_DATA_DIR", &data_dir)
 		.env("RUST_LOG", "dictymus=debug")
 		.spawn()
 		.expect("launch dictymus");

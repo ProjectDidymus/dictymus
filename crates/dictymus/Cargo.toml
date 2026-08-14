@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 
+[package.metadata.patois]
+translatable = true
+
 [[bin]]
 name = "dictymus"
 path = "src/main.rs"
@@ -11,6 +14,7 @@ path = "src/main.rs"
 [dependencies]
 dictymus-core = { path = "../dictymus-core" }
 dunce = "1.0"
+patois = { workspace = true, features = ["ui"] }
 wxdragon = { version = "0.9.18", features = ["webview"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
@@ -33,6 +37,7 @@ windows = { version = "0.62", features = [
 
 [build-dependencies]
 embed-manifest = "1.5.0"
+patois-build = { workspace = true }
 winresource = "0.1"
 
 [dev-dependencies]

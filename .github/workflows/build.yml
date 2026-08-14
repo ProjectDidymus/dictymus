@@ -67,6 +67,9 @@ jobs:
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
           $libPath = Join-Path $pkg.FullName "build\native\x64"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
+      # msgfmt compiles po/*.po into the catalogs the binary embeds.
+      - name: Install gettext
+        run: choco install gettext -y --no-progress
       - run: cargo test -p dictymus -- --ignored
 
   build:
@@ -112,7 +115,14 @@ jobs:
           arch: ${{ matrix.msvc-arch }}
       - name: Install build tools
         if: startsWith(matrix.name, 'macos')
-        run: brew install cmake ninja
+        # gettext is keg-only, so its bin dir must be put on PATH explicitly.
+        run: |
+          brew install cmake ninja gettext
+          echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
+      # msgfmt compiles po/*.po into the catalogs the binary embeds.
+      - name: Install gettext
+        if: startsWith(matrix.name, 'windows')
+        run: choco install gettext -y --no-progress
       - uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.target }}
@@ -135,6 +145,15 @@ jobs:
           $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.msvc-arch }}"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       - run: cargo build --release -p dictymus --target ${{ matrix.target }}
+      # patois-build only warns when msgfmt is missing; fail hard instead of
+      # shipping a release that silently lost its translations.
+      - name: Assert translations were embedded
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "crates/dictymus/locale/nl/LC_MESSAGES/dictymus.mo")) {
+            Write-Error "Dutch catalog missing - msgfmt was unavailable during the build"
+            exit 1
+          }
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}

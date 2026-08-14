@@ -1,5 +1,6 @@
 use crate::{ipc, menu, tabs};
 use dictymus_core::config::AppConfig;
+use patois::t;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -34,6 +35,9 @@ pub struct App {
 
 impl App {
 	pub fn new(config: AppConfig, config_warning: Option<String>) -> Self {
+		// Single source of truth for settings: the Options dialog mutates it at
+		// runtime and the close handler persists it, so both must share one copy.
+		let config = Rc::new(RefCell::new(config));
 		let single_instance_checker = SingleInstanceChecker::new(ipc::SINGLE_INSTANCE_NAME, None);
 		if let Some(checker) = single_instance_checker.as_ref()
 			&& checker.is_another_running()
@@ -45,11 +49,14 @@ impl App {
 		}
 
 		let frame = Frame::builder().with_title("Dictymus").with_size(Size::new(900, 650)).build();
-		frame.set_name("Dictionary");
+		// TRANSLATORS: Accessible name of the main window
+		frame.set_name(&t("Dictionary"));
 		frame.set_menu_bar(menu::create_menu_bar());
 		let status_bar = frame.create_status_bar(1, 0, -1, "statusbar");
-		status_bar.set_name("Status");
-		frame.set_status_text("Ready", 0);
+		// TRANSLATORS: Accessible name of the status bar
+		status_bar.set_name(&t("Status"));
+		// TRANSLATORS: Initial status bar text
+		frame.set_status_text(&t("Ready"), 0);
 		crate::accessibility::init_status_bar_live_region(status_bar);
 
 		let (base_font, font_warning) = crate::fonts::load_base_font();
@@ -57,7 +64,8 @@ impl App {
 		let panel = Panel::builder(&frame).build();
 		let sizer = BoxSizer::builder(Orientation::Vertical).build();
 		let notebook = Notebook::builder(&panel).build();
-		notebook.set_name("Dictionary tabs");
+		// TRANSLATORS: Accessible name of the tab list holding the open dictionaries
+		notebook.set_name(&t("Dictionary tabs"));
 		sizer.add(&notebook, 1, SizerFlag::Expand | SizerFlag::All, 0);
 		panel.set_sizer(sizer, true);
 
@@ -78,10 +86,12 @@ impl App {
 				tracing::warn!("config: {w}");
 				startup_errors.push(w);
 			}
-			for p in config.open_dictionaries.clone() {
+			for p in config.borrow().open_dictionaries.clone() {
 				if let Err(e) = tabs.borrow_mut().open_dictionary(&p) {
 					tracing::warn!("reopen failed: {e}");
-					startup_errors.push(format!("{e} — the dictionary was not reopened."));
+					// TRANSLATORS: Startup warning; the placeholder is the error that prevented reopening
+					startup_errors
+						.push(t("{} — the dictionary was not reopened.").replace("{}", &e));
 				}
 			}
 		}
@@ -91,14 +101,14 @@ impl App {
 
 		let frame_for_menu = frame;
 		let tabs_for_menu = Rc::clone(&tabs);
-		#[cfg(windows)]
-		let update_channel = config.effective_update_channel(crate::update::default_channel());
+		let config_for_menu = Rc::clone(&config);
 		frame.on_menu_selected(move |event| match event.get_id() {
 			menu::ids::OPEN => {
 				if let Some(path) = crate::dialogs::pick_dictionary(&frame_for_menu) {
 					match tabs_for_menu.borrow_mut().open_dictionary(std::path::Path::new(&path)) {
 						Ok(_) => {
-							frame_for_menu.set_status_text("Dictionary loaded", 0);
+							// TRANSLATORS: Status bar text after opening a dictionary
+							frame_for_menu.set_status_text(&t("Dictionary loaded"), 0);
 						}
 						Err(e) => {
 							tracing::warn!("open dictionary failed: {e}");
@@ -123,36 +133,38 @@ impl App {
 			menu::ids::EXIT => {
 				frame_for_menu.close(false);
 			}
+			menu::ids::OPTIONS => {
+				crate::options::show_options(&frame_for_menu, &config_for_menu);
+			}
 			menu::ids::ABOUT => {
 				crate::dialogs::show_about(&frame_for_menu);
 			}
 			#[cfg(windows)]
 			menu::ids::CHECK_UPDATES => {
-				crate::update::run_update_check(&frame_for_menu, update_channel, false);
+				let channel = config_for_menu
+					.borrow()
+					.effective_update_channel(crate::update::default_channel());
+				crate::update::run_update_check(&frame_for_menu, channel, false);
 			}
 			_ => {}
 		});
 
 		let tabs_for_close = Rc::clone(&tabs);
 		let frame_for_close = frame;
-		let log_level = config.log_level.clone();
-		let check_for_updates_on_startup = config.check_for_updates_on_startup;
-		let update_channel_setting = config.update_channel.clone();
+		let config_for_close = Rc::clone(&config);
 		frame.on_close(move |event| {
 			let mgr = tabs_for_close.borrow();
-			let cfg = AppConfig {
-				open_dictionaries: mgr.tabs.iter().map(|t| t.dict.path().to_path_buf()).collect(),
-				// Preserve the user's level setting across sessions.
-				log_level: log_level.clone(),
-				check_for_updates_on_startup,
-				update_channel: update_channel_setting.clone(),
-			};
+			// Persist the shared settings as they stand; only the open-tab list
+			// is owned by the tab manager rather than the config.
+			let mut cfg = config_for_close.borrow().clone();
+			cfg.open_dictionaries = mgr.tabs.iter().map(|t| t.dict.path().to_path_buf()).collect();
 			// Inform the user the session was lost, but always let the app exit.
 			if let Err(e) = cfg.save() {
 				tracing::error!("session save failed: {e}");
 				crate::dialogs::show_error(
 					&frame_for_close,
-					&format!("Could not save session: {e}"),
+					// TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
+					&t("Could not save session: {}").replace("{}", &e.to_string()),
 				);
 			}
 			event.skip(true);
@@ -174,7 +186,8 @@ impl App {
 		self.activate_from_ipc();
 		if let ipc::IpcCommand::OpenFile(path) = command {
 			match self.tabs.borrow_mut().open_dictionary(&path) {
-				Ok(_) => self.frame.set_status_text("Dictionary loaded", 0),
+				// TRANSLATORS: Status bar text after opening a dictionary
+				Ok(_) => self.frame.set_status_text(&t("Dictionary loaded"), 0),
 				Err(e) => {
 					tracing::warn!("open dictionary via IPC failed: {e}");
 					crate::dialogs::show_error(&self.frame, &e);

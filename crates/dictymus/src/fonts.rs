@@ -1,3 +1,4 @@
+use patois::t;
 use wxdragon::prelude::*;
 
 pub const FACE: &str = "SBL BibLit";
@@ -57,8 +58,10 @@ pub fn load_base_font() -> (Font, Option<String>) {
 	match font {
 		Some(font) if registered => (font, None),
 		Some(font) => {
-			(font, Some("Bundled font could not be registered; using system font".to_string()))
+			// TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be registered
+			(font, Some(t("Bundled font could not be registered; using system font")))
 		}
-		None => (Font::default(), Some("Bundled font unavailable; using system font".to_string())),
+		// TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
+		None => (Font::default(), Some(t("Bundled font unavailable; using system font"))),
 	}
 }

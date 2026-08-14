@@ -4,8 +4,12 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 
+[package.metadata.patois]
+translatable = true
+
 [dependencies]
 opendict-rs = "0.1"
+patois = { workspace = true }
 icu_normalizer = { workspace = true }
 icu_properties = { workspace = true }
 serde = { workspace = true }
