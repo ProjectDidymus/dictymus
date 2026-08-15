@@ -162,8 +162,8 @@ mod tests {
 		let dir = std::env::temp_dir().join(format!("dictymus-cfg-test-{}", std::process::id()));
 		unsafe { std::env::set_var("DICTYMUS_DATA_DIR", &dir) };
 		assert_eq!(AppConfig::log_dir().unwrap(), dir.join("logs"));
-		let mut cfg = AppConfig::default();
-		cfg.open_dictionaries = vec![PathBuf::from("/a/x.ifo")];
+		let cfg =
+			AppConfig { open_dictionaries: vec![PathBuf::from("/a/x.ifo")], ..Default::default() };
 		cfg.save().unwrap();
 		assert!(dir.join("config.toml").is_file());
 		let (loaded, warning) = AppConfig::load();
@@ -175,8 +175,10 @@ mod tests {
 
 	#[test]
 	fn round_trips_open_paths() {
-		let mut cfg = AppConfig::default();
-		cfg.open_dictionaries = vec![PathBuf::from("/a/x.ifo"), PathBuf::from("/b/y.ifo")];
+		let cfg = AppConfig {
+			open_dictionaries: vec![PathBuf::from("/a/x.ifo"), PathBuf::from("/b/y.ifo")],
+			..Default::default()
+		};
 		let toml = cfg.to_toml();
 		let back = AppConfig::from_toml(&toml).unwrap();
 		assert_eq!(back.open_dictionaries, cfg.open_dictionaries);

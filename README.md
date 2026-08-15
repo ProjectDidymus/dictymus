@@ -183,7 +183,7 @@ what CI builds and publishes.
    cargo release patch --execute
    ```
 
-   cargo-release runs fmt, clippy, and the core/xtask tests (the GUI crate is
+   cargo-release runs fmt, clippy, and the non-GUI crates' tests (the GUI crate is
    built by CI, so no VS Developer Prompt is needed), bumps all three crate
    versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
    tags `X.Y.Z`, and pushes.

@@ -55,7 +55,7 @@ uiautomation = "0.25.0"
 pre-release-hook = [
     "cmd",
     "/c",
-    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p dictymus-container -p xtask -- -D warnings && cargo test -p dictymus-core -p dictymus-container -p xtask",
+    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p dictymus-container -p xtask --all-targets -- -D warnings && cargo test -p dictymus-core -p dictymus-container -p xtask",
 ]
 # The file path resolves against this crate's directory.
 pre-release-replacements = [
