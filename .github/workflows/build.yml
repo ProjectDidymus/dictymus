@@ -72,15 +72,6 @@ jobs:
             target/debug/wxdragon_sys_cmake_build*
           key: wx-ui-test-${{ hashFiles('Cargo.lock') }}
           restore-keys: wx-ui-test-
-      # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
-      # inside the cached wx CMake tree does not survive the rust-cache cleanup.
-      - name: Install WebView2 SDK
-        shell: pwsh
-        run: |
-          nuget install Microsoft.Web.WebView2 -OutputDirectory packages
-          $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
-          $libPath = Join-Path $pkg.FullName "build\native\x64"
-          echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
       # directories are appended at the end of PATH inside the cargo step,
       # keeping MSVC's tools ahead of MSYS2's same-named ones.
@@ -110,7 +101,6 @@ jobs:
             os: windows-2025
             target: x86_64-pc-windows-msvc
             msvc-arch: x64
-            webview2-arch: x64
             artifact: target/x86_64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-x64
           # Cross-compiled on the x64 runner: arm64 runners queue long and
@@ -119,7 +109,6 @@ jobs:
             os: windows-2025
             target: aarch64-pc-windows-msvc
             msvc-arch: amd64_arm64
-            webview2-arch: arm64
             artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-arm64
           - name: macos-x64
@@ -188,16 +177,6 @@ jobs:
             target/${{ matrix.target }}/release/wxdragon_sys_cmake_build*
           key: wx-${{ matrix.name }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: wx-${{ matrix.name }}-
-      # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
-      # inside the cached wx CMake tree does not survive the rust-cache cleanup.
-      - name: Install WebView2 SDK
-        if: startsWith(matrix.name, 'windows')
-        shell: pwsh
-        run: |
-          nuget install Microsoft.Web.WebView2 -OutputDirectory packages
-          $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
-          $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.webview2-arch }}"
-          echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       - name: Build
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
