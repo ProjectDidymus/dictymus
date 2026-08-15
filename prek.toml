@@ -31,3 +31,9 @@ rev = "v1.0"
 hooks = [
     { id = "fmt" },
 ]
+
+[[repos]]
+repo = "local"
+hooks = [
+    { id = "check-translators", name = "Check TRANSLATORS comments reach xgettext", entry = "uv run tools/check_translators.py", language = "system", files = '\.rs$' },
+]
