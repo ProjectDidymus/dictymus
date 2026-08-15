@@ -43,6 +43,10 @@ pub fn load_or_create_scope_key(path: &Path) -> Result<[u8; 32]> {
 	}
 }
 
+pub fn generate_signing_key() -> SigningKey {
+	SigningKey::from_bytes(&crypto::random_key())
+}
+
 pub fn write_signing_key(path: &Path, key: &SigningKey) -> Result<()> {
 	write_key(path, &key.to_bytes())
 }

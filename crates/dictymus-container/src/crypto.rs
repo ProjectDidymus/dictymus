@@ -2,10 +2,10 @@
 //! and license key wrapping.
 
 use crate::{Error, Result};
+use chacha20poly1305::XChaCha20Poly1305;
 use chacha20poly1305::aead::{Aead, KeyInit, Payload};
-use chacha20poly1305::{XChaCha20Poly1305, XNonce};
-use rand::RngCore;
-use rand::rngs::OsRng;
+use rand::TryRng;
+use rand::rngs::SysRng;
 
 pub const NONCE_LEN: usize = 24;
 pub const KEY_LEN: usize = 32;
@@ -16,13 +16,13 @@ const LICENSE_KDF_CONTEXT: &str = "dictymus license v1";
 
 pub fn random_key() -> [u8; KEY_LEN] {
 	let mut key = [0; KEY_LEN];
-	OsRng.fill_bytes(&mut key);
+	SysRng.try_fill_bytes(&mut key).expect("system RNG unavailable");
 	key
 }
 
 pub fn random_nonce() -> [u8; NONCE_LEN] {
 	let mut nonce = [0; NONCE_LEN];
-	OsRng.fill_bytes(&mut nonce);
+	SysRng.try_fill_bytes(&mut nonce).expect("system RNG unavailable");
 	nonce
 }
 
@@ -38,7 +38,7 @@ pub fn grant_kek(scope_id: &str, licensee: &str) -> [u8; KEY_LEN] {
 pub fn encrypt(key: &[u8; KEY_LEN], nonce: &[u8; NONCE_LEN], aad: &[u8], msg: &[u8]) -> Vec<u8> {
 	let cipher = XChaCha20Poly1305::new(key.into());
 	cipher
-		.encrypt(XNonce::from_slice(nonce), Payload { msg, aad })
+		.encrypt(nonce.into(), Payload { msg, aad })
 		.expect("XChaCha20-Poly1305 encryption is infallible")
 }
 
@@ -49,9 +49,7 @@ pub fn decrypt(
 	ciphertext: &[u8],
 ) -> Result<Vec<u8>> {
 	let cipher = XChaCha20Poly1305::new(key.into());
-	cipher
-		.decrypt(XNonce::from_slice(nonce), Payload { msg: ciphertext, aad })
-		.map_err(|_| Error::DecryptFailed)
+	cipher.decrypt(nonce.into(), Payload { msg: ciphertext, aad }).map_err(|_| Error::DecryptFailed)
 }
 
 /// Encrypt a 32-byte key under `kek`; returns (nonce, wrapped bytes).

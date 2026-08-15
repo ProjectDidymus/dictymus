@@ -2,9 +2,10 @@
 
 use clap::{Parser, Subcommand};
 use dictymus_container::container::{collect_stardict_files, ifo_bookname, pack, seal};
-use dictymus_container::keys::{load_or_create_scope_key, load_signing_key, write_signing_key};
+use dictymus_container::keys::{
+	generate_signing_key, load_or_create_scope_key, load_signing_key, write_signing_key,
+};
 use dictymus_container::license::issue;
-use ed25519_dalek::SigningKey;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -109,7 +110,7 @@ fn container_args(
 fn run() -> Result<(), String> {
 	match Cli::parse().command {
 		Command::Keygen { out } => {
-			let key = SigningKey::generate(&mut rand::rngs::OsRng);
+			let key = generate_signing_key();
 			write_signing_key(&out, &key).map_err(|e| e.to_string())?;
 			let public: String =
 				key.verifying_key().to_bytes().iter().map(|b| format!("{b:02x}")).collect();
