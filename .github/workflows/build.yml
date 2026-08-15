@@ -167,7 +167,6 @@ jobs:
       # scratch. restore-keys reuses a stale tree incrementally after a
       # Cargo.lock change.
       - name: Cache wxWidgets build
-        if: startsWith(matrix.name, 'windows')
         uses: actions/cache@v6
         with:
           path: |
