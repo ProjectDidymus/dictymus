@@ -7,7 +7,7 @@ pub mod ids {
 	pub const CLOSE_ALL: i32 = 5003;
 	pub const EXIT: i32 = 5004;
 	pub const ABOUT: i32 = 5005;
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	pub const CHECK_UPDATES: i32 = 5006;
 	pub const OPTIONS: i32 = 5007;
 	pub const LICENSES: i32 = 5008;

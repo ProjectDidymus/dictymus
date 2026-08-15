@@ -33,7 +33,7 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 		language_codes.iter().position(|code| code == &current_language).unwrap_or(0);
 	language_combo.set_selection(u32::try_from(language_index).unwrap_or(0));
 
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	let updates_check = {
 		let check = CheckBox::builder(&dialog)
 			// TRANSLATORS: Option in the Options dialog
@@ -42,9 +42,9 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 		check.set_value(config.borrow().check_for_updates_on_startup);
 		check
 	};
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	let channel_codes = ["", "stable", "dev"];
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	let (channel_label, channel_combo) = {
 		// TRANSLATORS: Label of the update channel selector in the Options dialog
 		let channel_label_text = t("Update &channel:");
@@ -56,6 +56,10 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 		combo.append(&t("Stable"));
 		// TRANSLATORS: Update channel entry: rolling development builds
 		combo.append(&t("Development"));
+		#[cfg(target_os = "macos")]
+		combo.set_accessibility_label(
+			channel_label_text.replace('&', "").trim_end_matches(':').trim(),
+		);
 		let current = config.borrow().update_channel.clone();
 		let index = channel_codes.iter().position(|code| *code == current).unwrap_or(0);
 		combo.set_selection(u32::try_from(index).unwrap_or(0));
@@ -81,7 +85,7 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 	);
 	language_sizer.add(&language_combo, 0, SizerFlag::AlignCenterVertical, 0);
 	content_sizer.add_sizer(&language_sizer, 0, SizerFlag::All, DIALOG_PADDING);
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	{
 		content_sizer.add(&updates_check, 0, SizerFlag::All, DIALOG_PADDING);
 		let channel_sizer = BoxSizer::builder(Orientation::Horizontal).build();
@@ -112,7 +116,7 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 	let save_result = {
 		let mut cfg = config.borrow_mut();
 		cfg.language = new_language.clone();
-		#[cfg(windows)]
+		#[cfg(any(windows, target_os = "macos"))]
 		{
 			cfg.check_for_updates_on_startup = updates_check.is_checked();
 			let index = channel_combo
