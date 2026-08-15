@@ -67,6 +67,8 @@
 	dutch.AssocIfo=StarDict-woordenboeken (*.ifo) standaard openen met Dictymus
 	english.AssocMdx=Open MDict dictionaries (*.mdx) with Dictymus by default
 	dutch.AssocMdx=MDict-woordenboeken (*.mdx) standaard openen met Dictymus
+	english.AssocDicty=Open Dictymus dictionaries (*.dicty) with Dictymus by default
+	dutch.AssocDicty=Dictymus-woordenboeken (*.dicty) standaard openen met Dictymus
 	english.DictionaryProgId=Dictymus dictionary
 	dutch.DictionaryProgId=Dictymus-woordenboek
 	english.LaunchApp=Launch Dictymus
@@ -85,6 +87,7 @@
 	Name: "desktopicon"; Description: "{cm:DesktopShortcut}"; Flags: unchecked
 	Name: "assoc_ifo"; Description: "{cm:AssocIfo}"
 	Name: "assoc_mdx"; Description: "{cm:AssocMdx}"
+	Name: "assoc_dicty"; Description: "{cm:AssocDicty}"
 
 [Icons]
 	Name: "{autoprograms}\Dictymus"; Filename: "{app}\dictymus.exe"; Tasks: startmenuicon
@@ -99,6 +102,8 @@
 	Root: HKCR; Subkey: ".ifo\OpenWithProgids"; ValueType: string; ValueName: "Dictymus.Dictionary"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_ifo
 	Root: HKCR; Subkey: ".mdx"; ValueType: string; ValueName: ""; ValueData: "Dictymus.Dictionary"; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_mdx
 	Root: HKCR; Subkey: ".mdx\OpenWithProgids"; ValueType: string; ValueName: "Dictymus.Dictionary"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_mdx
+	Root: HKCR; Subkey: ".dicty"; ValueType: string; ValueName: ""; ValueData: "Dictymus.Dictionary"; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_dicty
+	Root: HKCR; Subkey: ".dicty\OpenWithProgids"; ValueType: string; ValueName: "Dictymus.Dictionary"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assoc_dicty
 
 [Code]
 const

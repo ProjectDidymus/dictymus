@@ -10,6 +10,7 @@ mod dialogs;
 mod fonts;
 mod ipc;
 mod lemma_list;
+mod licensing;
 mod logging;
 mod menu;
 mod options;

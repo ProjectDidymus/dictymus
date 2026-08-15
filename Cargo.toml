@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/dictymus-core", "crates/dictymus", "xtask"]
+members = ["crates/dictymus-core", "crates/dictymus", "crates/dictymus-container", "xtask"]
 
 [workspace.dependencies]
 icu_normalizer = { version = "2", features = ["compiled_data"] }

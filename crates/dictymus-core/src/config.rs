@@ -96,6 +96,11 @@ impl AppConfig {
 		Some(Self::data_dir()?.join("config.toml"))
 	}
 
+	/// Directory where installed `.dictykey` licenses live.
+	pub fn licenses_dir() -> Option<PathBuf> {
+		Some(Self::data_dir()?.join("licenses"))
+	}
+
 	/// Directory for rotated log files, alongside the config in the app-data
 	/// dir. `None` when no app-data dir is available.
 	pub fn log_dir() -> Option<PathBuf> {

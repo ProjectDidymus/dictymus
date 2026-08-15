@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 21:29+0200\n"
+"POT-Creation-Date: 2026-08-15 11:21+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -25,6 +25,10 @@ msgstr "{} — het woordenboek is niet opnieuw geopend."
 #. TRANSLATORS: Status bar text after opening a dictionary
 msgid "Dictionary loaded"
 msgstr "Woordenboek geladen"
+
+#. TRANSLATORS: Status bar text after installing a license file
+msgid "License installed"
+msgstr "Licentie geïnstalleerd"
 
 #. TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
 msgid "Could not save session: {}"
@@ -56,8 +60,12 @@ msgid "Open dictionary"
 msgstr "Woordenboek openen"
 
 #. TRANSLATORS: File picker filter label for all supported dictionary formats
-msgid "Dictionaries (*.ifo;*.mdx)"
-msgstr "Woordenboeken (*.ifo;*.mdx)"
+msgid "Dictionaries (*.dicty;*.ifo;*.mdx)"
+msgstr "Woordenboeken (*.dicty;*.ifo;*.mdx)"
+
+#. TRANSLATORS: File picker filter label for Dictymus dictionary containers
+msgid "Dictymus dictionaries (*.dicty)"
+msgstr "Dictymus-woordenboeken (*.dicty)"
 
 #. TRANSLATORS: File picker filter label for StarDict dictionaries
 msgid "StarDict info (*.ifo)"
@@ -71,6 +79,14 @@ msgstr "MDict (*.mdx)"
 msgid "All files (*.*)"
 msgstr "Alle bestanden (*.*)"
 
+#. TRANSLATORS: Title of the license file picker dialog
+msgid "Install license"
+msgstr "Licentie installeren"
+
+#. TRANSLATORS: File picker filter label for Dictymus license files
+msgid "Dictymus licenses (*.dictykey)"
+msgstr "Dictymus-licenties (*.dictykey)"
+
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be registered
 msgid "Bundled font could not be registered; using system font"
 msgstr ""
@@ -82,6 +98,26 @@ msgid "Bundled font unavailable; using system font"
 msgstr ""
 "Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt "
 "gebruikt"
+
+#. TRANSLATORS: Error installing a license; first placeholder is the file path, second the underlying error
+msgid "Cannot read {}: {}"
+msgstr "Kan {} niet lezen: {}"
+
+#. TRANSLATORS: Error installing a license file that is invalid or not signed by the publisher
+msgid "This is not a valid Dictymus license file."
+msgstr "Dit is geen geldig Dictymus-licentiebestand."
+
+#. TRANSLATORS: Error installing a license when no application data directory exists
+msgid "No application data directory is available."
+msgstr "Er is geen applicatiedatamap beschikbaar."
+
+#. TRANSLATORS: Error installing a license from a path that does not end in a file name
+msgid "The license path has no file name."
+msgstr "Het licentiepad bevat geen bestandsnaam."
+
+#. TRANSLATORS: Error installing a license; first placeholder is the destination path, second the underlying error
+msgid "Cannot install the license to {}: {}"
+msgstr "Kan de licentie niet installeren naar {}: {}"
 
 msgid ""
 "Could not start the single-instance service. Opening dictionary files from "
@@ -113,6 +149,14 @@ msgstr "&Alles sluiten"
 #. TRANSLATORS: Status bar help for the Close All menu item
 msgid "Close all dictionaries"
 msgstr "Alle woordenboeken sluiten"
+
+#. TRANSLATORS: File menu item installing a dictionary license file
+msgid "&Install License..."
+msgstr "L&icentie installeren..."
+
+#. TRANSLATORS: Status bar help for the Install License menu item
+msgid "Install a license file for a protected dictionary"
+msgstr "Een licentiebestand voor een beveiligd woordenboek installeren"
 
 #. TRANSLATORS: File menu item opening the Options dialog
 msgid "&Options..."
@@ -222,6 +266,14 @@ msgstr "Lemma's"
 msgid "Lemma"
 msgstr "Lemma"
 
+#. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
+msgid ""
+"{} requires a license. Use File → Install License... to install your license "
+"file."
+msgstr ""
+"{} vereist een licentie. Gebruik Bestand → Licentie installeren... om uw "
+"licentiebestand te installeren."
+
 #. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
 msgid "Cannot open {}: {}"
 msgstr "Kan {} niet openen: {}"
@@ -309,3 +361,6 @@ msgstr "Kan het updatescript niet starten"
 
 msgid "Unknown update file format."
 msgstr "Onbekend bestandsformaat voor de update."
+
+msgid "Dictionaries (*.ifo;*.mdx)"
+msgstr "Woordenboeken (*.ifo;*.mdx)"
