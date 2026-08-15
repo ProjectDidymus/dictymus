@@ -204,6 +204,7 @@ jobs:
   installer:
     name: Windows installer
     needs: [build]
+    if: github.event_name != 'pull_request'
     runs-on: windows-latest
     env:
       HAVE_MINISIGN_KEY: ${{ secrets.MINISIGN_KEY != '' }}
