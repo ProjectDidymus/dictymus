@@ -110,12 +110,11 @@ pub fn show_license_manager(parent: &Frame) {
 				return;
 			};
 			// TRANSLATORS: Yes/No confirmation before deleting a license; the placeholder is the licensee name
-			let message =
-				t("Remove the license for {}? Dictionaries it unlocks will no longer open.")
-					.replace("{}", &licensee);
+			let msg = t("Remove the license for {}? Dictionaries it unlocks will no longer open.")
+				.replace("{}", &licensee);
 			// TRANSLATORS: Title of the remove-license confirmation dialog
 			let title = t("Remove license");
-			let confirmed = MessageDialog::builder(&dialog, &message, &title)
+			let confirmed = MessageDialog::builder(&dialog, &msg, &title)
 				.with_style(
 					MessageDialogStyle::YesNo
 						| MessageDialogStyle::IconQuestion

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-15 14:26+0200\n"
+"POT-Creation-Date: 2026-08-15 22:10+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,6 +19,7 @@ msgstr ""
 msgid "Ready"
 msgstr "Gereed"
 
+#. TRANSLATORS: Startup warning; the placeholder is the error that prevented reopening
 msgid "{} — the dictionary was not reopened."
 msgstr "{} — het woordenboek is niet opnieuw geopend."
 
@@ -288,6 +289,7 @@ msgstr "Ontwikkeling"
 msgid "OK"
 msgstr "OK"
 
+#. TRANSLATORS: Label for the cancellation button
 msgid "Cancel"
 msgstr "Annuleren"
 

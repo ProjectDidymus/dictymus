@@ -98,8 +98,8 @@ impl App {
 					let e = e.into_message();
 					tracing::warn!("reopen failed: {e}");
 					// TRANSLATORS: Startup warning; the placeholder is the error that prevented reopening
-					startup_errors
-						.push(t("{} — the dictionary was not reopened.").replace("{}", &e));
+					let warning = t("{} — the dictionary was not reopened.").replace("{}", &e);
+					startup_errors.push(warning);
 				}
 			}
 		}

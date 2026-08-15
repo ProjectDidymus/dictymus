@@ -69,8 +69,9 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 	// TRANSLATORS: Label for the confirmation button
 	let ok_button = Button::builder(&dialog).with_id(ID_OK).with_label(&t("OK")).build();
 	// TRANSLATORS: Label for the cancellation button
+	let cancel_label = t("Cancel");
 	let cancel_button =
-		Button::builder(&dialog).with_id(ID_CANCEL).with_label(&t("Cancel")).build();
+		Button::builder(&dialog).with_id(ID_CANCEL).with_label(&cancel_label).build();
 	dialog.set_escape_id(ID_CANCEL);
 	dialog.set_affirmative_id(ID_OK);
 	ok_button.set_default();
