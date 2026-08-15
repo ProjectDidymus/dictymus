@@ -9,19 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- A single-file `.dicty` dictionary container format, either unsealed or
-  sealed (encrypted); sealed dictionaries are unlocked with per-user
-  `.dictykey` license files via the new File → Install License menu item,
-  or by placing the license next to the dictionary
-- A `dictymus-container` command-line tool for publishers: package
-  dictionaries (`pack`/`seal`) and issue licenses (`keygen`/`license`/
-  `inspect`)
-- The Windows installer can associate `.dicty` files with Dictymus
-- macOS is now delivered as a proper `Dictymus.app` bundle on a
-  drag-to-Applications disk image (`dictymus-macos.dmg`, Apple silicon,
-  macOS 11+) instead of a bare executable
-- macOS builds now check for updates at startup and via Help → Check for
-  Updates; the verified download still has to be installed manually
+- Dictionaries can now come as a single `.dicty` file instead of a folder
+  of separate files
+- Protected dictionaries, which open only with the personal `.dictykey`
+  license file you receive from the publisher
+- A Licenses window (File → Licenses, Ctrl+L) listing the licenses you have
+  installed, with buttons to import a new one or remove one you no longer
+  need
+- Opening a protected dictionary without its license now offers to import
+  the license there and then; a license file kept next to the dictionary is
+  also found automatically
+- A command-line tool for publishers, to package dictionaries and issue
+  licenses for them
+- The Windows installer can offer to open `.dicty` files with Dictymus when
+  you double-click them
+- macOS now gets a real Dictymus application on a disk image you drag to
+  your Applications folder, instead of a bare program file (Apple silicon,
+  macOS 11 or later)
+- macOS now checks for new versions at startup and through Help → Check for
+  Updates; the download is verified, but you install it yourself
 
 ## [0.2.0] - 2026-08-15
 
