@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-15 11:24+0200\n"
+"POT-Creation-Date: 2026-08-15 14:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,12 +28,20 @@ msgstr ""
 msgid "Dictionary loaded"
 msgstr ""
 
-#. TRANSLATORS: Status bar text after installing a license file
-msgid "License installed"
-msgstr ""
-
 #. TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
 msgid "Could not save session: {}"
+msgstr ""
+
+#. TRANSLATORS: Yes/No question when opening a protected dictionary; the placeholder is the dictionary name
+msgid "{} requires a license. Do you want to import a license file now?"
+msgstr ""
+
+#. TRANSLATORS: Title of the license question dialog
+msgid "License required"
+msgstr ""
+
+#. TRANSLATORS: Error after importing a license that does not unlock the dictionary; the placeholder is the dictionary name
+msgid "The imported license does not unlock {}."
 msgstr ""
 
 #. TRANSLATORS: Fallback page title when the entry has no headword
@@ -82,7 +90,7 @@ msgid "All files (*.*)"
 msgstr ""
 
 #. TRANSLATORS: Title of the license file picker dialog
-msgid "Install license"
+msgid "Import license"
 msgstr ""
 
 #. TRANSLATORS: File picker filter label for Dictymus license files
@@ -95,6 +103,46 @@ msgstr ""
 
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
 msgid "Bundled font unavailable; using system font"
+msgstr ""
+
+#. TRANSLATORS: Title of the Licenses dialog
+msgid "Licenses"
+msgstr ""
+
+#. TRANSLATORS: Label of the list of installed licenses
+msgid "Installed &licenses:"
+msgstr ""
+
+#. TRANSLATORS: Column header in the Licenses dialog: who the license was issued to
+msgid "Licensee"
+msgstr ""
+
+#. TRANSLATORS: Column header in the Licenses dialog: license issue date
+msgid "Issued"
+msgstr ""
+
+#. TRANSLATORS: Column header in the Licenses dialog: the dictionaries the license unlocks
+msgid "Dictionaries"
+msgstr ""
+
+#. TRANSLATORS: Button in the Licenses dialog importing a license file
+msgid "&Import..."
+msgstr ""
+
+#. TRANSLATORS: Button in the Licenses dialog removing the selected license
+msgid "&Remove"
+msgstr ""
+
+#. TRANSLATORS: Label of the button closing the Licenses dialog
+msgid "Close"
+msgstr ""
+
+#. TRANSLATORS: Yes/No confirmation before deleting a license; the placeholder is the licensee name
+msgid "Remove the license for {}? Dictionaries it unlocks will no longer open."
+msgstr ""
+
+#. TRANSLATORS: Title of the remove-license confirmation dialog
+msgid "Remove license"
 msgstr ""
 
 #. TRANSLATORS: Error installing a license; first placeholder is the file path, second the underlying error
@@ -115,6 +163,10 @@ msgstr ""
 
 #. TRANSLATORS: Error installing a license; first placeholder is the destination path, second the underlying error
 msgid "Cannot install the license to {}: {}"
+msgstr ""
+
+#. TRANSLATORS: Error removing a license; first placeholder is the file path, second the underlying error
+msgid "Cannot remove {}: {}"
 msgstr ""
 
 msgid ""
@@ -146,12 +198,12 @@ msgstr ""
 msgid "Close all dictionaries"
 msgstr ""
 
-#. TRANSLATORS: File menu item installing a dictionary license file
-msgid "&Install License..."
+#. TRANSLATORS: File menu item opening the Licenses dialog; the text after the tab is the keyboard shortcut
+msgid "&Licenses...\tCtrl+L"
 msgstr ""
 
-#. TRANSLATORS: Status bar help for the Install License menu item
-msgid "Install a license file for a protected dictionary"
+#. TRANSLATORS: Status bar help for the Licenses menu item
+msgid "View, import, or remove dictionary licenses"
 msgstr ""
 
 #. TRANSLATORS: File menu item opening the Options dialog
@@ -249,6 +301,11 @@ msgstr ""
 msgid "{} results"
 msgstr ""
 
+#. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
+msgid ""
+"{} requires a license. Use File → Licenses... to import your license file."
+msgstr ""
+
 #. TRANSLATORS: Label of the search field
 msgid "Search"
 msgstr ""
@@ -259,11 +316,6 @@ msgstr ""
 
 #. TRANSLATORS: Header of the single column in the list of dictionary entries
 msgid "Lemma"
-msgstr ""
-
-msgid ""
-"{} requires a license. Use File → Install License... to install your license "
-"file."
 msgstr ""
 
 #. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error

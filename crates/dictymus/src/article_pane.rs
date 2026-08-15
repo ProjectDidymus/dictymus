@@ -69,7 +69,7 @@ b, strong { font-weight:bold; } i, em { font-style:italic; }";
 /// JS injected into every article page.
 ///
 /// Besides the bword cross-ref click handler, this forwards menu-accelerator
-/// keystrokes (Ctrl+O / Ctrl+F4 / Ctrl+Q) to the host. The WebView2 control
+/// keystrokes (Ctrl+O / Ctrl+F4 / Ctrl+L / Ctrl+Q) to the host. The WebView2 control
 /// swallows keyboard input when it has focus, so wx's accelerator table never
 /// sees these chords — we catch them in JS and post the target menu id back,
 /// where `process_menu_command` runs the same handler the menu does.
@@ -91,6 +91,7 @@ document.addEventListener('keydown',function(e){{
   var id=0, k=e.key.toLowerCase();
   if(e.key==='F4') id={close};
   else if(k==='o') id={open};
+  else if(k==='l') id={licenses};
   else if(k==='q') id={exit};
   if(id){{ e.preventDefault(); window.bword.postMessage('menu:'+id); }}
 }});
@@ -114,6 +115,7 @@ if(document.fonts && document.fonts.ready){{
 }}",
 		close = ids::CLOSE,
 		open = ids::OPEN,
+		licenses = ids::LICENSES,
 		exit = ids::EXIT,
 	)
 }

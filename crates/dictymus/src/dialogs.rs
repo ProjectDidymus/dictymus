@@ -3,7 +3,7 @@ use wxdragon::prelude::*;
 
 /// Modal error dialog — the single error surface of the app. Modal so focus
 /// moves into the dialog and screen readers read the message text.
-pub fn show_error(parent: &Frame, message: &str) {
+pub fn show_error(parent: &dyn WxWidget, message: &str) {
 	// TRANSLATORS: Title of the error dialog
 	let title = t("Dictymus - Error");
 	MessageDialog::builder(parent, message, &title)
@@ -50,10 +50,10 @@ pub fn pick_dictionary(parent: &Frame) -> Option<String> {
 	if dialog.show_modal() == ID_OK { dialog.get_path() } else { None }
 }
 
-pub fn pick_license(parent: &Frame) -> Option<String> {
+pub fn pick_license(parent: &dyn WxWidget) -> Option<String> {
 	use wxdragon::id::ID_OK;
 	// TRANSLATORS: Title of the license file picker dialog
-	let message = t("Install license");
+	let message = t("Import license");
 	let wildcard = format!(
 		"{}|*.dictykey|{}|*.*",
 		// TRANSLATORS: File picker filter label for Dictymus license files

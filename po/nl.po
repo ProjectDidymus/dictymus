@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-15 11:21+0200\n"
+"POT-Creation-Date: 2026-08-15 14:26+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -26,13 +26,21 @@ msgstr "{} — het woordenboek is niet opnieuw geopend."
 msgid "Dictionary loaded"
 msgstr "Woordenboek geladen"
 
-#. TRANSLATORS: Status bar text after installing a license file
-msgid "License installed"
-msgstr "Licentie geïnstalleerd"
-
 #. TRANSLATORS: Error shown while exiting; the placeholder is the underlying error
 msgid "Could not save session: {}"
 msgstr "Kan de sessie niet opslaan: {}"
+
+#. TRANSLATORS: Yes/No question when opening a protected dictionary; the placeholder is the dictionary name
+msgid "{} requires a license. Do you want to import a license file now?"
+msgstr "{} vereist een licentie. Wil je nu een licentiebestand importeren?"
+
+#. TRANSLATORS: Title of the license question dialog
+msgid "License required"
+msgstr "Licentie vereist"
+
+#. TRANSLATORS: Error after importing a license that does not unlock the dictionary; the placeholder is the dictionary name
+msgid "The imported license does not unlock {}."
+msgstr "De geïmporteerde licentie ontgrendelt {} niet."
 
 #. TRANSLATORS: Fallback page title when the entry has no headword
 #. TRANSLATORS: Group label around the dictionary article pane
@@ -80,8 +88,8 @@ msgid "All files (*.*)"
 msgstr "Alle bestanden (*.*)"
 
 #. TRANSLATORS: Title of the license file picker dialog
-msgid "Install license"
-msgstr "Licentie installeren"
+msgid "Import license"
+msgstr "Licentie importeren"
 
 #. TRANSLATORS: File picker filter label for Dictymus license files
 msgid "Dictymus licenses (*.dictykey)"
@@ -98,6 +106,48 @@ msgid "Bundled font unavailable; using system font"
 msgstr ""
 "Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt "
 "gebruikt"
+
+#. TRANSLATORS: Title of the Licenses dialog
+msgid "Licenses"
+msgstr "Licenties"
+
+#. TRANSLATORS: Label of the list of installed licenses
+msgid "Installed &licenses:"
+msgstr "Geïnstalleerde &licenties:"
+
+#. TRANSLATORS: Column header in the Licenses dialog: who the license was issued to
+msgid "Licensee"
+msgstr "Licentiehouder"
+
+#. TRANSLATORS: Column header in the Licenses dialog: license issue date
+msgid "Issued"
+msgstr "Uitgegeven"
+
+#. TRANSLATORS: Column header in the Licenses dialog: the dictionaries the license unlocks
+msgid "Dictionaries"
+msgstr "Woordenboeken"
+
+#. TRANSLATORS: Button in the Licenses dialog importing a license file
+msgid "&Import..."
+msgstr "&Importeren..."
+
+#. TRANSLATORS: Button in the Licenses dialog removing the selected license
+msgid "&Remove"
+msgstr "Ve&rwijderen"
+
+#. TRANSLATORS: Label of the button closing the Licenses dialog
+msgid "Close"
+msgstr "Sluiten"
+
+#. TRANSLATORS: Yes/No confirmation before deleting a license; the placeholder is the licensee name
+msgid "Remove the license for {}? Dictionaries it unlocks will no longer open."
+msgstr ""
+"De licentie voor {} verwijderen? Woordenboeken die deze licentie "
+"ontgrendelt, kunnen daarna niet meer worden geopend."
+
+#. TRANSLATORS: Title of the remove-license confirmation dialog
+msgid "Remove license"
+msgstr "Licentie verwijderen"
 
 #. TRANSLATORS: Error installing a license; first placeholder is the file path, second the underlying error
 msgid "Cannot read {}: {}"
@@ -118,6 +168,10 @@ msgstr "Het licentiepad bevat geen bestandsnaam."
 #. TRANSLATORS: Error installing a license; first placeholder is the destination path, second the underlying error
 msgid "Cannot install the license to {}: {}"
 msgstr "Kan de licentie niet installeren naar {}: {}"
+
+#. TRANSLATORS: Error removing a license; first placeholder is the file path, second the underlying error
+msgid "Cannot remove {}: {}"
+msgstr "Kan {} niet verwijderen: {}"
 
 msgid ""
 "Could not start the single-instance service. Opening dictionary files from "
@@ -150,13 +204,13 @@ msgstr "&Alles sluiten"
 msgid "Close all dictionaries"
 msgstr "Alle woordenboeken sluiten"
 
-#. TRANSLATORS: File menu item installing a dictionary license file
-msgid "&Install License..."
-msgstr "L&icentie installeren..."
+#. TRANSLATORS: File menu item opening the Licenses dialog; the text after the tab is the keyboard shortcut
+msgid "&Licenses...\tCtrl+L"
+msgstr "&Licenties...\tCtrl+L"
 
-#. TRANSLATORS: Status bar help for the Install License menu item
-msgid "Install a license file for a protected dictionary"
-msgstr "Een licentiebestand voor een beveiligd woordenboek installeren"
+#. TRANSLATORS: Status bar help for the Licenses menu item
+msgid "View, import, or remove dictionary licenses"
+msgstr "Licenties voor woordenboeken bekijken, importeren of verwijderen"
 
 #. TRANSLATORS: File menu item opening the Options dialog
 msgid "&Options..."
@@ -254,6 +308,13 @@ msgstr "1 resultaat"
 msgid "{} results"
 msgstr "{} resultaten"
 
+#. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
+msgid ""
+"{} requires a license. Use File → Licenses... to import your license file."
+msgstr ""
+"{} vereist een licentie. Gebruik Bestand → Licenties... om je "
+"licentiebestand te importeren."
+
 #. TRANSLATORS: Label of the search field
 msgid "Search"
 msgstr "Zoeken"
@@ -265,14 +326,6 @@ msgstr "Lemma's"
 #. TRANSLATORS: Header of the single column in the list of dictionary entries
 msgid "Lemma"
 msgstr "Lemma"
-
-#. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
-msgid ""
-"{} requires a license. Use File → Install License... to install your license "
-"file."
-msgstr ""
-"{} vereist een licentie. Gebruik Bestand → Licentie installeren... om je "
-"licentiebestand te installeren."
 
 #. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
 msgid "Cannot open {}: {}"

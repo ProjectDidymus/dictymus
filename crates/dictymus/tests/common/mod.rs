@@ -139,6 +139,38 @@ pub fn find_widget(pid: u32, control_type: ControlType, name: &str) -> UIElement
 		.unwrap_or_else(|e| panic!("widget {control_type:?} \"{name}\" not found: {e}"))
 }
 
+/// Find a top-level window of `pid` titled `title` (e.g. a modal dialog).
+/// Depth 3, not 2: a modal dialog nests under its owner window in the UIA
+/// tree, one level deeper than the frame itself.
+pub fn find_window(pid: u32, title: &str) -> UIElement {
+	let automation = automation();
+	let root = automation.get_root_element().expect("desktop root");
+	automation
+		.create_matcher()
+		.from(root)
+		.depth(3)
+		.filter_fn(Box::new(move |e: &UIElement| Ok(e.get_process_id()? == pid)))
+		.control_type(ControlType::Window)
+		.name(title)
+		.timeout(15_000)
+		.find_first()
+		.unwrap_or_else(|e| panic!("window \"{title}\" not found: {e}"))
+}
+
+/// Find a widget by control type and name inside an arbitrary container
+/// element (e.g. a dialog found via `find_window`).
+pub fn find_widget_in(container: &UIElement, control_type: ControlType, name: &str) -> UIElement {
+	automation()
+		.create_matcher()
+		.from(container.clone())
+		.depth(7)
+		.control_type(control_type)
+		.name(name)
+		.timeout(15_000)
+		.find_first()
+		.unwrap_or_else(|e| panic!("widget {control_type:?} \"{name}\" not found: {e}"))
+}
+
 /// Block until the current tab's embedded WebView exists in the UIA tree
 /// (its Chromium child window has appeared); panics on timeout. Closing a
 /// tab before creation completes aborts the WebView mid-flight.

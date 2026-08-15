@@ -29,6 +29,28 @@ impl Drop for DictionaryTab {
 	}
 }
 
+/// Why opening a dictionary failed, as far as callers care: a missing
+/// license (which they may offer to fix) or anything else, already
+/// flattened to a display string.
+pub enum OpenFailure {
+	LicenseMissing { dict_name: String },
+	Other(String),
+}
+
+impl OpenFailure {
+	/// The non-interactive error message for this failure.
+	pub fn into_message(self) -> String {
+		match self {
+			OpenFailure::LicenseMissing { dict_name } => {
+				// TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
+				t("{} requires a license. Use File → Licenses... to import your license file.")
+					.replace("{}", &dict_name)
+			}
+			OpenFailure::Other(message) => message,
+		}
+	}
+}
+
 pub struct TabManager {
 	pub notebook: Notebook,
 	pub tabs: Vec<Rc<DictionaryTab>>,
@@ -226,26 +248,22 @@ impl TabManager {
 		});
 	}
 
-	pub fn open_dictionary(&mut self, path: &Path) -> Result<Rc<DictionaryTab>, String> {
+	pub fn open_dictionary(&mut self, path: &Path) -> Result<Rc<DictionaryTab>, OpenFailure> {
 		tracing::debug!("opening dictionary: {}", path.display());
 		let dict =
-			Rc::new(DictHandle::open(path, &crate::licensing::license_pubkey()).map_err(
-				|e| match e {
+			Rc::new(DictHandle::open(path, &crate::licensing::license_pubkey()).map_err(|e| {
+				match e {
 					dictymus_core::dictionary::OpenError::LicenseMissing { dict_name } => {
-						// TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
-						t(
-							"{} requires a license. Use File → Install License... to install your license file.",
-						)
-						.replace("{}", &dict_name)
+						OpenFailure::LicenseMissing { dict_name }
 					}
-					e => {
+					e => OpenFailure::Other(
 						// TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
 						t("Cannot open {}: {}")
 							.replacen("{}", &path.display().to_string(), 1)
-							.replacen("{}", &e.to_string(), 1)
-					}
-				},
-			)?);
+							.replacen("{}", &e.to_string(), 1),
+					),
+				}
+			})?);
 		let title = dict.title().to_string();
 		let tab = self.build_tab_panel(dict);
 		self.notebook.add_page(&tab.panel, &title, true, None);
