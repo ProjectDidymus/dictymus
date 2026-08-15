@@ -10,6 +10,7 @@ pub mod ids {
 	#[cfg(windows)]
 	pub const CHECK_UPDATES: i32 = 5006;
 	pub const OPTIONS: i32 = 5007;
+	pub const INSTALL_LICENSE: i32 = 5008;
 }
 
 pub fn create_menu_bar() -> MenuBar {
@@ -25,6 +26,10 @@ pub fn create_menu_bar() -> MenuBar {
 	let close_all_label = t("Close &All");
 	// TRANSLATORS: Status bar help for the Close All menu item
 	let close_all_help = t("Close all dictionaries");
+	// TRANSLATORS: File menu item installing a dictionary license file
+	let install_license_label = t("&Install License...");
+	// TRANSLATORS: Status bar help for the Install License menu item
+	let install_license_help = t("Install a license file for a protected dictionary");
 	// TRANSLATORS: File menu item opening the Options dialog
 	let options_label = t("&Options...");
 	// TRANSLATORS: Status bar help for the Options menu item
@@ -38,6 +43,7 @@ pub fn create_menu_bar() -> MenuBar {
 		.append_item(ids::CLOSE, &close_label, &close_help)
 		.append_item(ids::CLOSE_ALL, &close_all_label, &close_all_help)
 		.append_separator()
+		.append_item(ids::INSTALL_LICENSE, &install_license_label, &install_license_help)
 		.append_item(ids::OPTIONS, &options_label, &options_help)
 		.append_separator()
 		.append_item(ids::EXIT, &exit_label, &exit_help)

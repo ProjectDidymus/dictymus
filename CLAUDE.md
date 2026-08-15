@@ -5,7 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 Dictymus — native Rust wxdragon desktop dictionary for biblical languages (Hebrew, Greek).
-Cargo workspace with two crates: `dictymus-core` (pure logic) and `dictymus` (wxdragon UI).
+Cargo workspace with three crates: `dictymus-core` (pure logic), `dictymus-container`
+(`.dicty` container + `.dictykey` license formats and publisher CLI), and `dictymus`
+(wxdragon UI).
 Python converter for source HTML → StarDict in `tools/converter/`.
 
 First-class accessibility for blind or visually impaired users.

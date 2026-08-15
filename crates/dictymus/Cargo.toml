@@ -12,6 +12,7 @@ name = "dictymus"
 path = "src/main.rs"
 
 [dependencies]
+dictymus-container = { path = "../dictymus-container" }
 dictymus-core = { path = "../dictymus-core" }
 dunce = "1.0"
 patois = { workspace = true, features = ["ui"] }
@@ -41,6 +42,7 @@ patois-build = { workspace = true }
 winresource = "0.1"
 
 [dev-dependencies]
+tempfile = "3"
 uiautomation = "0.25.0"
 
 [package.metadata.release]
@@ -48,7 +50,7 @@ uiautomation = "0.25.0"
 pre-release-hook = [
     "cmd",
     "/c",
-    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p xtask -- -D warnings && cargo test -p dictymus-core -p xtask",
+    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p dictymus-container -p xtask -- -D warnings && cargo test -p dictymus-core -p dictymus-container -p xtask",
 ]
 # The file path resolves against this crate's directory.
 pre-release-replacements = [

@@ -96,6 +96,7 @@ impl App {
 		let frame_for_menu = frame;
 		let tabs_for_menu = Rc::clone(&tabs);
 		let config_for_menu = Rc::clone(&config);
+		let status_bar_for_menu = status_bar;
 		frame.on_menu_selected(move |event| match event.get_id() {
 			menu::ids::OPEN => {
 				if let Some(path) = crate::dialogs::pick_dictionary(&frame_for_menu) {
@@ -126,6 +127,27 @@ impl App {
 			}
 			menu::ids::EXIT => {
 				frame_for_menu.close(false);
+			}
+			menu::ids::INSTALL_LICENSE => {
+				if let Some(path) = crate::dialogs::pick_license(&frame_for_menu) {
+					match crate::licensing::install_license(
+						std::path::Path::new(&path),
+						&crate::licensing::license_pubkey(),
+					) {
+						Ok(_) => {
+							crate::accessibility::announce_status(
+								frame_for_menu,
+								status_bar_for_menu,
+								// TRANSLATORS: Status bar text after installing a license file
+								&t("License installed"),
+							);
+						}
+						Err(e) => {
+							tracing::warn!("install license failed: {e}");
+							crate::dialogs::show_error(&frame_for_menu, &e);
+						}
+					}
+				}
 			}
 			menu::ids::OPTIONS => {
 				crate::options::show_options(&frame_for_menu, &config_for_menu);

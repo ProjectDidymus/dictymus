@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A single-file `.dicty` dictionary container format, either unsealed or
+  sealed (encrypted); sealed dictionaries are unlocked with per-user
+  `.dictykey` license files via the new File → Install License menu item,
+  or by placing the license next to the dictionary
+- A `dictymus-container` command-line tool for publishers: package
+  dictionaries (`pack`/`seal`) and issue licenses (`keygen`/`license`/
+  `inspect`)
+- The Windows installer can associate `.dicty` files with Dictymus
+
 ## [0.2.0] - 2026-08-15
 
 ### Added

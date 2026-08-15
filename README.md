@@ -18,6 +18,9 @@ It is built from the ground up for blind and visually impaired users, with first
 - Bundled SBL BibLit font covering Hebrew, Greek, and Latin in a single face
 - Remembers open dictionaries between sessions
 - Automatic updates on Windows, with minisign-verified downloads
+- A single-file `.dicty` container format for distributing dictionaries,
+  optionally sealed (encrypted) with per-user license files — see
+  [Protected dictionaries](#protected-dictionaries)
 
 ## Workspace layout
 
@@ -26,6 +29,7 @@ This is a Cargo workspace. The main crates are:
 | Crate | Description |
 | --- | --- |
 | `dictymus-core` | Pure logic: dictionary loading, language detection, normalization, transliteration, config |
+| `dictymus-container` | The `.dicty` container and `.dictykey` license formats, plus the publisher CLI |
 | `dictymus` | The GUI application (wxWidgets via wxDragon) |
 
 ## Requirements
@@ -100,6 +104,36 @@ update_channel = ""   # "" = follow the build type, or pin "stable" / "dev"
 
 Setting the `DICTYMUS_NO_UPDATE_CHECK` environment variable suppresses the
 startup check (used by the UI tests).
+
+## Protected dictionaries
+
+Dictymus can read dictionaries packaged as single-file `.dicty` containers.
+A container wraps a normal StarDict fileset and is either **unsealed**
+(plain, openable by anyone) or **sealed**: the payload is encrypted with
+XChaCha20-Poly1305 under a per-container content key.
+
+Sealed dictionaries are unlocked by a `.dictykey` license file. A license
+names its owner, is Ed25519-signed by the publisher (verified offline
+against a key embedded in the app), and carries one or more *scope* keys.
+Each sealed container lists the scopes that can unlock it, so one suite
+license can open several dictionaries — including dictionaries published
+later under the same scope, without reissuing the license. Licenses are
+installed via File → Install License, or by placing the `.dictykey` next
+to the `.dicty` file.
+
+Containers and licenses are built with the `dictymus-container` CLI
+(`keygen`, `pack`, `seal`, `license`, `inspect`); run any subcommand with
+`--help` for usage.
+
+**Honest limits.** Dictymus is open source and decrypts on the user's
+machine, so a determined user can extract dictionary content — this
+protection cannot be stronger than the DRM on commercial e-books. What it
+provides rights holders is deterrence and traceability: content is
+unreadable to other tools, every license names its buyer, and altering
+that name breaks both the signature and the key unwrap. Scope keys are
+shared secrets by design; an extracted scope key unlocks every current and
+future dictionary in that scope, so scope granularity (per-dictionary vs.
+suite) bounds the blast radius.
 
 ## Pre-commit hooks
 
