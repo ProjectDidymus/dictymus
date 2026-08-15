@@ -15,6 +15,7 @@ use uiautomation::controls::ControlType;
 fn ctrl_f4_closes_tab_and_frees_it() {
 	let mut app = common::launch("close-tab");
 	common::wait_for_focus(app.pid, Duration::from_secs(30), common::is_search_field);
+	common::wait_for_webview(app.pid);
 
 	common::send_keys("{ctrl}{F4}");
 

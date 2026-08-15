@@ -139,6 +139,31 @@ pub fn find_widget(pid: u32, control_type: ControlType, name: &str) -> UIElement
 		.unwrap_or_else(|e| panic!("widget {control_type:?} \"{name}\" not found: {e}"))
 }
 
+/// Block until the current tab's embedded WebView exists in the UIA tree
+/// (its Chromium child window has appeared); panics on timeout. Closing a
+/// tab before creation completes aborts the WebView mid-flight.
+pub fn wait_for_webview(pid: u32) {
+	let automation = automation();
+	let root = automation.get_root_element().expect("desktop root");
+	let window = automation
+		.create_matcher()
+		.from(root)
+		.depth(2)
+		.filter_fn(Box::new(move |e: &UIElement| Ok(e.get_process_id()? == pid)))
+		.control_type(ControlType::Window)
+		.timeout(10_000)
+		.find_first()
+		.expect("app window");
+	automation
+		.create_matcher()
+		.from(window)
+		.depth(10)
+		.filter_fn(Box::new(|e: &UIElement| Ok(e.get_classname()?.starts_with("Chrome_WidgetWin"))))
+		.timeout(30_000)
+		.find_first()
+		.expect("webview child window");
+}
+
 pub fn set_value(element: &UIElement, text: &str) {
 	let pattern: uiautomation::patterns::UIValuePattern =
 		element.get_pattern().expect("ValuePattern");
