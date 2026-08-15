@@ -52,10 +52,12 @@ uiautomation = "0.25.0"
 
 [package.metadata.release]
 # cargo-release accepts a single hook command; cmd /c chains the checks.
+# The last one drives the real GUI through UI Automation, so it takes over
+# the desktop until it finishes.
 pre-release-hook = [
     "cmd",
     "/c",
-    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p dictymus-container -p xtask --all-targets -- -D warnings && cargo test -p dictymus-core -p dictymus-container -p xtask",
+    "cargo fmt --all -- --check && cargo clippy -p dictymus-core -p dictymus-container -p xtask --all-targets -- -D warnings && cargo test -p dictymus-core -p dictymus-container -p xtask && cargo test -p dictymus -- --ignored",
 ]
 # The file path resolves against this crate's directory.
 pre-release-replacements = [
