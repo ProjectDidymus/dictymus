@@ -17,7 +17,8 @@ It is built from the ground up for blind and visually impaired users, with first
 - Articles rendered in an embedded WebView with cross-reference links (`bword://` scheme)
 - Bundled SBL BibLit font covering Hebrew, Greek, and Latin in a single face
 - Remembers open dictionaries between sessions
-- Automatic updates on Windows, with minisign-verified downloads
+- Automatic updates on Windows and update notifications on macOS, with
+  minisign-verified downloads
 - A single-file `.dicty` container format for distributing dictionaries,
   optionally sealed (encrypted) with per-user license files — see
   [Protected dictionaries](#protected-dictionaries)
@@ -79,15 +80,36 @@ UI smoke test (requires the winapp CLI):
 pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path/to/dictionary.ifo>
 ```
 
+## Installing on macOS
+
+Download `dictymus-macos.dmg` (Apple silicon, macOS 11 or later) from the
+[releases page](https://github.com/ProjectDidymus/dictymus/releases), open it,
+and drag **Dictymus** to the **Applications** folder.
+
+Builds are not yet signed with an Apple Developer ID, so Gatekeeper blocks the
+first launch. After the "Apple could not verify" dialog, open **System
+Settings → Privacy & Security**, scroll to the Security section, and press
+**Open Anyway** (macOS 15 removed the older right-click → Open shortcut). If
+you instead get *"Dictymus is damaged and can't be opened"*, clear the
+quarantine flag in Terminal:
+
+```sh
+xattr -d com.apple.quarantine /Applications/Dictymus.app
+```
+
+This is needed once per install from the DMG. Updates installed from the
+in-app update download are not quarantined and launch without any dialog.
+
 ## Automatic updates
 
-On Windows, Dictymus checks for updates silently at startup and on demand via
-**Help → Check for Updates**. Downloads are verified with a
+On Windows and macOS, Dictymus checks for updates silently at startup and on
+demand via **Help → Check for Updates**. Downloads are verified with a
 [minisign](https://jedisct1.github.io/minisign/) signature before anything is
-executed. Installed copies (via the setup program) update through a silent
-reinstall; portable copies swap the executable in place, which requires the
-executable to live in a user-writable folder. macOS builds do not check for
-updates.
+executed. On Windows, installed copies (via the setup program) update through
+a silent reinstall; portable copies swap the executable in place, which
+requires the executable to live in a user-writable folder. On macOS, the
+verified update is downloaded and Dictymus points you at it; replacing the
+app in Applications is a manual step for now.
 
 Two release channels exist:
 
@@ -95,7 +117,8 @@ Two release channels exist:
 - **dev** — a rolling prerelease rebuilt on every push to master (the default
   for development builds)
 
-Both behaviors are configurable in `%APPDATA%\dictymus\config.toml`:
+Both behaviors are configurable in `%APPDATA%\dictymus\config.toml`
+(Windows) or `~/Library/Application Support/dictymus/config.toml` (macOS):
 
 ```toml
 check_for_updates_on_startup = true
@@ -164,9 +187,18 @@ what CI builds and publishes.
    built by CI, so no VS Developer Prompt is needed), bumps all three crate
    versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
    tags `X.Y.Z`, and pushes.
-3. The pushed tag triggers CI, which builds every target, signs the Windows
-   updater assets, and publishes the GitHub release with the changelog section
-   as its body.
+3. The pushed tag triggers CI, which builds every target, signs the updater
+   assets with minisign, packages the Windows installers and the macOS app
+   bundle (`dictymus-macos.dmg` for people, `dictymus-macos.zip` for the
+   updater), and publishes the GitHub release with the changelog section as
+   its body.
+
+CI also carries dormant macOS code-signing and notarization steps. They
+activate as soon as these repository secrets exist, with no workflow change:
+`MACOS_CERTIFICATE_P12_BASE64`, `MACOS_CERTIFICATE_PASSWORD`,
+`MACOS_KEYCHAIN_PASSWORD` (Developer ID Application certificate), and
+`APPSTORE_API_KEY_BASE64`, `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`
+(App Store Connect API key for `notarytool`).
 
 ## License
 

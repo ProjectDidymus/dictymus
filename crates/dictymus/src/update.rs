@@ -10,11 +10,15 @@ const GITHUB_REPO: &str = "ProjectDidymus/dictymus";
 const MINISIGN_PUBLIC_KEY: &str = "RWSIEq1WkvZZ4ZTn4dM16OvD6A/FjX9J0c5FTETolqvixOstZMQ3CK3e";
 const COMMIT_HASH: &str = env!("DICTYMUS_COMMIT_HASH");
 
-/// Suffix of the per-arch installer and portable zip assets published by CI.
-#[cfg(target_arch = "x86_64")]
+/// Suffix of the per-platform installer and portable zip assets published
+/// by CI. macOS needs its own suffix: its arm64 zip would otherwise clash
+/// with the Windows `dictymus-arm64.zip`.
+#[cfg(all(windows, target_arch = "x86_64"))]
 const ASSET_SUFFIX: &str = "-x64";
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(windows, target_arch = "aarch64"))]
 const ASSET_SUFFIX: &str = "-arm64";
+#[cfg(target_os = "macos")]
+const ASSET_SUFFIX: &str = "-macos";
 
 /// The channel this build tracks when the config does not pin one: release
 /// builds (HEAD on a tag) follow stable, development builds follow dev.

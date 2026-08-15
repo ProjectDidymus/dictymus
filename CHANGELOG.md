@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dictionaries (`pack`/`seal`) and issue licenses (`keygen`/`license`/
   `inspect`)
 - The Windows installer can associate `.dicty` files with Dictymus
+- macOS is now delivered as a proper `Dictymus.app` bundle on a
+  drag-to-Applications disk image (`dictymus-macos.dmg`, Apple silicon,
+  macOS 11+) instead of a bare executable
+- macOS builds now check for updates at startup and via Help → Check for
+  Updates; the verified download still has to be installed manually
 
 ## [0.2.0] - 2026-08-15
 

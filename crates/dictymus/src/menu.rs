@@ -50,7 +50,7 @@ pub fn create_menu_bar() -> MenuBar {
 		.build();
 
 	let help = Menu::builder();
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "macos"))]
 	let help = {
 		// TRANSLATORS: Help menu item
 		let check_updates_label = t("Check for &Updates...");

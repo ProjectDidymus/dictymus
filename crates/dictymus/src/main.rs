@@ -18,7 +18,7 @@ mod options;
 mod search_field;
 mod tabs;
 mod translation_manager;
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 mod update;
 
 use patois::t;
@@ -34,6 +34,10 @@ fn main() {
 	let (config, config_warning) = dictymus_core::config::AppConfig::load();
 	let _guard = logging::init(&config.log_level);
 	tracing::info!("dictymus starting");
+
+	// Must run before wx initializes to take effect.
+	#[cfg(target_os = "macos")]
+	promote_unbundled_to_regular_app();
 
 	// If wx itself failed to init there is no toolkit to show a dialog with;
 	// the nonzero exit code is what scripts and smoke tests need.
@@ -59,7 +63,7 @@ fn main() {
 				),
 			);
 		}
-		#[cfg(windows)]
+		#[cfg(any(windows, target_os = "macos"))]
 		if config.check_for_updates_on_startup
 			&& std::env::var_os("DICTYMUS_NO_UPDATE_CHECK").is_none()
 		{
@@ -70,5 +74,25 @@ fn main() {
 		tracing::error!("wxdragon init failed: {e}");
 		eprintln!("dictymus: {e}"); // echo: visible if launched from a console
 		std::process::exit(1);
+	}
+}
+
+/// Binaries outside an app bundle (`cargo run` builds) count as background
+/// processes of Terminal.app and get no menu bar; promote the process to a
+/// regular foreground app. Inside a bundle macOS handles this itself.
+#[cfg(target_os = "macos")]
+fn promote_unbundled_to_regular_app() {
+	use objc::{class, msg_send, runtime::Object, sel, sel_impl};
+
+	let in_bundle = std::env::current_exe()
+		.is_ok_and(|exe| exe.to_string_lossy().contains(".app/Contents/MacOS/"));
+	if in_bundle {
+		return;
+	}
+	// NSApplicationActivationPolicyRegular = 0.
+	unsafe {
+		let ns_app: *mut Object = msg_send![class!(NSApplication), sharedApplication];
+		let _: () = msg_send![ns_app, setActivationPolicy: 0_isize];
+		let _: () = msg_send![ns_app, activateIgnoringOtherApps: true];
 	}
 }

@@ -147,7 +147,7 @@ impl App {
 			menu::ids::ABOUT => {
 				crate::dialogs::show_about(&frame_for_menu);
 			}
-			#[cfg(windows)]
+			#[cfg(any(windows, target_os = "macos"))]
 			menu::ids::CHECK_UPDATES => {
 				let channel = config_for_menu
 					.borrow()
