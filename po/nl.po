@@ -271,7 +271,7 @@ msgid ""
 "{} requires a license. Use File → Install License... to install your license "
 "file."
 msgstr ""
-"{} vereist een licentie. Gebruik Bestand → Licentie installeren... om uw "
+"{} vereist een licentie. Gebruik Bestand → Licentie installeren... om je "
 "licentiebestand te installeren."
 
 #. TRANSLATORS: Error dialog text; first placeholder is the file path, second the underlying error
