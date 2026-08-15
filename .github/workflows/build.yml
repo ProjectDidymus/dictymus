@@ -58,6 +58,20 @@ jobs:
           cache-all-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
+      # The wxWidgets source and CMake build trees live in nonstandard
+      # directories under target/ that rust-cache's cleanup discards, so
+      # they get their own cache; without it every run rebuilds wx from
+      # scratch. restore-keys reuses a stale tree incrementally after a
+      # Cargo.lock change.
+      - name: Cache wxWidgets build
+        uses: actions/cache@v6
+        with:
+          path: |
+            target/debug/wxWidgets*
+            target/debug/wxwidgets_cmake_build*
+            target/debug/wxdragon_sys_cmake_build*
+          key: wx-ui-test-${{ hashFiles('Cargo.lock') }}
+          restore-keys: wx-ui-test-
       # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
       # inside the cached wx CMake tree does not survive the rust-cache cleanup.
       - name: Install WebView2 SDK
@@ -96,12 +110,16 @@ jobs:
             os: windows-2025
             target: x86_64-pc-windows-msvc
             msvc-arch: x64
+            webview2-arch: x64
             artifact: target/x86_64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-x64
+          # Cross-compiled on the x64 runner: arm64 runners queue long and
+          # their single-core speed roughly doubles the LTO-heavy build.
           - name: windows-arm64
-            os: windows-11-arm
+            os: windows-2025
             target: aarch64-pc-windows-msvc
-            msvc-arch: arm64
+            msvc-arch: amd64_arm64
+            webview2-arch: arm64
             artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
             artifact-name: dictymus-windows-arm64
           - name: macos-x64
@@ -155,6 +173,21 @@ jobs:
           cache-workspace-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
+      # The wxWidgets source and CMake build trees live in nonstandard
+      # directories under target/ that rust-cache's cleanup discards, so
+      # they get their own cache; without it every run rebuilds wx from
+      # scratch. restore-keys reuses a stale tree incrementally after a
+      # Cargo.lock change.
+      - name: Cache wxWidgets build
+        if: startsWith(matrix.name, 'windows')
+        uses: actions/cache@v6
+        with:
+          path: |
+            target/${{ matrix.target }}/release/wxWidgets*
+            target/${{ matrix.target }}/release/wxwidgets_cmake_build*
+            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build*
+          key: wx-${{ matrix.name }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: wx-${{ matrix.name }}-
       # Puts WebView2LoaderStatic.lib on the linker's LIB search path; the copy
       # inside the cached wx CMake tree does not survive the rust-cache cleanup.
       - name: Install WebView2 SDK
@@ -163,7 +196,7 @@ jobs:
         run: |
           nuget install Microsoft.Web.WebView2 -OutputDirectory packages
           $pkg = Get-ChildItem "packages" -Filter "Microsoft.Web.WebView2.*" -Directory | Select-Object -First 1
-          $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.msvc-arch }}"
+          $libPath = Join-Path $pkg.FullName "build\native\${{ matrix.webview2-arch }}"
           echo "LIB=$env:LIB;$libPath" >> $env:GITHUB_ENV
       - name: Build
         if: startsWith(matrix.name, 'windows')
