@@ -4,8 +4,6 @@
 use crate::{Error, Result};
 use chacha20poly1305::XChaCha20Poly1305;
 use chacha20poly1305::aead::{Aead, KeyInit, Payload};
-use rand::TryRng;
-use rand::rngs::SysRng;
 
 pub const NONCE_LEN: usize = 24;
 pub const KEY_LEN: usize = 32;
@@ -16,13 +14,13 @@ const LICENSE_KDF_CONTEXT: &str = "dictymus license v1";
 
 pub fn random_key() -> [u8; KEY_LEN] {
 	let mut key = [0; KEY_LEN];
-	SysRng.try_fill_bytes(&mut key).expect("system RNG unavailable");
+	getrandom::fill(&mut key).expect("system RNG unavailable");
 	key
 }
 
 pub fn random_nonce() -> [u8; NONCE_LEN] {
 	let mut nonce = [0; NONCE_LEN];
-	SysRng.try_fill_bytes(&mut nonce).expect("system RNG unavailable");
+	getrandom::fill(&mut nonce).expect("system RNG unavailable");
 	nonce
 }
 
