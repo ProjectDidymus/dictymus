@@ -5,9 +5,10 @@ members = ["crates/dictymus-core", "crates/dictymus", "crates/dictymus-container
 [workspace.dependencies]
 icu_normalizer = { version = "2", features = ["compiled_data"] }
 icu_properties = { version = "2", features = ["compiled_data"] }
-patois = "0.2.0"
-patois-build = "0.1.4"
+patois = "0.2.1"
+patois-build = "0.1.5"
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 toml = "1.1"
 dirs = "6"
 tracing = "0.1"
