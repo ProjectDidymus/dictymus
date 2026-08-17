@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-15 22:10+0200\n"
+"POT-Creation-Date: 2026-08-17 14:43+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -98,15 +98,11 @@ msgstr "Dictymus-licenties (*.dictykey)"
 
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be registered
 msgid "Bundled font could not be registered; using system font"
-msgstr ""
-"Het meegeleverde lettertype kon niet worden geregistreerd; het "
-"systeemlettertype wordt gebruikt"
+msgstr "Het meegeleverde lettertype kon niet worden geregistreerd; het systeemlettertype wordt gebruikt"
 
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
 msgid "Bundled font unavailable; using system font"
-msgstr ""
-"Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt "
-"gebruikt"
+msgstr "Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt gebruikt"
 
 #. TRANSLATORS: Title of the Licenses dialog
 msgid "Licenses"
@@ -142,9 +138,7 @@ msgstr "Sluiten"
 
 #. TRANSLATORS: Yes/No confirmation before deleting a license; the placeholder is the licensee name
 msgid "Remove the license for {}? Dictionaries it unlocks will no longer open."
-msgstr ""
-"De licentie voor {} verwijderen? Woordenboeken die deze licentie "
-"ontgrendelt, kunnen daarna niet meer worden geopend."
+msgstr "De licentie voor {} verwijderen? Woordenboeken die deze licentie ontgrendelt, kunnen daarna niet meer worden geopend."
 
 #. TRANSLATORS: Title of the remove-license confirmation dialog
 msgid "Remove license"
@@ -174,12 +168,8 @@ msgstr "Kan de licentie niet installeren naar {}: {}"
 msgid "Cannot remove {}: {}"
 msgstr "Kan {} niet verwijderen: {}"
 
-msgid ""
-"Could not start the single-instance service. Opening dictionary files from "
-"Explorer will start a separate window."
-msgstr ""
-"Kan de service voor een enkele instantie niet starten. Woordenboekbestanden "
-"die vanuit de Verkenner worden geopend, starten een apart venster."
+msgid "Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window."
+msgstr "Kan de service voor een enkele instantie niet starten. Woordenboekbestanden die vanuit de Verkenner worden geopend, starten een apart venster."
 
 #. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
 msgid "&Open...\tCtrl+O"
@@ -299,23 +289,17 @@ msgstr "Kan instellingen niet opslaan: {}"
 
 #. TRANSLATORS: Shown after changing the language in the Options dialog
 msgid "The language change will take full effect after you restart Dictymus."
-msgstr ""
-"De taalwijziging wordt volledig van kracht nadat Dictymus opnieuw is gestart."
-
-#. TRANSLATORS: Announced when a search matches exactly one entry
-msgid "1 result"
-msgstr "1 resultaat"
+msgstr "De taalwijziging wordt volledig van kracht nadat Dictymus opnieuw is gestart."
 
 #. TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
-msgid "{} results"
-msgstr "{} resultaten"
+msgid "{} result"
+msgid_plural "{} results"
+msgstr[0] "{} resultaat"
+msgstr[1] "{} resultaten"
 
 #. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
-msgid ""
-"{} requires a license. Use File → Licenses... to import your license file."
-msgstr ""
-"{} vereist een licentie. Gebruik Bestand → Licenties... om je "
-"licentiebestand te importeren."
+msgid "{} requires a license. Use File → Licenses... to import your license file."
+msgstr "{} vereist een licentie. Gebruik Bestand → Licenties... om je licentiebestand te importeren."
 
 #. TRANSLATORS: Label of the search field
 msgid "Search"
@@ -345,11 +329,9 @@ msgstr "Kan instellingen niet lezen ({}): {}"
 msgid "Settings file is invalid ({}): {}"
 msgstr "Instellingenbestand is ongeldig ({}): {}"
 
-#, c-format
 msgid "Update to %s"
 msgstr "Bijwerken naar %s"
 
-#, c-format
 msgid "A new version of %s is available. Here's what's new:"
 msgstr "Er is een nieuwe versie van %s beschikbaar. Dit is er nieuw:"
 
@@ -362,7 +344,6 @@ msgstr "&Nee"
 msgid "No release notes provided."
 msgstr "Geen release-opmerkingen beschikbaar."
 
-#, c-format
 msgid "%s Update"
 msgstr "%s-update"
 
@@ -372,7 +353,6 @@ msgstr "Update wordt gedownload..."
 msgid "No updates available."
 msgstr "Geen updates beschikbaar."
 
-#, c-format
 msgid "No updates available. Latest version: %s"
 msgstr "Geen updates beschikbaar. Nieuwste versie: %s"
 
@@ -382,11 +362,8 @@ msgstr "Info"
 msgid "Error"
 msgstr "Fout"
 
-#, c-format
-msgid ""
-"Security verification failed. The update might have been tampered with: %s"
-msgstr ""
-"Beveiligingsverificatie mislukt. Er is mogelijk met de update geknoeid: %s"
+msgid "Security verification failed. The update might have been tampered with: %s"
+msgstr "Beveiligingsverificatie mislukt. Er is mogelijk met de update geknoeid: %s"
 
 msgid "Security Error"
 msgstr "Beveiligingsfout"
@@ -394,7 +371,6 @@ msgstr "Beveiligingsfout"
 msgid "Update failed"
 msgstr "Update mislukt"
 
-#, c-format
 msgid ""
 "Update downloaded to: %s\n"
 "Please install it manually."
@@ -416,6 +392,3 @@ msgstr "Kan het updatescript niet starten"
 
 msgid "Unknown update file format."
 msgstr "Onbekend bestandsformaat voor de update."
-
-msgid "Dictionaries (*.ifo;*.mdx)"
-msgstr "Woordenboeken (*.ifo;*.mdx)"

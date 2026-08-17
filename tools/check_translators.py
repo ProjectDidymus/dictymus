@@ -1,10 +1,11 @@
 """Fail when a TRANSLATORS comment will not reach the pot file.
 
 `patois_build::gen_pot` extracts with
-`xgettext --keyword=t --language=C --add-comments=TRANSLATORS`, and xgettext
-keeps a comment block only when the line right after it holds the `t(` call.
-rustfmt wrapping a long statement moves `t(` down a line and silently drops the
-comment, so this checks that every block is still adjacent to its call.
+`xgettext --keyword=t --keyword=nt:1,2 --language=C --add-comments=TRANSLATORS`,
+and xgettext keeps a comment block only when the line right after it holds the
+`t(`/`nt(` call. rustfmt wrapping a long statement moves the call down a line
+and silently drops the comment, so this checks that every block is still
+adjacent to its call.
 
 Takes the files to check as arguments; without any, walks the crate sources.
 """
@@ -16,11 +17,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE_DIRS = ("crates/dictymus/src", "crates/dictymus-core/src", "crates/dictymus-container/src")
 COMMENT = "// TRANSLATORS"
-CALL = re.compile(r"\bt\(")
+CALL = re.compile(r"\bn?t\(")
 
 
 def orphaned(path):
-	"""Line numbers of TRANSLATORS blocks in `path` not followed by a t( call."""
+	"""Line numbers of TRANSLATORS blocks in `path` not followed by a t(/nt( call."""
 	try:
 		lines = path.read_text(encoding="utf-8").splitlines()
 	except (OSError, UnicodeDecodeError):
@@ -46,11 +47,11 @@ def main(argv):
 
 	failures = [(path, line, text) for path in paths for line, text in orphaned(path)]
 	for path, line, text in failures:
-		print(f"{path}:{line}: TRANSLATORS comment is not on the line above its t() call")
+		print(f"{path}:{line}: TRANSLATORS comment is not on the line above its t()/nt() call")
 		print(f"    {text}")
 	if failures:
-		print("\nxgettext drops these. Move the comment onto the t() line, or shorten")
-		print("the statement so rustfmt keeps t( on the line below the comment.")
+		print("\nxgettext drops these. Move the comment onto the t()/nt() line, or shorten")
+		print("the statement so rustfmt keeps the call on the line below the comment.")
 		return 1
 	return 0
 

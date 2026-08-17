@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-15 22:10+0200\n"
+"POT-Creation-Date: 2026-08-17 14:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #. TRANSLATORS: Initial status bar text
 msgid "Ready"
@@ -170,9 +171,7 @@ msgstr ""
 msgid "Cannot remove {}: {}"
 msgstr ""
 
-msgid ""
-"Could not start the single-instance service. Opening dictionary files from "
-"Explorer will start a separate window."
+msgid "Could not start the single-instance service. Opening dictionary files from Explorer will start a separate window."
 msgstr ""
 
 #. TRANSLATORS: File menu item; the text after the tab is the keyboard shortcut
@@ -295,17 +294,14 @@ msgstr ""
 msgid "The language change will take full effect after you restart Dictymus."
 msgstr ""
 
-#. TRANSLATORS: Announced when a search matches exactly one entry
-msgid "1 result"
-msgstr ""
-
 #. TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
-msgid "{} results"
-msgstr ""
+msgid "{} result"
+msgid_plural "{} results"
+msgstr[0] ""
+msgstr[1] ""
 
 #. TRANSLATORS: Error dialog text for a protected dictionary without an installed license; the placeholder is the dictionary name
-msgid ""
-"{} requires a license. Use File → Licenses... to import your license file."
+msgid "{} requires a license. Use File → Licenses... to import your license file."
 msgstr ""
 
 #. TRANSLATORS: Label of the search field
@@ -336,11 +332,9 @@ msgstr ""
 msgid "Settings file is invalid ({}): {}"
 msgstr ""
 
-#, c-format
 msgid "Update to %s"
 msgstr ""
 
-#, c-format
 msgid "A new version of %s is available. Here's what's new:"
 msgstr ""
 
@@ -353,7 +347,6 @@ msgstr ""
 msgid "No release notes provided."
 msgstr ""
 
-#, c-format
 msgid "%s Update"
 msgstr ""
 
@@ -363,7 +356,6 @@ msgstr ""
 msgid "No updates available."
 msgstr ""
 
-#, c-format
 msgid "No updates available. Latest version: %s"
 msgstr ""
 
@@ -373,9 +365,7 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#, c-format
-msgid ""
-"Security verification failed. The update might have been tampered with: %s"
+msgid "Security verification failed. The update might have been tampered with: %s"
 msgstr ""
 
 msgid "Security Error"
@@ -384,7 +374,6 @@ msgstr ""
 msgid "Update failed"
 msgstr ""
 
-#, c-format
 msgid ""
 "Update downloaded to: %s\n"
 "Please install it manually."
@@ -403,7 +392,4 @@ msgid "Failed to launch update script"
 msgstr ""
 
 msgid "Unknown update file format."
-msgstr ""
-
-msgid "Dictionaries (*.ifo;*.mdx)"
 msgstr ""
