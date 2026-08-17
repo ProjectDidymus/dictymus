@@ -35,6 +35,25 @@ Tests:
 Test fixtures: `dictymus_core::testing` generates tiny StarDict sets
 (Greek/Hebrew/Latin, public-domain words) — no real dictionaries needed.
 
+Translations (need `xgettext`, `msgmerge` and `msgfmt` on `PATH` — MSYS2 UCRT64
+`gettext` + `mingw-w64-ucrt-x86_64-gettext-tools` on Windows):
+
+- `cargo gen-pot` — regenerate `po/dictymus.pot` from every crate tagged
+  `[package.metadata.patois] translatable = true`, registry dependencies such as
+  `ship-shape` included
+- `cargo xtask translate` — regenerate the pot, then `msgmerge` it into every
+  `po/*.po`
+- `cargo build` only compiles `po/*.po` into the embedded
+  `crates/dictymus/locale/<lang>/LC_MESSAGES/dictymus.mo` catalogs; it does not
+  touch the pot
+- retiring a msgid needs a manual delete from `po/dictymus.pot`:
+  `patois-build` re-appends any entry the fresh scan misses, so that
+  dependency strings survive regeneration
+- translatable literals must stay on one source line; `xgettext` reads the
+  sources as C, so `xtask/src/sanitize_rust.rs` blanks lifetimes, raw strings
+  and multi-line literals before they reach it, and `gen-pot` fails if a
+  blanked literal belonged to a `t(`/`nt(` call
+
 Releasing:
 
 - `cargo release <level> --execute` — lockstep version bump, `CHANGELOG.md`
@@ -91,6 +110,11 @@ Latin. Loaded via `Font::add_private_font` for native widgets; via CSS
 - WebView `.url()` builder method is `.with_url(Some("...".to_string()))`
 - Menu events: `on_menu_selected` (not `on_menu`)
 - Text change events: `on_text_updated` (not `on_text`)
+- User-visible strings go through `patois::t`, counts through
+  `patois::nt(singular, plural, n)`; placeholders are `{}` filled in with
+  `.replace()`. Each call takes a `// TRANSLATORS:` comment on the line
+  immediately above it — `tools/check_translators.py` (prek hook) fails the
+  commit when rustfmt wrapping separates the two
 
 ## Converter contract
 

@@ -22,21 +22,11 @@ fn main() {
 	}
 }
 
-/// Regenerates `po/dictymus.pot` from every crate tagged
-/// `[package.metadata.patois] translatable = true` (including registry
-/// dependencies such as `ship-shape`), then compiles each `po/*.po` into
-/// `locale/<lang>/LC_MESSAGES/dictymus.mo` for `patois::embed_domain!` to
-/// pick up. Needs `xgettext`/`msgfmt` on `PATH`; degrades to warnings and an
-/// untranslated binary without them.
+/// Compiles each `po/*.po` into `locale/<lang>/LC_MESSAGES/dictymus.mo` for
+/// `patois::embed_domain!` to pick up. Needs `msgfmt` on `PATH`; degrades to a
+/// warning and an untranslated binary without it. Regenerating
+/// `po/dictymus.pot` is a separate step: `cargo gen-pot`.
 fn build_translations() {
-	let manifest_dir =
-		std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default());
-	if let Some(workspace_dir) = manifest_dir.ancestors().nth(2) {
-		let po_dir = workspace_dir.join("po");
-		if let Err(e) = patois_build::gen_pot(workspace_dir, &po_dir, "dictymus") {
-			println!("cargo:warning=Failed to regenerate dictymus.pot from Rust sources: {e}");
-		}
-	}
 	patois_build::compile_translations("../../po", "locale");
 }
 
