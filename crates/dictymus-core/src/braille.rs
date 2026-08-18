@@ -69,11 +69,20 @@ pub fn to_ascii_braille(text: &str, language: &str) -> String {
 			run.push(ch);
 		} else {
 			flush_run(translator, &mut run, &mut out);
-			out.push(ch);
+			// Direction control marks (converter output carries a
+			// left-to-right mark after each Hebrew span) mean nothing in the
+			// left-to-right ASCII output and only disturb a braille display.
+			if !is_bidi_control(ch) {
+				out.push(ch);
+			}
 		}
 	}
 	flush_run(translator, &mut run, &mut out);
 	out
+}
+
+fn is_bidi_control(ch: char) -> bool {
+	matches!(ch, '\u{061C}' | '\u{200E}' | '\u{200F}' | '\u{202A}'..='\u{202E}' | '\u{2066}'..='\u{2069}')
 }
 
 /// Convert the text nodes of trusted article HTML to ASCII braille, leaving
@@ -311,6 +320,18 @@ mod tests {
 	#[test]
 	fn html_entities_are_preserved() {
 		assert_eq!(braille_html("<p>&amp;דָּבָר&#x20;</p>", "he"), "<p>&amp;\"d&lt;v&lt;r&#x20;</p>");
+	}
+
+	#[test]
+	fn direction_marks_are_dropped() {
+		// Converter output places a raw left-to-right mark after each Hebrew
+		// span. Direction marks mean nothing in the left-to-right ASCII
+		// braille output and only disturb a braille display.
+		assert_eq!(to_ascii_braille("\u{200E}\u{5d0}\u{200F}", "he"), "a");
+		assert_eq!(
+			braille_html("<p><span lang=\"he\" dir=\"rtl\">\u{5d0}</span>\u{200E}; ok</p>", "he"),
+			"<p><span lang=\"he\" dir=\"rtl\">a</span>; ok</p>"
+		);
 	}
 
 	#[test]
