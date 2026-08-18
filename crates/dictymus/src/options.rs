@@ -5,14 +5,20 @@ use std::rc::Rc;
 use wxdragon::id::{ID_CANCEL, ID_OK};
 use wxdragon::prelude::*;
 
+use crate::tabs::TabManager;
 use crate::translation_manager::TranslationManager;
 
 const DIALOG_PADDING: i32 = 5;
 
 /// Modal Options dialog. On OK the shared config is updated and saved
 /// immediately; a language change is applied to the running process (new
-/// widgets pick it up) and announced as fully effective after a restart.
-pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
+/// widgets pick it up) and announced as fully effective after a restart. A
+/// braille toggle re-renders the open tabs right away.
+pub fn show_options(
+	parent: &Frame,
+	config: &Rc<RefCell<AppConfig>>,
+	tabs: &Rc<RefCell<TabManager>>,
+) {
 	// TRANSLATORS: Title of the Options dialog
 	let dialog = Dialog::builder(parent, &t("Options")).build();
 
@@ -66,6 +72,24 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 		(label, combo)
 	};
 
+	// TRANSLATORS: Group label in the Options dialog around braille display settings
+	let braille_group_label = t("Braille");
+	let braille_sizer =
+		StaticBoxSizerBuilder::new_with_label(Orientation::Vertical, &dialog, &braille_group_label)
+			.build();
+	// TRANSLATORS: Option in the Options dialog; shows Hebrew script as ASCII braille
+	let hebrew_braille_label = t("Show Hebrew as ASCII &braille");
+	// Fall back to the dialog as parent if the sizer has no StaticBox —
+	// degrades the group label rather than crashing.
+	let hebrew_braille_check = match braille_sizer.get_static_box() {
+		Some(braille_box) => {
+			CheckBox::builder(&braille_box).with_label(&hebrew_braille_label).build()
+		}
+		None => CheckBox::builder(&dialog).with_label(&hebrew_braille_label).build(),
+	};
+	hebrew_braille_check.set_value(config.borrow().braille_languages.iter().any(|l| l == "he"));
+	braille_sizer.add(&hebrew_braille_check, 0, SizerFlag::All, DIALOG_PADDING);
+
 	// TRANSLATORS: Label for the confirmation button
 	let ok_button = Button::builder(&dialog).with_id(ID_OK).with_label(&t("OK")).build();
 	// TRANSLATORS: Label for the cancellation button
@@ -99,6 +123,7 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 		channel_sizer.add(&channel_combo, 0, SizerFlag::AlignCenterVertical, 0);
 		content_sizer.add_sizer(&channel_sizer, 0, SizerFlag::All, DIALOG_PADDING);
 	}
+	content_sizer.add_sizer(&braille_sizer, 0, SizerFlag::Expand | SizerFlag::All, DIALOG_PADDING);
 	let button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
 	button_sizer.add_stretch_spacer(1);
 	button_sizer.add(&ok_button, 0, SizerFlag::All, DIALOG_PADDING);
@@ -114,7 +139,8 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 	let new_language = patois::ui::resolve_language_choice(&language_combo, &language_codes)
 		.unwrap_or_else(|| current_language.clone());
 	let language_changed = new_language != current_language;
-	let save_result = {
+	let hebrew_braille = hebrew_braille_check.is_checked();
+	let (braille_changed, save_result) = {
 		let mut cfg = config.borrow_mut();
 		cfg.language = new_language.clone();
 		#[cfg(any(windows, target_os = "macos"))]
@@ -126,8 +152,19 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 				.unwrap_or(0);
 			cfg.update_channel = channel_codes.get(index).copied().unwrap_or("").to_string();
 		}
-		cfg.save()
+		let braille_changed = hebrew_braille != cfg.braille_languages.iter().any(|l| l == "he");
+		if braille_changed {
+			if hebrew_braille {
+				cfg.braille_languages.push("he".to_string());
+			} else {
+				cfg.braille_languages.retain(|l| l != "he");
+			}
+		}
+		(braille_changed, cfg.save())
 	};
+	if braille_changed {
+		apply_braille_to_tabs(config, tabs);
+	}
 	if let Err(e) = save_result {
 		tracing::error!("settings save failed: {e}");
 		crate::dialogs::show_error(
@@ -148,6 +185,23 @@ pub fn show_options(parent: &Frame, config: &Rc<RefCell<AppConfig>>) {
 			)
 			.build()
 			.show_modal();
+	}
+}
+
+/// Re-derive every open tab's braille flag and re-render the ones that
+/// flipped: reset the search (a stale query means nothing in the other input
+/// mode) and repopulate explicitly — `change_value` fires no text event, and
+/// an empty-to-empty clear would fire none either way.
+fn apply_braille_to_tabs(config: &Rc<RefCell<AppConfig>>, tabs: &Rc<RefCell<TabManager>>) {
+	let languages = config.borrow().braille_languages.clone();
+	for tab in &tabs.borrow().tabs {
+		let was = tab.braille.get();
+		tab.apply_braille(&languages);
+		if tab.braille.get() != was {
+			tab.search.change_value("");
+			*tab.filtered.borrow_mut() = (0..tab.dict.word_count()).collect();
+			crate::lemma_list::repopulate(tab);
+		}
 	}
 }
 

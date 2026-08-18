@@ -14,6 +14,9 @@ It is built from the ground up for blind and visually impaired users, with first
   Logos Biblical keyboard layout and get Hebrew or Greek glyphs
 - Diacritic-insensitive matching: unpointed Hebrew and unaccented Greek queries match pointed/accented lemmas
 - Automatic language detection per dictionary (Hebrew vs. Greek)
+- Optional ASCII braille view for Hebrew: lemmas and articles are shown in
+  International Hebrew Braille Code cells (Braille ASCII, lowercase), and the
+  search field takes ASCII braille input directly
 - Articles rendered in an embedded WebView with cross-reference links (`bword://` scheme)
 - Bundled SBL BibLit font covering Hebrew, Greek, and Latin in a single face
 - Remembers open dictionaries between sessions
@@ -209,3 +212,10 @@ distributed by the [Society of Biblical Literature](https://www.sbl-site.org/res
 under the [SBL Font End User License Agreement](https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf),
 which permits free non-commercial use and unmodified redistribution.
 Commercial use requires a separate license from SBL.
+
+The ASCII braille view links the [louis-rs](https://github.com/liblouis/louis-rs)
+braille translator and embeds Hebrew braille tables from
+[liblouis](https://github.com/liblouis/liblouis)
+(`crates/dictymus-core/assets/braille-tables/`). Both are licensed under the
+[GNU LGPL 2.1 or later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html);
+their source is available at the linked repositories.
