@@ -1355,7 +1355,7 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 [[package]]
 name = "louis-rs"
 version = "0.2.8"
-source = "git+https://github.com/LeonarddeR/louis-rs?rev=370aafec34fd5e1904b12ad6ee282639d0815c32#370aafec34fd5e1904b12ad6ee282639d0815c32"
+source = "git+https://github.com/LeonarddeR/louis-rs?rev=282cb37258e3cbc8b9487eb7e686d71cba927a8f#282cb37258e3cbc8b9487eb7e686d71cba927a8f"
 dependencies = [
  "clap",
  "enumset",

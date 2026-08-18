@@ -76,8 +76,8 @@ Releasing:
   `from_table_source`), Unicode-braille→lowercase-BRF mapping,
   `to_ascii_braille()` / `braille_html()` (HTML-escaping text-node transform)
   / `normalize_braille()` (braille analogue of `normalize_for_search`);
-  louis-rs is pinned to a fork rev until the multipass fixes
-  (louis-rs #22/#23) are released
+  louis-rs is pinned to a fork rev until the multipass fix
+  (louis-rs #22) is released
 - `config.rs` — `AppConfig` (open dictionary paths, update settings, braille
   languages, persisted via TOML in OS app-data dir) + `UpdateChannel`
 
