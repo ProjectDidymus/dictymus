@@ -4,7 +4,7 @@ pub fn transliterate_char(ch: char, language: &str) -> char {
 	let lower = ch.to_ascii_lowercase();
 	let mapped = match language {
 		"he" => hebrew(lower),
-		"el" => greek(lower),
+		"grc" => greek(lower),
 		_ => None,
 	};
 	mapped.unwrap_or(ch)
@@ -79,7 +79,7 @@ mod tests {
 
 	#[test]
 	fn greek_maps_q_to_theta() {
-		assert_eq!(transliterate_char('q', "el"), 'θ');
+		assert_eq!(transliterate_char('q', "grc"), 'θ');
 	}
 
 	#[test]

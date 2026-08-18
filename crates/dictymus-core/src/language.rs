@@ -7,7 +7,9 @@ pub fn detect<S: AsRef<str>>(words: &[S]) -> &'static str {
 		for ch in word.as_ref().chars() {
 			match script.get(ch) {
 				Script::Hebrew => return "he",
-				Script::Greek => return "el",
+				// Ancient Greek (ISO 639-3): these are biblical-language
+				// dictionaries, and "grc" has no 639-1 equivalent.
+				Script::Greek => return "grc",
 				_ => {}
 			}
 		}
@@ -26,7 +28,8 @@ mod tests {
 
 	#[test]
 	fn detects_greek() {
-		assert_eq!(detect(&["λογος"]), "el");
+		// Ancient Greek: ISO 639-3 "grc" (no 639-1 code exists), not modern "el".
+		assert_eq!(detect(&["λογος"]), "grc");
 	}
 
 	#[test]

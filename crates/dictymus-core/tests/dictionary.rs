@@ -18,7 +18,7 @@ fn loads_word_list_and_detects_greek() {
 	let d = DictHandle::open(&testing::write_greek(&dir), &testing::test_license_pubkey())
 		.expect("open fixture");
 	assert_eq!(d.word_count(), 2);
-	assert_eq!(d.language(), "el");
+	assert_eq!(d.language(), "grc");
 	assert_eq!(d.words().len(), d.word_count());
 	drop(d);
 	let _ = std::fs::remove_dir_all(&dir);

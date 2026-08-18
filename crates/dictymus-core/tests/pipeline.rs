@@ -12,6 +12,6 @@ fn typed_query_normalizes_to_match_pointed_lemma() {
 
 #[test]
 fn greek_transliterate_and_normalize() {
-	let typed: String = "logos".chars().map(|c| transliterate_char(c, "el")).collect();
+	let typed: String = "logos".chars().map(|c| transliterate_char(c, "grc")).collect();
 	assert_eq!(normalize_for_search("λόγος"), normalize_for_search(&typed));
 }
