@@ -5,6 +5,10 @@ members = ["crates/dictymus-core", "crates/dictymus", "crates/dictymus-container
 [workspace.dependencies]
 icu_normalizer = { version = "2", features = ["compiled_data"] }
 icu_properties = { version = "2", features = ["compiled_data"] }
+# Pinned to a fork merge of upstream main plus two multipass fixes the Hebrew
+# tables need (liblouis/louis-rs#22 and #23). Move to the upstream repo once
+# those land, and to a registry version once a release contains them.
+louis-rs = { git = "https://github.com/LeonarddeR/louis-rs", rev = "370aafec34fd5e1904b12ad6ee282639d0815c32" }
 patois = "0.2.1"
 patois-build = "0.1.5"
 serde = { version = "1", features = ["derive"] }
