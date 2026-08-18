@@ -34,14 +34,17 @@ pub struct DictionaryTab {
 }
 
 impl DictionaryTab {
-	/// Derive the braille flag from the configured languages and build the
-	/// lemma cache when the mode turns on. Built here, on toggle — never
-	/// inside the paint-driven list callback, which must stay cheap.
+	/// Derive the braille flag from the configured languages; build the lemma
+	/// cache when the mode turns on and drop it when the mode turns off.
+	/// Built here, on toggle — never inside the paint-driven list callback,
+	/// which must stay cheap.
 	pub fn apply_braille(&self, braille_languages: &[String]) {
 		let on = braille_languages.iter().any(|l| l == self.language)
 			&& braille::supported(self.language);
 		self.braille.set(on);
-		if on && self.braille_words.borrow().is_none() {
+		if !on {
+			*self.braille_words.borrow_mut() = None;
+		} else if self.braille_words.borrow().is_none() {
 			let display: Vec<String> = self
 				.dict
 				.words()

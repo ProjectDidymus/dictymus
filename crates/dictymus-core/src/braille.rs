@@ -48,7 +48,7 @@ static BRF_LOWER: &[u8; 64] = b" a1b'k2l@cif/msp\"e3h9o6r^djg>ntq,*5<-u8v.%[$+x!
 
 /// Whether ASCII braille conversion is available for the given language code.
 pub fn supported(language: &str) -> bool {
-	registration(language).is_some()
+	registration(language).is_some_and(|lang| lang.translator().is_some())
 }
 
 /// Convert the script runs of the given language inside `text` to ASCII
