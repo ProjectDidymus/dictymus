@@ -1,4 +1,5 @@
 use crate::tabs::DictionaryTab;
+use dictymus_core::braille;
 use dictymus_core::normalize::normalize_for_search;
 use patois::t;
 use wxdragon::prelude::*;
@@ -17,6 +18,14 @@ pub fn render_row(tab: &DictionaryTab, row: usize) {
 		.article_html(word_idx)
 		// TRANSLATORS: Shown in the article pane when the entry has no content
 		.unwrap_or_else(|| format!("<p>{}</p>", t("Article unavailable.")));
+	let (title, html) = if tab.braille.get() {
+		(
+			braille::to_ascii_braille(&title, tab.language),
+			braille::braille_html(&html, tab.language),
+		)
+	} else {
+		(title, html)
+	};
 	let page = wrap_html(&html, &title);
 	*tab.article_html.borrow_mut() = page;
 	tab.article.load_url("assets:///article");
@@ -30,11 +39,17 @@ pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 	// word here made each cross-ref click O(n · normalize).
 	let normalized = tab.dict.normalized_words();
 	let Some(word_idx) = normalized.iter().position(|w| w.starts_with(&key)) else {
+		// The announced word follows the tab's display mode.
+		let shown = if tab.braille.get() {
+			braille::to_ascii_braille(word, tab.language)
+		} else {
+			word.to_string()
+		};
 		crate::accessibility::announce_status(
 			tab.frame,
 			tab.status_bar,
 			// TRANSLATORS: Announced when a cross-reference target is not in the dictionary; the placeholder is the word
-			&t("Not found: {}").replace("{}", word),
+			&t("Not found: {}").replace("{}", &shown),
 		);
 		return;
 	};

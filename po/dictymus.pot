@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-17 14:43+0200\n"
+"POT-Creation-Date: 2026-08-17 23:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -276,6 +276,14 @@ msgstr ""
 
 #. TRANSLATORS: Update channel entry: rolling development builds
 msgid "Development"
+msgstr ""
+
+#. TRANSLATORS: Group label in the Options dialog around braille display settings
+msgid "Braille"
+msgstr ""
+
+#. TRANSLATORS: Option in the Options dialog; shows Hebrew script as ASCII braille
+msgid "Show Hebrew as ASCII &braille"
 msgstr ""
 
 #. TRANSLATORS: Label for the confirmation button

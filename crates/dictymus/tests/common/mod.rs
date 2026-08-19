@@ -55,13 +55,23 @@ impl Drop for App {
 
 /// Launch the app with a generated Greek fixture; `test_name` keys the temp dir.
 pub fn launch(test_name: &str) -> App {
+	launch_with(test_name, dictymus_core::testing::write_greek, "language = \"en\"\n")
+}
+
+/// Launch the app against the fixture `write_fixture` produces, with the
+/// given config file contents; `test_name` keys the temp dir. Configs should
+/// pin `language = "en"`: the tests match widgets by their English
+/// accessible names regardless of the machine's display language.
+pub fn launch_with(
+	test_name: &str,
+	write_fixture: fn(&std::path::Path) -> PathBuf,
+	config: &str,
+) -> App {
 	let base = std::env::temp_dir().join(format!("dictymus-ui-{test_name}-{}", std::process::id()));
-	let ifo = dictymus_core::testing::write_greek(&base.join("fixture"));
-	// The tests match widgets by their English accessible names, so pin the UI
-	// language regardless of the machine's display language.
+	let ifo = write_fixture(&base.join("fixture"));
 	let data_dir = base.join("data");
 	std::fs::create_dir_all(&data_dir).expect("create data dir");
-	std::fs::write(data_dir.join("config.toml"), "language = \"en\"\n").expect("write config");
+	std::fs::write(data_dir.join("config.toml"), config).expect("write config");
 	let child = Command::new(env!("CARGO_BIN_EXE_dictymus"))
 		.arg(&ifo)
 		.env("DICTYMUS_NO_UPDATE_CHECK", "1")

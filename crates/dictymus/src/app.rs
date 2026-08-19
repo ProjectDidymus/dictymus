@@ -66,7 +66,13 @@ impl App {
 		sizer.add(&notebook, 1, SizerFlag::Expand | SizerFlag::All, 0);
 		panel.set_sizer(sizer, true);
 
-		let tab_manager = tabs::TabManager::new(notebook, base_font.clone(), status_bar, frame);
+		let tab_manager = tabs::TabManager::new(
+			notebook,
+			base_font.clone(),
+			status_bar,
+			frame,
+			Rc::clone(&config),
+		);
 		let tabs = Rc::new(RefCell::new(tab_manager));
 
 		// Startup: load CLI arg or reopen saved config paths
@@ -142,7 +148,7 @@ impl App {
 				crate::license_manager::show_license_manager(&frame_for_menu);
 			}
 			menu::ids::OPTIONS => {
-				crate::options::show_options(&frame_for_menu, &config_for_menu);
+				crate::options::show_options(&frame_for_menu, &config_for_menu, &tabs_for_menu);
 			}
 			menu::ids::ABOUT => {
 				crate::dialogs::show_about(&frame_for_menu);

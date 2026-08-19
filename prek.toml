@@ -1,8 +1,9 @@
 [[repos]]
 repo = "builtin"
 hooks = [
-	{ id = "trailing-whitespace" },
-	{ id = "end-of-file-fixer" },
+	# The vendored liblouis braille tables stay byte-identical to upstream.
+	{ id = "trailing-whitespace", exclude = "crates/dictymus-core/assets/braille-tables/" },
+	{ id = "end-of-file-fixer", exclude = "crates/dictymus-core/assets/braille-tables/" },
 	{ id = "check-added-large-files" },
 	{ id = "check-case-conflict" },
 	{ id = "check-illegal-windows-names" },

@@ -67,10 +67,19 @@ Releasing:
 **dictymus-core** — pure logic, no GUI:
 
 - `dictionary.rs` — `DictHandle` wrapping `opendict::stardict::StarDictDictionary`
-- `language.rs` — `detect()` scanning word list via `unicode-script`
+- `language.rs` — `detect()` scanning word list; returns `"he"`, `"grc"`
+  (Ancient Greek, ISO 639-3 — never `"el"`) or `"unknown"`
 - `normalize.rs` — `normalize_for_search()`: NFD→strip marks→NFC→lowercase→fold final sigma
 - `transliterate.rs` — `transliterate_char()`: Logos Biblical keyboard maps for Hebrew/Greek
-- `config.rs` — `AppConfig` (open dictionary paths, update settings, persisted via TOML in OS app-data dir) + `UpdateChannel`
+- `braille.rs` — per-language ASCII braille: embedded liblouis IHBC tables
+  (`assets/braille-tables/`, include-flattened into `louis-rs`'s
+  `from_table_source`), Unicode-braille→lowercase-BRF mapping,
+  `to_ascii_braille()` / `braille_html()` (HTML-escaping text-node transform)
+  / `normalize_braille()` (braille analogue of `normalize_for_search`);
+  louis-rs is pinned to a fork rev until the multipass fix
+  (louis-rs #22) is released
+- `config.rs` — `AppConfig` (open dictionary paths, update settings, braille
+  languages, persisted via TOML in OS app-data dir) + `UpdateChannel`
 
 **dictymus** — wxdragon UI:
 
@@ -80,6 +89,9 @@ Releasing:
 - `search_field.rs` — char-level transliteration + live list filtering
 - `lemma_list.rs` — `repopulate()` for virtual ListCtrl (`set_item_count` + `refresh_items`)
 - `article_pane.rs` — `render_row()` + `wrap_html()` (WebView HTML injection) + `navigate_to()` + `percent_decode()`
+- `options.rs` — Options dialog; the Braille group toggles
+  `braille_languages` and re-renders open tabs (per-tab `braille` flag +
+  lemma cache in `tabs.rs`; search matches folded braille forms when on)
 - `dialogs.rs` — File Open dialog, About dialog
 - `fonts.rs` — SBL BibLit font loading
 - `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate

@@ -53,6 +53,9 @@ pub struct AppConfig {
 	/// UI language code (e.g. `"en"`, `"nl"`), or empty to follow the system
 	/// language.
 	pub language: String,
+	/// Dictionary language codes (e.g. `"he"`) whose script is shown as ASCII
+	/// braille instead.
+	pub braille_languages: Vec<String>,
 }
 
 impl Default for AppConfig {
@@ -63,6 +66,7 @@ impl Default for AppConfig {
 			check_for_updates_on_startup: true,
 			update_channel: String::new(),
 			language: String::new(),
+			braille_languages: Vec::new(),
 		}
 	}
 }
@@ -266,6 +270,20 @@ mod tests {
 		let cfg = AppConfig { language: "nl".into(), ..Default::default() };
 		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
 		assert_eq!(back.language, "nl");
+	}
+
+	#[test]
+	fn old_config_without_braille_languages_loads_with_default() {
+		// Configs written before the field existed must still deserialize.
+		let cfg = AppConfig::from_toml("open_dictionaries = [\"/a/x.ifo\"]").unwrap();
+		assert!(cfg.braille_languages.is_empty());
+	}
+
+	#[test]
+	fn braille_languages_round_trip() {
+		let cfg = AppConfig { braille_languages: vec!["he".into()], ..Default::default() };
+		let back = AppConfig::from_toml(&cfg.to_toml()).unwrap();
+		assert_eq!(back.braille_languages, vec!["he".to_string()]);
 	}
 
 	#[test]

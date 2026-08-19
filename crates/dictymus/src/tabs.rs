@@ -1,11 +1,20 @@
+use dictymus_core::braille;
+use dictymus_core::config::AppConfig;
 use dictymus_core::dictionary::DictHandle;
 use patois::t;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::path::Path;
 use std::rc::{Rc, Weak};
 use wxdragon::event::WebViewEvents;
 use wxdragon::prelude::*;
 use wxdragon::widgets::webview::WebView;
+
+/// Per-tab ASCII braille forms of the lemma list: what the list shows and the
+/// folded forms the search matches against.
+pub struct BrailleCache {
+	pub display: Vec<String>,
+	pub normalized: Vec<String>,
+}
 
 pub struct DictionaryTab {
 	pub panel: Panel,
@@ -18,6 +27,35 @@ pub struct DictionaryTab {
 	pub frame: Frame,
 	pub status_bar: wxdragon::widgets::statusbar::StatusBar,
 	pub article_html: RefCell<String>,
+	/// Whether this tab shows its script as ASCII braille. Hot callbacks read
+	/// this cell; `apply_braille` derives it from the config.
+	pub braille: Cell<bool>,
+	pub braille_words: RefCell<Option<BrailleCache>>,
+}
+
+impl DictionaryTab {
+	/// Derive the braille flag from the configured languages; build the lemma
+	/// cache when the mode turns on and drop it when the mode turns off.
+	/// Built here, on toggle — never inside the paint-driven list callback,
+	/// which must stay cheap.
+	pub fn apply_braille(&self, braille_languages: &[String]) {
+		let on = braille_languages.iter().any(|l| l == self.language)
+			&& braille::supported(self.language);
+		self.braille.set(on);
+		if !on {
+			*self.braille_words.borrow_mut() = None;
+		} else if self.braille_words.borrow().is_none() {
+			let display: Vec<String> = self
+				.dict
+				.words()
+				.iter()
+				.map(|w| braille::to_ascii_braille(w, self.language))
+				.collect();
+			let normalized =
+				display.iter().map(|b| braille::normalize_braille(b, self.language)).collect();
+			*self.braille_words.borrow_mut() = Some(BrailleCache { display, normalized });
+		}
+	}
 }
 
 // Proves tabs are actually freed after close; guards against reintroducing
@@ -57,6 +95,7 @@ pub struct TabManager {
 	pub base_font: Font,
 	pub status_bar: wxdragon::widgets::statusbar::StatusBar,
 	pub frame: Frame,
+	pub config: Rc<RefCell<AppConfig>>,
 }
 
 impl TabManager {
@@ -65,8 +104,9 @@ impl TabManager {
 		base_font: Font,
 		status_bar: wxdragon::widgets::statusbar::StatusBar,
 		frame: Frame,
+		config: Rc<RefCell<AppConfig>>,
 	) -> Self {
-		Self { notebook, tabs: Vec::new(), base_font, status_bar, frame }
+		Self { notebook, tabs: Vec::new(), base_font, status_bar, frame, config }
 	}
 
 	pub fn build_tab_panel(&self, dict: Rc<DictHandle>) -> Rc<DictionaryTab> {
@@ -88,7 +128,10 @@ impl TabManager {
 			status_bar: self.status_bar,
 			filtered: RefCell::new(filtered),
 			article_html: RefCell::new(String::new()),
+			braille: Cell::new(false),
+			braille_words: RefCell::new(None),
 		});
+		rc.apply_braille(&self.config.borrow().braille_languages);
 		Self::register_asset_handler(&rc);
 		Self::wire_events(&rc);
 		rc
@@ -215,8 +258,13 @@ impl TabManager {
 		rc.list.set_virtual_text_callback(move |row, _col| {
 			let Some(tab) = tab_for_virt.upgrade() else { return String::new() };
 			let filtered = tab.filtered.borrow();
-			let words = tab.dict.words();
-			filtered.get(row as usize).and_then(|&wi| words.get(wi)).cloned().unwrap_or_default()
+			let Some(&wi) = filtered.get(row as usize) else { return String::new() };
+			if tab.braille.get()
+				&& let Some(cache) = tab.braille_words.borrow().as_ref()
+			{
+				return cache.display.get(wi).cloned().unwrap_or_default();
+			}
+			tab.dict.words().get(wi).cloned().unwrap_or_default()
 		});
 		let tab_for_sel = Rc::downgrade(rc);
 		rc.list.on_item_selected(move |event| {

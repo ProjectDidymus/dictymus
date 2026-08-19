@@ -1,5 +1,6 @@
 Dictymus is distributed under the MIT License. The bundled SBL BibLit font
-has its own license, described after the MIT License text.
+and the bundled braille translation components have their own licenses,
+described after the MIT License text.
 
 
 MIT License
@@ -36,3 +37,15 @@ of Biblical Literature.
 Font information: https://www.sbl-site.org/resources/fonts/
 License text:
 https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf
+
+
+Braille Translation Components
+
+The ASCII braille view uses the louis-rs braille translator and embeds
+Hebrew braille tables from the liblouis project. Both are licensed under the
+GNU Lesser General Public License, version 2.1 or later. Their source code
+is available at the projects' repositories.
+
+louis-rs: https://github.com/liblouis/louis-rs
+liblouis tables: https://github.com/liblouis/liblouis
+License text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
