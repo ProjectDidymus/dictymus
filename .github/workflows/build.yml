@@ -58,20 +58,7 @@ jobs:
           cache-all-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
-      # The wxWidgets source and CMake build trees live in nonstandard
-      # directories under target/ that rust-cache's cleanup discards, so
-      # they get their own cache; without it every run rebuilds wx from
-      # scratch. restore-keys reuses a stale tree incrementally after a
-      # Cargo.lock change.
-      - name: Cache wxWidgets build
-        uses: actions/cache@v6
-        with:
-          path: |
-            target/debug/wxWidgets*
-            target/debug/wxwidgets_cmake_build*
-            target/debug/wxdragon_sys_cmake_build*
-          key: wx-ui-test-${{ hashFiles('Cargo.lock') }}
-          restore-keys: wx-ui-test-
+          cache-directories: ${{ runner.temp }}/wx-build
       # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
       # directories are appended at the end of PATH inside the cargo step,
       # keeping MSVC's tools ahead of MSYS2's same-named ones.
@@ -85,6 +72,11 @@ jobs:
             mingw-w64-ucrt-x86_64-gettext-tools
       - name: Run UI tests
         shell: pwsh
+        env:
+          # wxdragon-sys builds its CMake trees here; rust-cache saves the
+          # directory through cache-directories.
+          WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
+          WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
         run: |
           $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
           cargo test -p dictymus -- --ignored
@@ -161,29 +153,23 @@ jobs:
           cache-workspace-crates: true
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
-      # The wxWidgets source and CMake build trees live in nonstandard
-      # directories under target/ that rust-cache's cleanup discards, so
-      # they get their own cache; without it every run rebuilds wx from
-      # scratch. restore-keys reuses a stale tree incrementally after a
-      # Cargo.lock change.
-      - name: Cache wxWidgets build
-        uses: actions/cache@v6
-        with:
-          path: |
-            target/${{ matrix.target }}/release/wxWidgets*
-            target/${{ matrix.target }}/release/wxwidgets_cmake_build*
-            target/${{ matrix.target }}/release/wxdragon_sys_cmake_build*
-          key: wx-${{ matrix.name }}-${{ hashFiles('Cargo.lock') }}
-          restore-keys: wx-${{ matrix.name }}-
+          cache-directories: ${{ runner.temp }}/wx-build
       - name: Build
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
+        env:
+          # wxdragon-sys builds its CMake trees here; rust-cache saves the
+          # directory through cache-directories.
+          WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
+          WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
         run: |
           $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
           cargo build --release -p dictymus --target ${{ matrix.target }}
       - name: Build
         if: startsWith(matrix.name, 'macos')
         env:
+          WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
+          WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
           # Must stay in sync with LSMinimumSystemVersion in the xtask
           # Info.plist.
           MACOSX_DEPLOYMENT_TARGET: "11.0"

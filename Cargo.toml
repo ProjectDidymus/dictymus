@@ -10,7 +10,7 @@ icu_properties = { version = "2", features = ["compiled_data"] }
 # and to a registry version once a release contains it.
 louis-rs = { git = "https://github.com/LeonarddeR/louis-rs", rev = "282cb37258e3cbc8b9487eb7e686d71cba927a8f" }
 patois = "0.2.1"
-patois-build = "0.1.5"
+patois-build = "0.1.6"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "1.1"
