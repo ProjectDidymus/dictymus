@@ -1,0 +1,42 @@
+name: Clear caches
+
+on:
+  schedule:
+    # daily at 03:00 UTC
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      max_age_hours:
+        description: "Also delete every cache not accessed within this many hours"
+        type: number
+        required: false
+
+permissions:
+  actions: write
+
+jobs:
+  clear:
+    name: Delete superseded caches
+    runs-on: ubuntu-latest
+    steps:
+      # Every cache key ends in a hash; the entries sharing the rest of the
+      # key are revisions of one cache, and only the newest one stays.
+      - name: Delete superseded caches
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          MAX_AGE_HOURS: ${{ inputs.max_age_hours }}
+        run: |
+          gh cache list --limit 1000 --json id,key,createdAt,lastAccessedAt \
+            | jq --raw-output --arg max_age "${MAX_AGE_HOURS:-0}" '
+                def seconds: sub("[.][0-9]+Z$"; "Z") | fromdateiso8601;
+                def stale: (now - (.lastAccessedAt | seconds)) > ($max_age | tonumber) * 3600;
+                (group_by(.key | sub("-[0-9a-f]+$"; "")) | map(sort_by(.createdAt | seconds) | .[:-1]) | flatten)
+                + (if ($max_age | tonumber) > 0 then map(select(stale)) else [] end)
+                | unique_by(.id) | .[] | "\(.id) \(.key)"
+              ' \
+            | while read -r id key; do
+                echo "deleting $key"
+                gh cache delete "$id"
+              done
