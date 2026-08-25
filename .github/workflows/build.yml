@@ -37,50 +37,6 @@ jobs:
       - uses: swatinem/rust-cache@v2
       - run: cargo test -p dictymus-core -p dictymus-container -p xtask
 
-  ui-test:
-    name: UI test (Windows)
-    needs: [check, test]
-    runs-on: windows-2025
-    steps:
-      # Tags must be visible so build.rs can tell release builds (HEAD on a
-      # tag) from development builds.
-      - uses: actions/checkout@v7
-        with:
-          fetch-tags: true
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-        with:
-          key: ui-test
-          cache-all-crates: true
-          cache-on-failure: true
-          save-if: ${{ github.ref == 'refs/heads/master' }}
-          cache-directories: ${{ runner.temp }}/wx-build
-      # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
-      # directories are appended at the end of PATH inside the cargo step,
-      # keeping MSVC's tools ahead of MSYS2's same-named ones.
-      - name: Install gettext via MSYS2
-        id: msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          install: >-
-            gettext
-            mingw-w64-ucrt-x86_64-gettext-tools
-      - name: Run UI tests
-        shell: pwsh
-        env:
-          # wxdragon-sys builds its CMake trees here; rust-cache saves the
-          # directory through cache-directories.
-          WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
-          WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
-        run: |
-          $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
-          cargo test -p dictymus -- --ignored
-
   build:
     name: Build (${{ matrix.name }})
     needs: [check, test]
@@ -158,8 +114,10 @@ jobs:
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
         env:
-          # wxdragon-sys builds its CMake trees here; rust-cache saves the
-          # directory through cache-directories.
+          # wxdragon-sys downloads the wxWidgets source and builds its CMake
+          # trees here; rust-cache saves the directory through
+          # cache-directories.
+          WXWIDGETS_DIR: ${{ runner.temp }}/wx-build/source
           WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
           WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
         run: |
@@ -168,12 +126,24 @@ jobs:
       - name: Build
         if: startsWith(matrix.name, 'macos')
         env:
+          WXWIDGETS_DIR: ${{ runner.temp }}/wx-build/source
           WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
           WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
           # Must stay in sync with LSMinimumSystemVersion in the xtask
           # Info.plist.
           MACOSX_DEPLOYMENT_TARGET: "11.0"
         run: cargo build --release -p dictymus --target ${{ matrix.target }}
+      # The debug test build reuses the release build's wx directories.
+      - name: Run UI tests
+        if: matrix.name == 'windows-x64'
+        shell: pwsh
+        env:
+          WXWIDGETS_DIR: ${{ runner.temp }}/wx-build/source
+          WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
+          WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
+        run: |
+          $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
+          cargo test -p dictymus --target ${{ matrix.target }} -- --ignored
       # patois-build only warns when msgfmt is missing; fail hard instead of
       # shipping a release that silently lost its translations.
       - name: Assert translations were embedded

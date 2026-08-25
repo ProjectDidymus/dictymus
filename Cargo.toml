@@ -28,3 +28,7 @@ codegen-units = 1
 
 [patch.crates-io]
 opendict-rs = { git = "https://github.com/leonardder/opendict-rs", branch = "dictymus" }
+# Tracks upstream main for the wxWidgets download into an absent custom
+# WXWIDGETS_DIR (AllenDang/wxDragon#207); patois and ship-shape share the copy.
+# Drop once a release contains it.
+wxdragon = { git = "https://github.com/AllenDang/wxDragon", branch = "main" }
