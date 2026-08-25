@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The search field keeps a history of the entries you visited in its tab:
+  press Down in the field to go back to an earlier entry and Up to come
+  forward again, or open its list to pick one. An entry is recorded when you
+  press Enter in the search field, activate it in the list, or leave it by
+  following a cross-reference. The history is cleared when the tab closes
+
 ## [0.3.0] - 2026-08-15
 
 ### Added

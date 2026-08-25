@@ -2,12 +2,12 @@ use crate::tabs::DictionaryTab;
 use dictymus_core::braille;
 use dictymus_core::normalize::normalize_for_search;
 use patois::t;
-use wxdragon::prelude::*;
 
 /// Render the article for the lemma at filtered-row `row` into the WebView.
 pub fn render_row(tab: &DictionaryTab, row: usize) {
 	let filtered = tab.filtered.borrow();
 	let Some(&word_idx) = filtered.get(row) else { return };
+	tab.current.set(Some(word_idx));
 	// TRANSLATORS: Fallback page title when the entry has no headword
 	let title = tab.dict.words().get(word_idx).cloned().unwrap_or_else(|| t("Article"));
 	drop(filtered);
@@ -54,24 +54,13 @@ pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 		return;
 	};
 
-	let row = tab.filtered.borrow().iter().position(|&i| i == word_idx);
-
-	let row = if let Some(r) = row {
-		r
-	} else {
-		tab.search.change_value("");
-		*tab.filtered.borrow_mut() = (0..tab.dict.word_count()).collect();
-		crate::lemma_list::repopulate(tab);
-		tab.filtered.borrow().iter().position(|&i| i == word_idx).unwrap_or(0)
-	};
-
-	// Mark the row selected+focused in the list (so it tracks the article), but
-	// do NOT pull widget focus to the list — the user clicked a link in the
-	// article and should keep reading there.
-	let sel_focused = ListItemState::Selected | ListItemState::Focused;
-	tab.list.set_item_state(row as i64, sel_focused, sel_focused);
-	tab.list.ensure_visible(row as i64);
-	render_row(tab, row);
+	// Only the lemma left behind joins the history; the field shows the
+	// target uncommitted. Widget focus stays in the article.
+	if let Some(current) = tab.current.get() {
+		crate::search_history::push(tab, current);
+	}
+	tab.search.change_value(&tab.display_word(word_idx));
+	crate::search_field::apply_filter(tab, Some(word_idx));
 }
 
 pub const ARTICLE_CSS: &str = "\

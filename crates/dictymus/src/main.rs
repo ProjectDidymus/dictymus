@@ -16,6 +16,7 @@ mod logging;
 mod menu;
 mod options;
 mod search_field;
+mod search_history;
 mod tabs;
 mod translation_manager;
 #[cfg(any(windows, target_os = "macos"))]

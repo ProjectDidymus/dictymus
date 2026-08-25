@@ -12,6 +12,10 @@ use uiautomation::UIAutomation;
 use uiautomation::controls::ControlType;
 use uiautomation::core::UIElement;
 use uiautomation::inputs::Keyboard;
+use windows::Win32::UI::Input::KeyboardAndMouse::{
+	INPUT, INPUT_0, INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY,
+	KEYEVENTF_KEYUP, MAPVK_VK_TO_VSC, MapVirtualKeyW, SendInput, VIRTUAL_KEY, VK_DOWN, VK_UP,
+};
 
 pub struct App {
 	pub child: Child,
@@ -149,6 +153,55 @@ pub fn find_widget(pid: u32, control_type: ControlType, name: &str) -> UIElement
 		.unwrap_or_else(|e| panic!("widget {control_type:?} \"{name}\" not found: {e}"))
 }
 
+/// The search field's text entry: the `Edit` inside the "Search" combo box.
+/// Read its value through this element; type into it with `type_query`.
+pub fn search_field(pid: u32) -> UIElement {
+	let combo = find_widget(pid, ControlType::ComboBox, "Search");
+	automation()
+		.create_matcher()
+		.from(combo)
+		.depth(2)
+		.control_type(ControlType::Edit)
+		.timeout(15_000)
+		.find_first()
+		.unwrap_or_else(|e| panic!("edit inside the Search combo box not found: {e}"))
+}
+
+/// Poll the element's value until it reads `expected`; panics on timeout.
+pub fn wait_for_value(element: &UIElement, expected: &str) {
+	let deadline = Instant::now() + Duration::from_secs(10);
+	loop {
+		let current = value(element);
+		if current == expected {
+			return;
+		}
+		assert!(Instant::now() < deadline, "value stayed at {current:?}, expected {expected:?}");
+		std::thread::sleep(Duration::from_millis(250));
+	}
+}
+
+/// Poll the list's selected item names until they equal `expected`; panics
+/// on timeout. The filter runs on the UI thread after a value change lands,
+/// so the selection is never checked just once.
+pub fn wait_for_selection(list: &UIElement, expected: &[&str]) {
+	let deadline = Instant::now() + Duration::from_secs(10);
+	loop {
+		let selection: uiautomation::patterns::UISelectionPattern =
+			list.get_pattern().expect("SelectionPattern");
+		let names: Vec<String> = selection
+			.get_selection()
+			.expect("selection")
+			.iter()
+			.map(|item| item.get_name().expect("item name"))
+			.collect();
+		if names == expected {
+			return;
+		}
+		assert!(Instant::now() < deadline, "selection stayed at {names:?}, expected {expected:?}");
+		std::thread::sleep(Duration::from_millis(500));
+	}
+}
+
 /// Find a top-level window of `pid` titled `title` (e.g. a modal dialog).
 /// Depth 3, not 2: a modal dialog nests under its owner window in the UIA
 /// tree, one level deeper than the frame itself.
@@ -206,12 +259,6 @@ pub fn wait_for_webview(pid: u32) {
 		.expect("webview child window");
 }
 
-pub fn set_value(element: &UIElement, text: &str) {
-	let pattern: uiautomation::patterns::UIValuePattern =
-		element.get_pattern().expect("ValuePattern");
-	pattern.set_value(text).expect("set value");
-}
-
 pub fn value(element: &UIElement) -> String {
 	let pattern: uiautomation::patterns::UIValuePattern =
 		element.get_pattern().expect("ValuePattern");
@@ -225,4 +272,47 @@ pub fn click(element: &UIElement) {
 /// Send a key chord OS-wide; the freshly spawned app owns the foreground.
 pub fn send_keys(keys: &str) {
 	Keyboard::new().send_keys(keys).expect("send keys");
+}
+
+/// Wait until the search field has focus and still has it a second later.
+pub fn wait_for_search_focus(pid: u32) {
+	wait_for_focus(pid, Duration::from_secs(30), is_search_field);
+	std::thread::sleep(Duration::from_secs(1));
+	wait_for_focus(pid, Duration::from_secs(10), is_search_field);
+}
+
+/// Replace the focused field's text by typing ASCII `text` over a
+/// select-all; a Hebrew or Greek tab transliterates it. Keystrokes go
+/// wherever the foreground focus is, so call `wait_for_search_focus` first.
+pub fn type_query(text: &str) {
+	assert!(text.is_ascii(), "type_query takes ASCII: {text:?}");
+	send_keys("{ctrl}a");
+	Keyboard::new().send_text(text).expect("send text");
+}
+
+pub fn arrow_down() {
+	press(VK_DOWN);
+}
+
+pub fn arrow_up() {
+	press(VK_UP);
+}
+
+/// Press and release an arrow key as the extended key with its real scan
+/// code.
+fn press(key: VIRTUAL_KEY) {
+	let inputs = [key_input(key, KEYBD_EVENT_FLAGS(0)), key_input(key, KEYEVENTF_KEYUP)];
+	let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
+	assert_eq!(sent as usize, inputs.len(), "SendInput rejected the key events");
+}
+
+fn key_input(key: VIRTUAL_KEY, flags: KEYBD_EVENT_FLAGS) -> INPUT {
+	let scan = unsafe { MapVirtualKeyW(u32::from(key.0), MAPVK_VK_TO_VSC) } as u16;
+	let flags = flags | KEYEVENTF_EXTENDEDKEY;
+	INPUT {
+		r#type: INPUT_KEYBOARD,
+		Anonymous: INPUT_0 {
+			ki: KEYBDINPUT { wVk: key, wScan: scan, dwFlags: flags, time: 0, dwExtraInfo: 0 },
+		},
+	}
 }

@@ -30,7 +30,10 @@ Tests:
 - `cargo test -p dictymus-core` — core logic tests only
 - `cargo test -p dictymus -- --ignored` — UI tests in `crates/dictymus/tests/`
   (drive the real GUI via the `uiautomation` crate; need an interactive
-  desktop; run in CI; shared harness in `tests/common/`)
+  desktop; run in CI; shared harness in `tests/common/`: type into the search
+  field with `type_query` (ASCII, transliterated by the app) after
+  `wait_for_search_focus`, arrows via `arrow_down`/`arrow_up`; UIA
+  `set_value` and the crate's `{down}` do not reach the combo box)
 
 Test fixtures: `dictymus_core::testing` generates tiny StarDict sets
 (Greek/Hebrew/Latin, public-domain words) — no real dictionaries needed.
@@ -80,14 +83,24 @@ Releasing:
   (louis-rs #22) is released
 - `config.rs` — `AppConfig` (open dictionary paths, update settings, braille
   languages, persisted via TOML in OS app-data dir) + `UpdateChannel`
+- `history.rs` — `History`: capped, most-recent-first list of visited word
+  indices (one per tab, session only)
 
 **dictymus** — wxdragon UI:
 
 - `app.rs` — `App` struct, startup (CLI arg / reopen config), menu wiring
 - `menu.rs` — menu IDs + `create_menu_bar()`
-- `tabs.rs` — `TabManager` + `DictionaryTab` (panel, search, list, article WebView)
+- `tabs.rs` — `TabManager` + `DictionaryTab` (panel, search `ComboBox`, list,
+  article WebView; `display_word()` for the lemma as shown, `current` = the
+  rendered article's word index)
 - `search_field.rs` — char-level transliteration + live list filtering
-- `lemma_list.rs` — `repopulate()` for virtual ListCtrl (`set_item_count` + `refresh_items`)
+  (`apply_filter(tab, exact)`; a history pick is recalled by exact index when
+  the combo's selection matches the field's text)
+- `search_history.rs` — glue between `History` and the search `ComboBox`:
+  `push` (rebuilds the dropdown items), `commit` (Enter / list activation:
+  records the shown lemma and shows it in the field); a link follow records
+  only the lemma left; Down/Up in the field arrive as text events
+- `lemma_list.rs` — `repopulate()` / `repopulate_at(row)` for virtual ListCtrl (`set_item_count` + `refresh_items`)
 - `article_pane.rs` — `render_row()` + `wrap_html()` (WebView HTML injection) + `navigate_to()` + `percent_decode()`
 - `options.rs` — Options dialog; the Braille group toggles
   `braille_languages` and re-renders open tabs (per-tab `braille` flag +

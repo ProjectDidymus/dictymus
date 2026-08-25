@@ -1,6 +1,7 @@
 use dictymus_core::braille;
 use dictymus_core::config::AppConfig;
 use dictymus_core::dictionary::DictHandle;
+use dictymus_core::history::History;
 use patois::t;
 use std::cell::{Cell, RefCell};
 use std::path::Path;
@@ -18,7 +19,7 @@ pub struct BrailleCache {
 
 pub struct DictionaryTab {
 	pub panel: Panel,
-	pub search: TextCtrl,
+	pub search: ComboBox,
 	pub list: ListCtrl,
 	pub article: WebView,
 	pub dict: Rc<DictHandle>,
@@ -31,9 +32,27 @@ pub struct DictionaryTab {
 	/// this cell; `apply_braille` derives it from the config.
 	pub braille: Cell<bool>,
 	pub braille_words: RefCell<Option<BrailleCache>>,
+	/// Lemmas visited in this tab, most recent first; the search combo's
+	/// dropdown items mirror it.
+	pub history: RefCell<History>,
+	/// Word index of the article on screen, once one has been rendered.
+	pub current: Cell<Option<usize>>,
+	/// Result count of the last filter run, for the "n results" announcement.
+	pub result_count: Cell<usize>,
 }
 
 impl DictionaryTab {
+	/// The lemma at `idx` as the tab shows it: ASCII braille in braille mode,
+	/// the dictionary's own script otherwise.
+	pub fn display_word(&self, idx: usize) -> String {
+		if self.braille.get()
+			&& let Some(cache) = self.braille_words.borrow().as_ref()
+		{
+			return cache.display.get(idx).cloned().unwrap_or_default();
+		}
+		self.dict.words().get(idx).cloned().unwrap_or_default()
+	}
+
 	/// Derive the braille flag from the configured languages; build the lemma
 	/// cache when the mode turns on and drop it when the mode turns off.
 	/// Built here, on toggle — never inside the paint-driven list callback,
@@ -130,6 +149,9 @@ impl TabManager {
 			article_html: RefCell::new(String::new()),
 			braille: Cell::new(false),
 			braille_words: RefCell::new(None),
+			history: RefCell::new(History::default()),
+			current: Cell::new(None),
+			result_count: Cell::new(usize::MAX),
 		});
 		rc.apply_braille(&self.config.borrow().braille_languages);
 		Self::register_asset_handler(&rc);
@@ -137,15 +159,15 @@ impl TabManager {
 		rc
 	}
 
-	/// Create the tab's widgets and sizers. Widget creation order is part of
-	/// the contract: the smoke test targets wx's sequentially auto-assigned
-	/// control IDs.
-	fn build_layout(&self) -> (Panel, TextCtrl, ListCtrl, WebView) {
+	/// Create the tab's widgets and sizers.
+	fn build_layout(&self) -> (Panel, ComboBox, ListCtrl, WebView) {
 		let panel = Panel::builder(&self.notebook).build();
 
 		// TRANSLATORS: Label of the search field
 		let search_label = StaticText::builder(&panel).with_label(&t("Search")).build();
-		let search = TextCtrl::builder(&panel).with_style(TextCtrlStyle::ProcessEnter).build();
+		let search = ComboBox::builder(&panel)
+			.with_style(ComboBoxStyle::Default | ComboBoxStyle::ProcessEnter)
+			.build();
 		search.set_font(&self.base_font);
 
 		let splitter = SplitterWindow::builder(&panel).build();
@@ -259,12 +281,7 @@ impl TabManager {
 			let Some(tab) = tab_for_virt.upgrade() else { return String::new() };
 			let filtered = tab.filtered.borrow();
 			let Some(&wi) = filtered.get(row as usize) else { return String::new() };
-			if tab.braille.get()
-				&& let Some(cache) = tab.braille_words.borrow().as_ref()
-			{
-				return cache.display.get(wi).cloned().unwrap_or_default();
-			}
-			tab.dict.words().get(wi).cloned().unwrap_or_default()
+			tab.display_word(wi)
 		});
 		let tab_for_sel = Rc::downgrade(rc);
 		rc.list.on_item_selected(move |event| {
@@ -273,6 +290,11 @@ impl TabManager {
 			if row >= 0 {
 				crate::article_pane::render_row(&tab, row as usize);
 			}
+		});
+		let tab_for_act = Rc::downgrade(rc);
+		rc.list.on_item_activated(move |_event| {
+			let Some(tab) = tab_for_act.upgrade() else { return };
+			crate::search_history::commit(&tab);
 		});
 		rc.article.add_script_message_handler("bword");
 		let tab_for_msg = Rc::downgrade(rc);

@@ -1,6 +1,7 @@
 pub mod braille;
 pub mod config;
 pub mod dictionary;
+pub mod history;
 pub mod language;
 pub mod normalize;
 pub mod testing;

@@ -12,6 +12,8 @@ It is built from the ground up for blind and visually impaired users, with first
 - Tabbed interface for working with multiple dictionaries at once
 - Live, incremental lemma search with on-the-fly transliteration: type with the
   Logos Biblical keyboard layout and get Hebrew or Greek glyphs
+- A per-tab history of visited entries in the search field: Down and Up step
+  back and forward through them, or pick one from its dropdown
 - Diacritic-insensitive matching: unpointed Hebrew and unaccented Greek queries match pointed/accented lemmas
 - Automatic language detection per dictionary (Hebrew vs. Greek)
 - Optional ASCII braille view for Hebrew: lemmas and articles are shown in

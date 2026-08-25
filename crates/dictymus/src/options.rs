@@ -190,8 +190,9 @@ pub fn show_options(
 
 /// Re-derive every open tab's braille flag and re-render the ones that
 /// flipped: reset the search (a stale query means nothing in the other input
-/// mode) and repopulate explicitly — `change_value` fires no text event, and
-/// an empty-to-empty clear would fire none either way.
+/// mode), repopulate explicitly — `change_value` fires no text event, and
+/// an empty-to-empty clear would fire none either way — and rebuild the
+/// history dropdown in the new display form.
 fn apply_braille_to_tabs(config: &Rc<RefCell<AppConfig>>, tabs: &Rc<RefCell<TabManager>>) {
 	let languages = config.borrow().braille_languages.clone();
 	for tab in &tabs.borrow().tabs {
@@ -201,6 +202,7 @@ fn apply_braille_to_tabs(config: &Rc<RefCell<AppConfig>>, tabs: &Rc<RefCell<TabM
 			tab.search.change_value("");
 			*tab.filtered.borrow_mut() = (0..tab.dict.word_count()).collect();
 			crate::lemma_list::repopulate(tab);
+			crate::search_history::sync_items(tab);
 		}
 	}
 }

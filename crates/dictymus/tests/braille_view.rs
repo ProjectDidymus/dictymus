@@ -9,9 +9,7 @@
 
 mod common;
 
-use std::time::{Duration, Instant};
 use uiautomation::controls::ControlType;
-use uiautomation::patterns::UISelectionPattern;
 
 #[test]
 #[ignore = "drives the real GUI via UI Automation; needs an interactive desktop"]
@@ -24,28 +22,13 @@ fn braille_mode_searches_and_lists_in_ascii_braille() {
 
 	// In braille mode the query is ASCII braille and matches the folded
 	// braille forms: "dvr" leaves only דָּבָר.
-	let search = common::find_widget(app.pid, ControlType::Edit, "Search");
-	common::set_value(&search, "dvr");
-	assert_eq!(common::value(&search), "dvr");
+	common::wait_for_search_focus(app.pid);
+	let search = common::search_field(app.pid);
+	common::type_query("dvr");
+	common::wait_for_value(&search, "dvr");
 
 	// The remaining row is selected by the filter and shows the lemma as
-	// IHBC ASCII braille. Poll the selection: the filter runs on the UI
-	// thread after the value change lands.
+	// IHBC ASCII braille.
 	let list = common::find_widget(app.pid, ControlType::List, "Lemmas");
-	let deadline = Instant::now() + Duration::from_secs(10);
-	let mut names: Vec<String>;
-	loop {
-		let selection: UISelectionPattern = list.get_pattern().expect("SelectionPattern");
-		names = selection
-			.get_selection()
-			.expect("selection")
-			.iter()
-			.map(|item| item.get_name().expect("item name"))
-			.collect();
-		if names == ["\"d<v<r"] {
-			break;
-		}
-		assert!(Instant::now() < deadline, "selection stayed at {names:?}");
-		std::thread::sleep(Duration::from_millis(500));
-	}
+	common::wait_for_selection(&list, &["\"d<v<r"]);
 }

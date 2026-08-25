@@ -4,7 +4,6 @@ use dictymus_core::braille;
 use dictymus_core::normalize::normalize_for_search;
 use dictymus_core::transliterate::transliterate_char;
 use patois::nt;
-use std::cell::Cell;
 use std::rc::Rc;
 use wxdragon::prelude::*;
 
@@ -41,46 +40,70 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 		});
 	}
 
-	// Filtering: recompute on every text change. In braille mode the query is
-	// ASCII braille and matches the folded braille forms of the lemmas;
-	// otherwise the script query matches the normalized lemmas.
+	// Filtering: recompute on every text change, typed or picked from the
+	// history dropdown. A pick recalls the exact entry: the combo's selection
+	// names a history slot, taken only when the field shows that entry's
+	// display form.
 	// Weak capture: bail if the tab is being closed (see TabManager::close_tab).
 	let tab_for_text = Rc::downgrade(tab);
-	let last_count: Cell<usize> = Cell::new(usize::MAX);
 	tab.search.on_text_updated(move |_event| {
 		let Some(tab) = tab_for_text.upgrade() else { return };
-		let mut filtered = Vec::new();
-		let query = if tab.braille.get() {
-			let query = braille::normalize_braille(&tab.search.get_value(), tab.language);
-			match tab.braille_words.borrow().as_ref() {
-				Some(cache) => {
-					for (i, w) in cache.normalized.iter().enumerate() {
-						if query.is_empty() || w.starts_with(&query) {
-							filtered.push(i);
-						}
-					}
-				}
-				None => filtered.extend(0..tab.dict.word_count()),
-			}
-			query
-		} else {
-			let query = normalize_for_search(&tab.search.get_value());
-			for (i, w) in tab.dict.normalized_words().iter().enumerate() {
-				if query.is_empty() || w.starts_with(&query) {
-					filtered.push(i);
-				}
-			}
-			query
-		};
-		let count = filtered.len();
-		tracing::debug!(query = %query, results = count, "search");
-		*tab.filtered.borrow_mut() = filtered;
-		lemma_list::repopulate(&tab);
-		if count != last_count.get() {
-			last_count.set(count);
+		let exact = tab
+			.search
+			.get_selection()
+			.and_then(|i| tab.history.borrow().entries().get(i as usize).copied())
+			.filter(|&idx| tab.display_word(idx) == tab.search.get_value());
+		if apply_filter(&tab, exact) {
+			let count = tab.result_count.get();
 			// TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
 			let msg = nt("{} result", "{} results", count as u64).replace("{}", &count.to_string());
 			crate::accessibility::announce_status(tab.frame, tab.status_bar, &msg);
 		}
 	});
+
+	let tab_for_enter = Rc::downgrade(tab);
+	tab.search.on_enter_pressed(move |event| {
+		event.event.skip(false);
+		let Some(tab) = tab_for_enter.upgrade() else { return };
+		crate::search_history::commit(&tab);
+	});
+}
+
+/// Filter the lemma list by the field's text. In braille mode the query is
+/// ASCII braille and matches the folded braille forms of the lemmas;
+/// otherwise the script query matches the normalized lemmas. The row of
+/// `exact` is selected when it survives the filter, else the first row.
+/// Returns whether the result count changed.
+pub fn apply_filter(tab: &DictionaryTab, exact: Option<usize>) -> bool {
+	let mut filtered = Vec::new();
+	let query = if tab.braille.get() {
+		let query = braille::normalize_braille(&tab.search.get_value(), tab.language);
+		match tab.braille_words.borrow().as_ref() {
+			Some(cache) => {
+				for (i, w) in cache.normalized.iter().enumerate() {
+					if query.is_empty() || w.starts_with(&query) {
+						filtered.push(i);
+					}
+				}
+			}
+			None => filtered.extend(0..tab.dict.word_count()),
+		}
+		query
+	} else {
+		let query = normalize_for_search(&tab.search.get_value());
+		for (i, w) in tab.dict.normalized_words().iter().enumerate() {
+			if query.is_empty() || w.starts_with(&query) {
+				filtered.push(i);
+			}
+		}
+		query
+	};
+	let count = filtered.len();
+	tracing::debug!(query = %query, results = count, "search");
+	let row = exact.and_then(|idx| filtered.iter().position(|&i| i == idx)).unwrap_or(0);
+	*tab.filtered.borrow_mut() = filtered;
+	lemma_list::repopulate_at(tab, row);
+	let changed = count != tab.result_count.get();
+	tab.result_count.set(count);
+	changed
 }

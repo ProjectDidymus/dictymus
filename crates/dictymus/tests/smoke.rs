@@ -14,11 +14,12 @@ use uiautomation::controls::ControlType;
 #[ignore = "drives the real GUI via UI Automation; needs an interactive desktop"]
 fn typing_filters_and_list_click_selects() {
 	let app = common::launch("smoke");
-	common::wait_for_focus(app.pid, Duration::from_secs(30), common::is_search_field);
+	common::wait_for_search_focus(app.pid);
 
-	let search = common::find_widget(app.pid, ControlType::Edit, "Search");
-	common::set_value(&search, "λ");
-	assert_eq!(common::value(&search), "λ");
+	// "l" transliterates to λ in a Greek tab.
+	let search = common::search_field(app.pid);
+	common::type_query("l");
+	common::wait_for_value(&search, "λ");
 
 	let list = common::find_widget(app.pid, ControlType::List, "Lemmas");
 	common::click(&list);
