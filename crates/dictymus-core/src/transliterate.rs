@@ -13,7 +13,7 @@ pub fn transliterate_char(ch: char, language: &str) -> char {
 fn hebrew(c: char) -> Option<char> {
 	Some(match c {
 		'\'' => 'א',
-		'`' => 'ע',
+		'`' | '"' => 'ע',
 		'b' => 'ב',
 		'g' => 'ג',
 		'd' => 'ד',
@@ -75,6 +75,12 @@ mod tests {
 	#[test]
 	fn hebrew_maps_b_to_bet() {
 		assert_eq!(transliterate_char('b', "he"), 'ב');
+	}
+
+	#[test]
+	fn hebrew_maps_backtick_and_double_quote_to_ayin() {
+		assert_eq!(transliterate_char('`', "he"), 'ע');
+		assert_eq!(transliterate_char('"', "he"), 'ע');
 	}
 
 	#[test]
