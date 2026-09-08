@@ -3,20 +3,15 @@ use std::sync::OnceLock;
 use icu_properties::{CodePointMapData, props::Script};
 use louis::{Direction, Translator};
 
-/// How `normalize_braille` treats one ASCII braille cell.
-enum Fold {
-	Keep,
-	Drop,
-	Map(char),
-}
+use crate::normalize::SearchKey;
 
 struct BrailleLanguage {
 	language: &'static str,
 	script: Script,
 	entry_table: &'static str,
 	tables: &'static [(&'static str, &'static str)],
-	fold_cell: fn(char) -> Fold,
 	translator: OnceLock<Option<Translator>>,
+	back_translator: OnceLock<Option<Translator>>,
 }
 
 static HEBREW_TABLES: &[(&str, &str)] = &[
@@ -38,8 +33,8 @@ static LANGUAGES: [BrailleLanguage; 1] = [BrailleLanguage {
 	script: Script::Hebrew,
 	entry_table: "hbo-ihbc-rules.uti",
 	tables: HEBREW_TABLES,
-	fold_cell: fold_hebrew_cell,
 	translator: OnceLock::new(),
+	back_translator: OnceLock::new(),
 }];
 
 /// Dots 1–6 of each Unicode braille cell, indexed by its low six bits, as the
@@ -128,20 +123,29 @@ pub fn braille_html(html: &str, language: &str) -> String {
 	out
 }
 
-/// Braille-space analogue of `normalize_for_search`: fold an ASCII braille
-/// string so that pointed and unpointed spellings of the same word compare
-/// equal. Applied to both the query and the brailled lemma.
-pub fn normalize_braille(text: &str, language: &str) -> String {
-	let Some(lang) = registration(language) else {
-		return text.to_string();
+/// The search key of an ASCII braille query: the cells are back-translated
+/// to script text and keyed like a typed query. A trailing dagesh cell (the
+/// IHBC writes it before its letter) is left out, and the shin dot is not a
+/// constraint; the sin dot is. Unregistered languages and untranslatable
+/// input key the text as typed.
+pub fn search_key(ascii: &str, language: &str) -> SearchKey {
+	let Some(translator) = registration(language).and_then(|lang| lang.back_translator()) else {
+		return SearchKey::new(ascii);
 	};
-	text.chars()
-		.filter_map(|cell| match (lang.fold_cell)(cell) {
-			Fold::Keep => Some(cell),
-			Fold::Drop => None,
-			Fold::Map(to) => Some(to),
-		})
-		.collect()
+	let cells = ascii.strip_suffix('"').unwrap_or(ascii);
+	// Hiriq-yod and tsere-yod cells become vowel cell + yod cell; an alef
+	// cell is appended for the translation and stripped off again.
+	let cells = cells.replace('9', "ij").replace('#', "/j") + "a";
+	match translator.translate(&unicode_braille_from_ascii(&cells)) {
+		Ok(text) => {
+			let text = text.strip_suffix('א').unwrap_or(&text);
+			SearchKey::new(&text.replace('\u{05C1}', ""))
+		}
+		Err(error) => {
+			tracing::warn!(%error, "braille back-translation failed");
+			SearchKey::new(ascii)
+		}
+	}
 }
 
 fn registration(language: &str) -> Option<&'static BrailleLanguage> {
@@ -150,18 +154,22 @@ fn registration(language: &str) -> Option<&'static BrailleLanguage> {
 
 impl BrailleLanguage {
 	fn translator(&self) -> Option<&Translator> {
-		self.translator
-			.get_or_init(|| {
-				let source = flatten_table(self.tables, self.entry_table)?;
-				match Translator::from_table_source(&source, Direction::Forward) {
-					Ok(translator) => Some(translator),
-					Err(error) => {
-						tracing::warn!(language = self.language, %error, "braille table failed to load");
-						None
-					}
-				}
-			})
-			.as_ref()
+		self.translator.get_or_init(|| self.load(Direction::Forward)).as_ref()
+	}
+
+	fn back_translator(&self) -> Option<&Translator> {
+		self.back_translator.get_or_init(|| self.load(Direction::Backward)).as_ref()
+	}
+
+	fn load(&self, direction: Direction) -> Option<Translator> {
+		let source = flatten_table(self.tables, self.entry_table)?;
+		match Translator::from_table_source(&source, direction) {
+			Ok(translator) => Some(translator),
+			Err(error) => {
+				tracing::warn!(language = self.language, %error, "braille table failed to load");
+				None
+			}
+		}
 	}
 }
 
@@ -206,6 +214,16 @@ fn ascii_from_unicode_braille(cells: &str) -> String {
 		.collect()
 }
 
+fn unicode_braille_from_ascii(cells: &str) -> String {
+	cells
+		.chars()
+		.map(|cell| match BRF_LOWER.iter().position(|&brf| char::from(brf) == cell) {
+			Some(dots) => char::from_u32(0x2800 + dots as u32).expect("braille block"),
+			None => cell,
+		})
+		.collect()
+}
+
 fn flush_text_node(text: &mut String, language: &str, out: &mut String) {
 	if text.is_empty() {
 		return;
@@ -222,29 +240,82 @@ fn flush_text_node(text: &mut String, language: &str, out: &mut String) {
 	text.clear();
 }
 
-fn fold_hebrew_cell(cell: char) -> Fold {
-	match cell {
-		// Vowel points, dagesh, mappiq and the IHBC cantillation cells,
-		// all stripped as marks by normalize_for_search.
-		'\'' | '5' | '3' | '>' | 'i' | '/' | 'e' | 'c' | '<' | 'o' | 'u' | '"' | '^' | '@'
-		| '1' | '2' => Fold::Drop,
-		// Dagesh letter forms fold to their plain letters.
-		'b' => Fold::Map('v'),
-		'k' => Fold::Map('*'),
-		'p' => Fold::Map('f'),
-		'\\' => Fold::Map('?'),
-		// Vowel-consonant contractions keep their consonant.
-		'[' | '+' => Fold::Map('w'),
-		'9' | '#' => Fold::Map('j'),
-		// Sin folds onto shin, like the stripped shin/sin dots.
-		':' => Fold::Map('%'),
-		_ => Fold::Keep,
+#[cfg(test)]
+mod search_key_tests {
+	use super::search_key;
+	use crate::normalize::SearchKey;
+
+	fn matches(lemma: &str, ascii: &str) -> bool {
+		SearchKey::new(lemma).starts_with(&search_key(ascii, "he"))
+	}
+
+	#[test]
+	fn pointed_braille_equals_the_pointed_key() {
+		assert_eq!(search_key("\"d<v<r", "he"), SearchKey::new("דָּבָר"));
+	}
+
+	#[test]
+	fn consonant_cells_match_any_pointing() {
+		for lemma in ["דָּבָר", "דִּבֵּר", "דֶּבֶר", "דֹּבֶר", "דבר"] {
+			assert!(matches(lemma, "dvr"), "{lemma}");
+		}
+	}
+
+	#[test]
+	fn vowel_cell_constrains() {
+		assert!(matches("דֶּבֶר", "dev"));
+		assert!(matches("דֹּבֶר", "dver"));
+		assert!(!matches("דָּבָר", "dev"));
+	}
+
+	#[test]
+	fn dagesh_letter_form_constrains_plain_form_does_not() {
+		assert!(matches("בּ", "b"));
+		assert!(!matches("ב", "b"));
+		assert!(matches("בּ", "v"));
+		assert!(matches("ב", "v"));
+	}
+
+	#[test]
+	fn shin_cell_matches_shin_sin_and_dotless_but_sin_cell_only_sin() {
+		assert!(matches("שָׁלוֹם", "%"));
+		assert!(matches("שָׂרָה", "%"));
+		assert!(matches("ש", "%"));
+		assert!(matches("שָׂרָה", ":"));
+		assert!(!matches("שָׁלוֹם", ":"));
+	}
+
+	#[test]
+	fn trailing_dagesh_cell_waits_for_its_letter() {
+		assert_eq!(search_key("d\"", "he"), search_key("d", "he"));
+	}
+
+	#[test]
+	fn contractions_expand() {
+		assert_eq!(search_key("a5loh9m", "he"), SearchKey::new("אֱלֹהִים"));
+		assert_eq!(search_key("h9", "he"), SearchKey::new("הִי"));
+		assert_eq!(search_key("l#", "he"), SearchKey::new("לֵי"));
+		assert_eq!(search_key("[", "he"), SearchKey::new("וֹ"));
+		assert_eq!(search_key("+", "he"), SearchKey::new("וּ"));
+		assert_eq!(search_key("^h", "he"), SearchKey::new("הּ"));
+	}
+
+	#[test]
+	fn unregistered_language_passes_through() {
+		assert_eq!(search_key("dvr", "grc"), SearchKey::new("dvr"));
+	}
+
+	#[test]
+	fn letter_before_a_final_form_survives() {
+		assert_eq!(search_key("jm", "he"), SearchKey::new("ים"));
+		assert_eq!(search_key("ljm", "he"), SearchKey::new("לים"));
+		assert_eq!(search_key("m", "he"), SearchKey::new("מ"));
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	use super::{braille_html, normalize_braille, supported, to_ascii_braille};
+	use super::{braille_html, supported, to_ascii_braille};
 
 	#[test]
 	fn hebrew_is_supported() {
@@ -338,40 +409,5 @@ mod tests {
 	fn html_unregistered_language_passes_through() {
 		let html = "<p>δαβαρ</p>";
 		assert_eq!(braille_html(html, "grc"), html);
-	}
-
-	#[test]
-	fn normalize_drops_points_and_folds_dagesh_forms() {
-		assert_eq!(normalize_braille("\"d<v<r", "he"), "dvr");
-		assert_eq!(normalize_braille("b", "he"), "v");
-		assert_eq!(normalize_braille("k", "he"), "*");
-		assert_eq!(normalize_braille("p", "he"), "f");
-		assert_eq!(normalize_braille("\\", "he"), "?");
-		assert_eq!(normalize_braille(":", "he"), "%");
-	}
-
-	#[test]
-	fn normalize_maps_contractions_to_consonant_residue() {
-		assert_eq!(normalize_braille("a5loh9m", "he"), "alhjm");
-		assert_eq!(normalize_braille("[", "he"), "w");
-		assert_eq!(normalize_braille("+", "he"), "w");
-		assert_eq!(normalize_braille("#", "he"), "j");
-	}
-
-	#[test]
-	fn normalize_matches_hebrew_space_normalization() {
-		// The braille of the pointed lemma folds to the braille of the
-		// unpointed lemma, mirroring normalize_for_search.
-		let pointed = normalize_braille(&to_ascii_braille("דָּבָר", "he"), "he");
-		let unpointed = to_ascii_braille("דבר", "he");
-		assert_eq!(pointed, unpointed);
-		let pointed = normalize_braille(&to_ascii_braille("אֱלֹהִים", "he"), "he");
-		let unpointed = to_ascii_braille("אלהים", "he");
-		assert_eq!(pointed, unpointed);
-	}
-
-	#[test]
-	fn normalize_unregistered_language_passes_through() {
-		assert_eq!(normalize_braille("\"d<v<r", "grc"), "\"d<v<r");
 	}
 }

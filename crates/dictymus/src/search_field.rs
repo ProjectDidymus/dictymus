@@ -1,8 +1,8 @@
 use crate::lemma_list;
 use crate::tabs::DictionaryTab;
 use dictymus_core::braille;
-use dictymus_core::normalize::normalize_for_search;
-use dictymus_core::transliterate::transliterate_char;
+use dictymus_core::normalize::SearchKey;
+use dictymus_core::transliterate::transliterate;
 use patois::nt;
 use std::rc::Rc;
 use wxdragon::prelude::*;
@@ -27,13 +27,11 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 					&& let Some(ch) = char::from_u32(code as u32)
 					&& ch.is_ascii()
 					&& !ch.is_control()
+					&& let Some(text) = transliterate(ch, lang)
 				{
-					let mapped = transliterate_char(ch, lang);
-					if mapped != ch {
-						tab.search.write_text(&mapped.to_string());
-						kbd.event.skip(false);
-						return;
-					}
+					tab.search.write_text(text);
+					kbd.event.skip(false);
+					return;
 				}
 			}
 			event.skip(true);
@@ -69,37 +67,28 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 	});
 }
 
-/// Filter the lemma list by the field's text. In braille mode the query is
-/// ASCII braille and matches the folded braille forms of the lemmas;
-/// otherwise the script query matches the normalized lemmas. The row of
-/// `exact` is selected when it survives the filter, else the first row.
-/// Returns whether the result count changed.
+/// Filter the lemma list by the field's text: the query's key (read as
+/// ASCII braille in braille mode) must be a prefix of the lemma's key, so
+/// typed points narrow the match and untyped ones match any pointing. The
+/// row of `exact` is selected when it survives the filter, else the first
+/// row. Returns whether the result count changed.
 pub fn apply_filter(tab: &DictionaryTab, exact: Option<usize>) -> bool {
-	let mut filtered = Vec::new();
+	let text = tab.search.get_value();
 	let query = if tab.braille.get() {
-		let query = braille::normalize_braille(&tab.search.get_value(), tab.language);
-		match tab.braille_words.borrow().as_ref() {
-			Some(cache) => {
-				for (i, w) in cache.normalized.iter().enumerate() {
-					if query.is_empty() || w.starts_with(&query) {
-						filtered.push(i);
-					}
-				}
-			}
-			None => filtered.extend(0..tab.dict.word_count()),
-		}
-		query
+		braille::search_key(&text, tab.language)
 	} else {
-		let query = normalize_for_search(&tab.search.get_value());
-		for (i, w) in tab.dict.normalized_words().iter().enumerate() {
-			if query.is_empty() || w.starts_with(&query) {
-				filtered.push(i);
-			}
-		}
-		query
+		SearchKey::new(&text)
 	};
+	let filtered: Vec<usize> = tab
+		.dict
+		.search_keys()
+		.iter()
+		.enumerate()
+		.filter(|(_, key)| key.starts_with(&query))
+		.map(|(i, _)| i)
+		.collect();
 	let count = filtered.len();
-	tracing::debug!(query = %query, results = count, "search");
+	tracing::debug!(query = %text, results = count, "search");
 	let row = exact.and_then(|idx| filtered.iter().position(|&i| i == idx)).unwrap_or(0);
 	*tab.filtered.borrow_mut() = filtered;
 	lemma_list::repopulate_at(tab, row);

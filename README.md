@@ -14,7 +14,9 @@ It is built from the ground up for blind and visually impaired users, with first
   Logos Biblical keyboard layout and get Hebrew or Greek glyphs
 - A per-tab history of visited entries in the search field: Down and Up step
   back and forward through them, or pick one from its dropdown
-- Diacritic-insensitive matching: unpointed Hebrew and unaccented Greek queries match pointed/accented lemmas
+- Point-aware matching: an unpointed Hebrew or unaccented Greek query matches
+  every pointing of a lemma, while the points and accents you type narrow the
+  match
 - Automatic language detection per dictionary (Hebrew vs. Greek)
 - Optional ASCII braille view for Hebrew: lemmas and articles are shown in
   International Hebrew Braille Code cells (Braille ASCII, lowercase), and the

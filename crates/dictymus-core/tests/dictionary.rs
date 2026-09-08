@@ -30,6 +30,7 @@ fn detects_hebrew() {
 	let d = DictHandle::open(&testing::write_hebrew(&dir), &testing::test_license_pubkey())
 		.expect("open fixture");
 	assert_eq!(d.language(), "he");
+	assert_eq!(d.search_keys().len(), d.word_count());
 	drop(d);
 	let _ = std::fs::remove_dir_all(&dir);
 }

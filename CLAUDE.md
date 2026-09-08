@@ -32,8 +32,10 @@ Tests:
   (drive the real GUI via the `uiautomation` crate; need an interactive
   desktop; run in CI; shared harness in `tests/common/`: type into the search
   field with `type_query` (ASCII, transliterated by the app) after
-  `wait_for_search_focus`, arrows via `arrow_down`/`arrow_up`; UIA
-  `set_value` and the crate's `{down}` do not reach the combo box)
+  `wait_for_search_focus`, arrows via `arrow_down`/`arrow_up`, row counts
+  via `wait_for_item_count`; UIA `set_value` and the crate's `{down}` do not
+  reach the combo box; one test per file, since each launches the app and
+  takes the foreground)
 
 Test fixtures: `dictymus_core::testing` generates tiny StarDict sets
 (Greek/Hebrew/Latin, public-domain words) — no real dictionaries needed.
@@ -72,15 +74,26 @@ Releasing:
 - `dictionary.rs` — `DictHandle` wrapping `opendict::stardict::StarDictDictionary`
 - `language.rs` — `detect()` scanning word list; returns `"he"`, `"grc"`
   (Ancient Greek, ISO 639-3 — never `"el"`) or `"unknown"`
-- `normalize.rs` — `normalize_for_search()`: NFD→strip marks→NFC→lowercase→fold final sigma
-- `transliterate.rs` — `transliterate_char()`: Logos Biblical keyboard maps for Hebrew/Greek
+- `normalize.rs` — `SearchKey`: NFD→lowercase→fold finals, split into
+  clusters of base char + significant marks (Hebrew accents, meteg, rafe and
+  the upper/lower dots dropped; qamats qatan→qamats, holam haser→holam);
+  `starts_with()` is the search's prefix match: bases equal, query marks ⊆
+  lemma marks, so typed points narrow and untyped ones match any;
+  `unpointed()` clears the marks
+- `transliterate.rs` — `transliterate()`: Logos Biblical keyboard maps for
+  Hebrew/Greek, plain + Shift planes (Shift entry for the key as typed first,
+  then the plain entry for its lowercase); `Option<&str>` because shureq and
+  `[`/`]` are two code points; plain `o` is qamats, Shift+o holam
 - `braille.rs` — per-language ASCII braille: embedded liblouis IHBC tables
   (`assets/braille-tables/`, include-flattened into `louis-rs`'s
-  `from_table_source`), Unicode-braille→lowercase-BRF mapping,
-  `to_ascii_braille()` / `braille_html()` (HTML-escaping text-node transform)
-  / `normalize_braille()` (braille analogue of `normalize_for_search`);
-  louis-rs is pinned to a fork rev until the multipass fix
-  (louis-rs #22) is released
+  `from_table_source`, forward and backward translators), Unicode-braille↔
+  lowercase-BRF mapping, `to_ascii_braille()` / `braille_html()`
+  (HTML-escaping text-node transform) / `search_key()` (back-translates an
+  ASCII braille query into a `SearchKey`; drops a trailing dagesh cell,
+  expands the hiriq-yod/tsere-yod cells itself, translates with a sentinel
+  alef so the final-form rules leave the last letter alone, and strips the
+  shin dot since the shin cell is ambiguous); louis-rs is pinned to a fork
+  rev until the multipass fix (louis-rs #22) is released
 - `config.rs` — `AppConfig` (open dictionary paths, update settings, braille
   languages, persisted via TOML in OS app-data dir) + `UpdateChannel`
 - `history.rs` — `History`: capped, most-recent-first list of visited word
@@ -94,8 +107,10 @@ Releasing:
   article WebView; `display_word()` for the lemma as shown, `current` = the
   rendered article's word index)
 - `search_field.rs` — char-level transliteration + live list filtering
-  (`apply_filter(tab, exact)`; a history pick is recalled by exact index when
-  the combo's selection matches the field's text)
+  (`apply_filter(tab, exact)` keys the field text — via `braille::search_key`
+  in braille mode — and keeps the lemmas whose `SearchKey` starts with it; a
+  history pick is recalled by exact index when the combo's selection matches
+  the field's text)
 - `search_history.rs` — glue between `History` and the search `ComboBox`:
   `push` (rebuilds the dropdown items), `commit` (Enter / list activation:
   records the shown lemma and shows it in the field); a link follow records
@@ -104,7 +119,8 @@ Releasing:
 - `article_pane.rs` — `render_row()` + `wrap_html()` (WebView HTML injection) + `navigate_to()` + `percent_decode()`
 - `options.rs` — Options dialog; the Braille group toggles
   `braille_languages` and re-renders open tabs (per-tab `braille` flag +
-  lemma cache in `tabs.rs`; search matches folded braille forms when on)
+  display cache in `tabs.rs`; the search back-translates the ASCII braille
+  query when on)
 - `dialogs.rs` — File Open dialog, About dialog
 - `fonts.rs` — SBL BibLit font loading
 - `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate
@@ -121,9 +137,15 @@ Cross-refs use `bword://WORD` scheme; intercepted by `on_navigating` handler.
 Latin. Loaded via `Font::add_private_font` for native widgets; via CSS
 `@font-face file://` URL for WebView.
 
-**Normalization:** `normalize_for_search` strips Hebrew points and Greek diacritics so unpointed queries match pointed lemmas.
+**Search matching:** `SearchKey` compares cluster by cluster; an unpointed
+query matches every pointing of a lemma, and every point or accent the query
+carries must be on the lemma. Cross-references (`navigate_to`) try the pointed
+target first, then its letters alone.
 
-**Transliteration:** `transliterate_char` maps Logos Biblical keyboard layout chars to Hebrew/Greek glyphs on keypress.
+**Transliteration:** `transliterate` maps Logos Biblical keyboard layout keys
+(plain and Shift planes) to Hebrew/Greek text on keypress; the authoritative
+tables were dumped from the installed layouts (`ToUnicodeEx`), the manual is
+`D:\logos\LogosBiblicalHebrewKeyboard\Logos Biblical Hebrew Keyboard.pdf`.
 
 ## Conventions
 

@@ -20,15 +20,18 @@ fn braille_mode_searches_and_lists_in_ascii_braille() {
 		"language = \"en\"\nbraille_languages = [\"he\"]\n",
 	);
 
-	// In braille mode the query is ASCII braille and matches the folded
-	// braille forms: "dvr" leaves only דָּבָר.
+	// In braille mode the query is ASCII braille: consonant cells alone
+	// match every pointing of דבר.
 	common::wait_for_search_focus(app.pid);
 	let search = common::search_field(app.pid);
+	let list = common::find_widget(app.pid, ControlType::List, "Lemmas");
 	common::type_query("dvr");
 	common::wait_for_value(&search, "dvr");
+	common::wait_for_item_count(&list, 4);
 
-	// The remaining row is selected by the filter and shows the lemma as
-	// IHBC ASCII braille.
-	let list = common::find_widget(app.pid, ControlType::List, "Lemmas");
-	common::wait_for_selection(&list, &["\"d<v<r"]);
+	// A vowel cell narrows: dalet-segol leaves only דֶּבֶר, selected and shown
+	// as IHBC ASCII braille.
+	common::type_query("dev");
+	common::wait_for_item_count(&list, 1);
+	common::wait_for_selection(&list, &["\"dever"]);
 }

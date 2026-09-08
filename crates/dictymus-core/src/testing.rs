@@ -105,7 +105,15 @@ pub fn write_hebrew(dir: &Path) -> PathBuf {
 		dir,
 		"hebrew",
 		"Hebrew Fixture",
-		&[("דָּבָר", "<b>דָּבָר</b> word, matter"), ("אֱלֹהִים", "<b>אֱלֹהִים</b> God")],
+		&[
+			("דָּבָר", "<b>דָּבָר</b> word, matter"),
+			("דִּבֵּר", "<b>דִּבֵּר</b> he spoke"),
+			("דֶּבֶר", "<b>דֶּבֶר</b> plague"),
+			("דֹּבֶר", "<b>דֹּבֶר</b> pasture"),
+			("אֱלֹהִים", "<b>אֱלֹהִים</b> God"),
+			("יַיִן", "<b>יַיִן</b> wine"),
+			("יוֹם", "<b>יוֹם</b> day"),
+		],
 	)
 }
 

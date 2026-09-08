@@ -10,11 +10,9 @@ use wxdragon::event::WebViewEvents;
 use wxdragon::prelude::*;
 use wxdragon::widgets::webview::WebView;
 
-/// Per-tab ASCII braille forms of the lemma list: what the list shows and the
-/// folded forms the search matches against.
+/// Per-tab ASCII braille forms of the lemma list, as the list shows them.
 pub struct BrailleCache {
 	pub display: Vec<String>,
-	pub normalized: Vec<String>,
 }
 
 pub struct DictionaryTab {
@@ -70,9 +68,7 @@ impl DictionaryTab {
 				.iter()
 				.map(|w| braille::to_ascii_braille(w, self.language))
 				.collect();
-			let normalized =
-				display.iter().map(|b| braille::normalize_braille(b, self.language)).collect();
-			*self.braille_words.borrow_mut() = Some(BrailleCache { display, normalized });
+			*self.braille_words.borrow_mut() = Some(BrailleCache { display });
 		}
 	}
 }

@@ -1,5 +1,5 @@
 use crate::language;
-use crate::normalize::normalize_for_search;
+use crate::normalize::SearchKey;
 use dictymus_container::VerifyingKey;
 use opendict::Dictionary;
 use opendict::mdict::MdictDictionary;
@@ -111,7 +111,7 @@ fn license_candidates(container_path: &Path) -> Vec<PathBuf> {
 pub struct DictHandle {
 	dict: Box<dyn Dictionary + Send + Sync>,
 	words: Vec<String>,
-	normalized_words: Vec<String>,
+	search_keys: Vec<SearchKey>,
 	language: &'static str,
 	title: String,
 	path: PathBuf,
@@ -140,11 +140,11 @@ impl DictHandle {
 				_ => opendict::open(dir)?,
 			};
 		let words: Vec<String> = dict.word_list().iter().map(|s| s.to_string()).collect();
-		let normalized_words = words.iter().map(|w| normalize_for_search(w)).collect();
+		let search_keys = words.iter().map(|w| SearchKey::new(w)).collect();
 		let language = language::detect(&words);
 		let title = dict.info().name.clone();
 		tracing::info!(title, language, entries = words.len(), "dictionary loaded");
-		Ok(Self { dict, words, normalized_words, language, title, path: path.to_path_buf() })
+		Ok(Self { dict, words, search_keys, language, title, path: path.to_path_buf() })
 	}
 
 	pub fn title(&self) -> &str {
@@ -163,8 +163,9 @@ impl DictHandle {
 		&self.words
 	}
 
-	pub fn normalized_words(&self) -> &[String] {
-		&self.normalized_words
+	/// One search key per word, in word order.
+	pub fn search_keys(&self) -> &[SearchKey] {
+		&self.search_keys
 	}
 
 	pub fn path(&self) -> &Path {

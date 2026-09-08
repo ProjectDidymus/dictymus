@@ -202,6 +202,28 @@ pub fn wait_for_selection(list: &UIElement, expected: &[&str]) {
 	}
 }
 
+/// Poll the list's row count until it equals `expected`; panics on timeout.
+/// The rows sit at depth 2 below the list in the crate's walker.
+pub fn wait_for_item_count(list: &UIElement, expected: usize) {
+	let deadline = Instant::now() + Duration::from_secs(10);
+	loop {
+		let count = automation()
+			.create_matcher()
+			.from(list.clone())
+			.depth(2)
+			.control_type(ControlType::ListItem)
+			.timeout(3_000)
+			.find_all()
+			.map(|items| items.len())
+			.unwrap_or(0);
+		if count == expected {
+			return;
+		}
+		assert!(Instant::now() < deadline, "list stayed at {count} rows, expected {expected}");
+		std::thread::sleep(Duration::from_millis(500));
+	}
+}
+
 /// Find a top-level window of `pid` titled `title` (e.g. a modal dialog).
 /// Depth 3, not 2: a modal dialog nests under its owner window in the UIA
 /// tree, one level deeper than the frame itself.

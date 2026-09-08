@@ -16,6 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   following a cross-reference. The history is cleared when the tab closes
 - In Hebrew dictionaries, typing `"` in the search field enters ע, as an
   alternative to `` ` ``
+- The search field now takes the whole Logos Biblical Hebrew keyboard: `a e i
+  o u` enter the short vowels (`o` is a qamats), `,` a sheva and `.` a dagesh,
+  Shift+letter the final forms, long vowels (Shift+o is the holam) and hataf
+  vowels, `[` and `]` shin with its sin or shin dot, and Shift+u a shureq
+- In Greek dictionaries, Shift enters capitals, `v` the final sigma, and the
+  accent and breathing keys of the Logos Biblical Greek keyboard enter their
+  marks
+
+### Changed
+
+- Points and accents you type now narrow the search: `dber` finds only דֶּבֶר
+  and דֹּבֶר, while `dbr` still finds every pointing of דבר. A point you do
+  not type matches any pointing, and cantillation, meteg and rafe never count
+- The ASCII braille search follows the same rule: a vowel cell or a dagesh
+  letter form narrows the list, a plain consonant cell matches any pointing
 
 ## [0.3.0] - 2026-08-15
 

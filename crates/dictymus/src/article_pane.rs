@@ -1,6 +1,6 @@
 use crate::tabs::DictionaryTab;
 use dictymus_core::braille;
-use dictymus_core::normalize::normalize_for_search;
+use dictymus_core::normalize::SearchKey;
 use patois::t;
 
 /// Render the article for the lemma at filtered-row `row` into the WebView.
@@ -33,12 +33,14 @@ pub fn render_row(tab: &DictionaryTab, row: usize) {
 
 /// Navigate within the tab to the given word (used for bword:// cross-refs).
 pub fn navigate_to(tab: &DictionaryTab, word: &str) {
-	let key = normalize_for_search(word);
-
-	// Match against the precomputed normalized list — re-normalizing every
-	// word here made each cross-ref click O(n · normalize).
-	let normalized = tab.dict.normalized_words();
-	let Some(word_idx) = normalized.iter().position(|w| w.starts_with(&key)) else {
+	// The pointed key first, then its letters alone.
+	let key = SearchKey::new(word);
+	let keys = tab.dict.search_keys();
+	let found = keys.iter().position(|k| k.starts_with(&key)).or_else(|| {
+		let letters = key.unpointed();
+		keys.iter().position(|k| k.starts_with(&letters))
+	});
+	let Some(word_idx) = found else {
 		// The announced word follows the tab's display mode.
 		let shown = if tab.braille.get() {
 			braille::to_ascii_braille(word, tab.language)
