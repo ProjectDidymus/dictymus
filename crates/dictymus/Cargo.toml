@@ -42,7 +42,7 @@ windows = { version = "0.62", features = [
 ] }
 
 [build-dependencies]
-embed-manifest = "1.5.0"
+embed-manifest = "1.5.1"
 patois-build = { workspace = true }
 winresource = "0.1"
 
@@ -51,7 +51,7 @@ windows = { version = "0.62", features = ["Win32_UI_Input_KeyboardAndMouse"] }
 
 [dev-dependencies]
 tempfile = "3"
-uiautomation = "0.25.0"
+uiautomation = "0.25.1"
 
 [package.metadata.release]
 # cargo-release accepts a single hook command; cmd /c chains the checks.
