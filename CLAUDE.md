@@ -92,8 +92,8 @@ Releasing:
   ASCII braille query into a `SearchKey`; drops a trailing dagesh cell,
   expands the hiriq-yod/tsere-yod cells itself, translates with a sentinel
   alef so the final-form rules leave the last letter alone, and strips the
-  shin dot since the shin cell is ambiguous); louis-rs is pinned to a fork
-  rev until the multipass fix (louis-rs #22) is released
+  shin dot since the shin cell is ambiguous); louis-rs is pinned to an
+  upstream main rev until the multipass fix (louis-rs #21) is released
 - `config.rs` — `AppConfig` (open dictionary paths, update settings, braille
   languages, persisted via TOML in OS app-data dir) + `UpdateChannel`
 - `history.rs` — `History`: capped, most-recent-first list of visited word

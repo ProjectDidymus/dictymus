@@ -1355,7 +1355,7 @@ checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 [[package]]
 name = "louis-rs"
 version = "0.2.8"
-source = "git+https://github.com/LeonarddeR/louis-rs?rev=282cb37258e3cbc8b9487eb7e686d71cba927a8f#282cb37258e3cbc8b9487eb7e686d71cba927a8f"
+source = "git+https://github.com/liblouis/louis-rs?rev=5f380cc6186dad568ccaf523075b391248c01a3b#5f380cc6186dad568ccaf523075b391248c01a3b"
 dependencies = [
  "clap",
  "enumset",
@@ -1364,6 +1364,7 @@ dependencies = [
  "log",
  "rayon",
  "search_path",
+ "smallvec",
  "tabled",
  "thiserror",
 ]
