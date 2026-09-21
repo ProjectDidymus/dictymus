@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-17 23:41+0200\n"
+"POT-Creation-Date: 2026-09-21 10:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,6 +61,10 @@ msgstr ""
 
 #. TRANSLATORS: Title of the error dialog
 msgid "Dictymus - Error"
+msgstr ""
+
+#. TRANSLATORS: Third-party license notice in the About dialog; the source code links follow on the next lines
+msgid "The ASCII braille view uses the louis-rs braille translator and Hebrew braille tables from liblouis, both licensed under the GNU Lesser General Public License, version 2.1 or later. Their source code is available at:"
 msgstr ""
 
 #. TRANSLATORS: One-line app description in the About dialog
@@ -340,6 +344,38 @@ msgstr ""
 msgid "Settings file is invalid ({}): {}"
 msgstr ""
 
+msgid "Unknown update file format."
+msgstr ""
+
+msgid "Failed to open disk image"
+msgstr ""
+
+msgid "The update has been downloaded and its disk image opened. Quit %s and drag the new version into Applications to finish installing."
+msgstr ""
+
+msgid "Update Ready"
+msgstr ""
+
+msgid "Failed to get current exe path"
+msgstr ""
+
+msgid "Failed to launch installer script"
+msgstr ""
+
+msgid "Failed to launch update script"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Update failed"
+msgstr ""
+
+msgid ""
+"Update downloaded to: %s\n"
+"Please install it manually."
+msgstr ""
+
 msgid "Update to %s"
 msgstr ""
 
@@ -370,34 +406,8 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-msgid "Error"
-msgstr ""
-
 msgid "Security verification failed. The update might have been tampered with: %s"
 msgstr ""
 
 msgid "Security Error"
-msgstr ""
-
-msgid "Update failed"
-msgstr ""
-
-msgid ""
-"Update downloaded to: %s\n"
-"Please install it manually."
-msgstr ""
-
-msgid "Update Ready"
-msgstr ""
-
-msgid "Failed to get current exe path"
-msgstr ""
-
-msgid "Failed to launch installer script"
-msgstr ""
-
-msgid "Failed to launch update script"
-msgstr ""
-
-msgid "Unknown update file format."
 msgstr ""

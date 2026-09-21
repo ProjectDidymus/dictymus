@@ -18,8 +18,16 @@ pub fn show_about(parent: &Frame) {
 	let mut info = AboutDialogInfo::new();
 	info.set_name("Dictymus");
 	info.set_version(env!("CARGO_PKG_VERSION"));
-	// TRANSLATORS: One-line app description in the About dialog
-	info.set_description(&t("An accessible dictionary for biblical languages"));
+	#[rustfmt::skip]
+	// TRANSLATORS: Third-party license notice in the About dialog; the source code links follow on the next lines
+	let braille_notice = t("The ASCII braille view uses the louis-rs braille translator and Hebrew braille tables from liblouis, both licensed under the GNU Lesser General Public License, version 2.1 or later. Their source code is available at:");
+	let description = format!(
+		"{}\n\n{}\nhttps://github.com/liblouis/louis-rs\nhttps://github.com/liblouis/liblouis",
+		// TRANSLATORS: One-line app description in the About dialog
+		t("An accessible dictionary for biblical languages"),
+		braille_notice,
+	);
+	info.set_description(&description);
 	show_about_box(&info, Some(parent));
 }
 
