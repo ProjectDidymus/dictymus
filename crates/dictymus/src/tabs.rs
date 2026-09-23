@@ -24,7 +24,7 @@ pub struct DictionaryTab {
 	pub language: &'static str,
 	pub filtered: RefCell<Vec<usize>>,
 	pub frame: Frame,
-	pub status_bar: wxdragon::widgets::statusbar::StatusBar,
+	pub announcer: StaticText,
 	pub article_html: RefCell<String>,
 	/// Whether this tab shows its script as ASCII braille. Hot callbacks read
 	/// this cell; `apply_braille` derives it from the config.
@@ -108,7 +108,7 @@ pub struct TabManager {
 	pub notebook: Notebook,
 	pub tabs: Vec<Rc<DictionaryTab>>,
 	pub base_font: Font,
-	pub status_bar: wxdragon::widgets::statusbar::StatusBar,
+	pub announcer: StaticText,
 	pub frame: Frame,
 	pub config: Rc<RefCell<AppConfig>>,
 }
@@ -117,11 +117,11 @@ impl TabManager {
 	pub fn new(
 		notebook: Notebook,
 		base_font: Font,
-		status_bar: wxdragon::widgets::statusbar::StatusBar,
+		announcer: StaticText,
 		frame: Frame,
 		config: Rc<RefCell<AppConfig>>,
 	) -> Self {
-		Self { notebook, tabs: Vec::new(), base_font, status_bar, frame, config }
+		Self { notebook, tabs: Vec::new(), base_font, announcer, frame, config }
 	}
 
 	pub fn build_tab_panel(&self, dict: Rc<DictHandle>) -> Rc<DictionaryTab> {
@@ -140,7 +140,7 @@ impl TabManager {
 			dict,
 			language,
 			frame: self.frame,
-			status_bar: self.status_bar,
+			announcer: self.announcer,
 			filtered: RefCell::new(filtered),
 			article_html: RefCell::new(String::new()),
 			braille: Cell::new(false),
@@ -361,7 +361,7 @@ impl TabManager {
 		}
 		crate::accessibility::announce_status(
 			self.frame,
-			self.status_bar,
+			self.announcer,
 			// TRANSLATORS: Announced after closing a tab; the placeholder is the dictionary title
 			&t("Closed {}").replace("{}", &title),
 		);

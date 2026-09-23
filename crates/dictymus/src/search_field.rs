@@ -55,7 +55,7 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 			let count = tab.result_count.get();
 			// TRANSLATORS: Announced after a search; the placeholder is the number of matching entries
 			let msg = nt("{} result", "{} results", count as u64).replace("{}", &count.to_string());
-			crate::accessibility::announce_status(tab.frame, tab.status_bar, &msg);
+			crate::accessibility::announce_status(tab.frame, tab.announcer, &msg);
 		}
 	});
 

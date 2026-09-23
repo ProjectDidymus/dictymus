@@ -122,6 +122,11 @@ Releasing:
   display cache in `tabs.rs`; the search back-translates the ASCII braille
   query when on)
 - `dialogs.rs` — File Open dialog, About dialog
+- `accessibility.rs` — `announce_status()`: status bar text plus a screen
+  reader announcement through the `live-region` crate (UIA notification on
+  Windows, `Priority::Medium` so it queues behind speech) raised from a
+  zero-size `StaticText` on the frame's panel (`create_announcer()`); the UI
+  test harness records these with `common::Notifications`
 - `fonts.rs` — SBL BibLit font loading
 - `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate
   (GitHub Releases + minisign + silent Inno Setup handoff); channel defaults

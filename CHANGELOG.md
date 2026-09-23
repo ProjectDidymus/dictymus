@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not type matches any pointing, and cantillation, meteg and rafe never count
 - The ASCII braille search follows the same rule: a vowel cell or a dagesh
   letter form narrows the list, a plain consonant cell matches any pointing
+- Screen reader messages, such as the number of search results or the name
+  of a closed tab, are now sent as notifications rather than read from the
+  status bar, which still shows them. On Windows a message waits for the
+  speech in progress; on macOS VoiceOver now speaks them too
 
 ## [0.3.0] - 2026-08-15
 

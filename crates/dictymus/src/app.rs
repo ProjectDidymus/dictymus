@@ -53,14 +53,14 @@ impl App {
 
 		let frame = Frame::builder().with_title("Dictymus").with_size(Size::new(900, 650)).build();
 		frame.set_menu_bar(menu::create_menu_bar());
-		let status_bar = frame.create_status_bar(1, 0, -1, "statusbar");
+		frame.create_status_bar(1, 0, -1, "statusbar");
 		// TRANSLATORS: Initial status bar text
 		frame.set_status_text(&t("Ready"), 0);
-		crate::accessibility::init_status_bar_live_region(status_bar);
 
 		let (base_font, font_warning) = crate::fonts::load_base_font();
 
 		let panel = Panel::builder(&frame).build();
+		let announcer = crate::accessibility::create_announcer(&panel);
 		let sizer = BoxSizer::builder(Orientation::Vertical).build();
 		let notebook = Notebook::builder(&panel).build();
 		sizer.add(&notebook, 1, SizerFlag::Expand | SizerFlag::All, 0);
@@ -69,7 +69,7 @@ impl App {
 		let tab_manager = tabs::TabManager::new(
 			notebook,
 			base_font.clone(),
-			status_bar,
+			announcer,
 			frame,
 			Rc::clone(&config),
 		);
@@ -110,7 +110,7 @@ impl App {
 			}
 		}
 		if let Some(w) = font_warning {
-			crate::accessibility::announce_status(frame, status_bar, &w);
+			crate::accessibility::announce_status(frame, announcer, &w);
 		}
 
 		let frame_for_menu = frame;

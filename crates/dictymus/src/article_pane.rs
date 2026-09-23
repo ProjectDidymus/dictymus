@@ -49,7 +49,7 @@ pub fn navigate_to(tab: &DictionaryTab, word: &str) {
 		};
 		crate::accessibility::announce_status(
 			tab.frame,
-			tab.status_bar,
+			tab.announcer,
 			// TRANSLATORS: Announced when a cross-reference target is not in the dictionary; the placeholder is the word
 			&t("Not found: {}").replace("{}", &shown),
 		);
