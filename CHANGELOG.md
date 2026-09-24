@@ -23,6 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In Greek dictionaries, Shift enters capitals, `v` the final sigma, and the
   accent and breathing keys of the Logos Biblical Greek keyboard enter their
   marks
+- Hebrew can be shown as ASCII braille: turn on Options → Braille → Show
+  Hebrew as ASCII braille, and the lemma list and articles show Hebrew in
+  International Hebrew Braille Code as lowercase Braille ASCII, while the
+  search field takes an ASCII braille query. Text in other scripts stays as
+  it is
+- The About dialog names the braille components licensed under the LGPL
+  (louis-rs and the liblouis Hebrew tables) and where their source code is
+  available
 
 ### Changed
 
