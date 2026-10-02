@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: dictymus 0.3.0\n"
+"Project-Id-Version: dictymus 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 10:17+0200\n"
+"POT-Creation-Date: 2026-10-02 08:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -344,31 +344,19 @@ msgstr ""
 msgid "Settings file is invalid ({}): {}"
 msgstr ""
 
-msgid "Unknown update file format."
+msgid "Not running from an AppImage; cannot self-update."
+msgstr ""
+
+msgid "Failed to get current exe path"
+msgstr ""
+
+msgid "Failed to launch update script"
 msgstr ""
 
 msgid "Failed to open disk image"
 msgstr ""
 
 msgid "The update has been downloaded and its disk image opened. Quit %s and drag the new version into Applications to finish installing."
-msgstr ""
-
-msgid "Update Ready"
-msgstr ""
-
-msgid "Failed to get current exe path"
-msgstr ""
-
-msgid "Failed to launch installer script"
-msgstr ""
-
-msgid "Failed to launch update script"
-msgstr ""
-
-msgid "Error"
-msgstr ""
-
-msgid "Update failed"
 msgstr ""
 
 msgid ""
@@ -395,6 +383,15 @@ msgid "%s Update"
 msgstr ""
 
 msgid "Downloading update..."
+msgstr ""
+
+msgid "Update failed"
+msgstr ""
+
+msgid "Update Ready"
+msgstr ""
+
+msgid "Error"
 msgstr ""
 
 msgid "No updates available."

@@ -1,7 +1,7 @@
 use std::{env, sync::Arc};
 
 use dictymus_core::config::UpdateChannel;
-use ship_shape::UpdaterConfig;
+use ship_shape::{InstallKind, UpdaterConfig, ui::CheckTrigger};
 use wxdragon::prelude::*;
 
 const GITHUB_REPO: &str = "ProjectDidymus/dictymus";
@@ -26,10 +26,6 @@ pub fn default_channel() -> UpdateChannel {
 	if env!("DICTYMUS_IS_DEV") == "true" { UpdateChannel::Dev } else { UpdateChannel::Stable }
 }
 
-fn user_agent() -> String {
-	format!("dictymus/{}", env!("CARGO_PKG_VERSION"))
-}
-
 /// Installed copies have the Inno Setup uninstaller next to the exe; portable
 /// unzips do not, and get an in-place zip swap instead of the installer.
 fn is_installer_distribution() -> bool {
@@ -43,21 +39,24 @@ fn is_installer_distribution() -> bool {
 /// silent startup check and the Help menu; concurrent calls are a no-op.
 pub fn run_update_check(frame: &Frame, channel: UpdateChannel, silent: bool) {
 	tracing::info!(%channel, silent, "checking for updates");
+	let install_kind =
+		if is_installer_distribution() { InstallKind::Installer } else { InstallKind::Portable };
 	let config = Arc::new(
-		UpdaterConfig::new(GITHUB_REPO, "dictymus", "Dictymus", MINISIGN_PUBLIC_KEY, user_agent())
-			.with_asset_suffix(ASSET_SUFFIX),
+		UpdaterConfig::new(
+			GITHUB_REPO,
+			"dictymus",
+			"Dictymus",
+			MINISIGN_PUBLIC_KEY,
+			env!("CARGO_PKG_VERSION"),
+		)
+		.with_commit(COMMIT_HASH)
+		.with_install_kind(install_kind)
+		.with_asset_suffix(ASSET_SUFFIX),
 	);
 	let ship_channel = match channel {
 		UpdateChannel::Stable => ship_shape::UpdateChannel::Stable,
 		UpdateChannel::Dev => ship_shape::UpdateChannel::Dev,
 	};
-	ship_shape::ui::run_update_check(
-		config,
-		frame.handle_ptr() as usize,
-		env!("CARGO_PKG_VERSION"),
-		COMMIT_HASH,
-		is_installer_distribution(),
-		ship_channel,
-		silent,
-	);
+	let trigger = if silent { CheckTrigger::Automatic } else { CheckTrigger::Manual };
+	ship_shape::ui::run_update_check(config, frame, ship_channel, trigger);
 }

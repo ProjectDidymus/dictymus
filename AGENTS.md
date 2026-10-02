@@ -51,9 +51,9 @@ Translations (need `xgettext`, `msgmerge` and `msgfmt` on `PATH` — MSYS2 UCRT6
 - `cargo build` only compiles `po/*.po` into the embedded
   `crates/dictymus/locale/<lang>/LC_MESSAGES/dictymus.mo` catalogs; it does not
   touch the pot
-- retiring a msgid needs a manual delete from `po/dictymus.pot`:
-  `patois-build` re-appends any entry the fresh scan misses, so that
-  dependency strings survive regeneration
+- a retired msgid leaves `po/dictymus.pot` on regeneration, but `msgmerge`
+  keeps it in each `po/*.po` as an obsolete `#~` entry; delete those by hand,
+  then rerun `cargo xtask translate` to confirm nothing changes
 - translatable literals must stay on one source line; `xgettext` reads the
   sources as C, so `xtask/src/sanitize_rust.rs` blanks lifetimes, raw strings
   and multi-line literals before they reach it, and `gen-pot` fails if a

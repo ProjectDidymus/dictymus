@@ -6,8 +6,8 @@ members = ["crates/dictymus-core", "crates/dictymus", "crates/dictymus-container
 icu_normalizer = { version = "2", features = ["compiled_data"] }
 icu_properties = { version = "2", features = ["compiled_data"] }
 louis-rs = "0.3.0"
-patois = "0.2.1"
-patois-build = "0.1.14"
+patois = "0.2.3"
+patois-build = "0.1.15"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "1.1"
