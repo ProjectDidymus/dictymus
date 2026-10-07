@@ -155,9 +155,7 @@ impl App {
 			}
 			#[cfg(any(windows, target_os = "macos"))]
 			menu::ids::CHECK_UPDATES => {
-				let channel = config_for_menu
-					.borrow()
-					.effective_update_channel(crate::update::default_channel());
+				let channel = config_for_menu.borrow().effective_update_channel();
 				crate::update::run_update_check(&frame_for_menu, channel, false);
 			}
 			_ => {}

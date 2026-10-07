@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- On Windows, the file properties of `dictymus.exe` show Dictymus, Project
+  Didymus and the copyright notice
+- The update channel defaults to stable for every build, and Options no
+  longer offers "Default for this build"; development builds follow the
+  development channel only when it is chosen in Options
+
+### Fixed
+
+- Automatic updates on macOS find the new disk image again
+
 ## [0.4.0] - 2026-09-24
 
 ### Added

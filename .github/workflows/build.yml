@@ -42,31 +42,32 @@ jobs:
     needs: [check, test]
     runs-on: ${{ matrix.os }}
     env:
-      HAVE_MACOS_CERT: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 != '' }}
-      HAVE_NOTARY_KEY: ${{ secrets.APPSTORE_API_KEY_BASE64 != '' }}
       HAVE_MINISIGN_KEY: ${{ secrets.MINISIGN_KEY != '' }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: windows-x64
-            os: windows-2025
-            target: x86_64-pc-windows-msvc
+            os: windows-latest
             msvc-arch: x64
-            artifact: target/x86_64-pc-windows-msvc/release/dictymus.exe
+            arch: x64
+            artifact: |
+              target/release/dictymus_setup-x64.exe*
+              target/release/dictymus-x64.zip*
             artifact-name: dictymus-windows-x64
-          # Cross-compiled on the x64 runner: arm64 runners queue long and
-          # their single-core speed roughly doubles the LTO-heavy build.
           - name: windows-arm64
-            os: windows-2025
-            target: aarch64-pc-windows-msvc
-            msvc-arch: amd64_arm64
-            artifact: target/aarch64-pc-windows-msvc/release/dictymus.exe
+            os: windows-11-arm
+            msvc-arch: arm64
+            arch: arm64
+            artifact: |
+              target/release/dictymus_setup-arm64.exe*
+              target/release/dictymus-arm64.zip*
             artifact-name: dictymus-windows-arm64
           - name: macos-arm64
             os: macos-latest
-            target: aarch64-apple-darwin
-            artifact: target/dictymus-macos.*
+            artifact: |
+              target/release/dictymus-macos.dmg*
+              target/release/dictymus-macos.zip*
             artifact-name: dictymus-macos
     steps:
       # Tags must be visible so build.rs can tell release builds (HEAD on a
@@ -85,7 +86,6 @@ jobs:
         run: |
           brew install cmake ninja gettext
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
-      # msgfmt compiles po/*.po into the catalogs the binary embeds.
       # msgfmt compiles po/*.po into the catalogs the binary embeds. MSYS2's
       # directories are appended at the end of PATH inside the cargo step,
       # keeping MSVC's tools ahead of MSYS2's same-named ones.
@@ -99,8 +99,6 @@ jobs:
             gettext
             mingw-w64-ucrt-x86_64-gettext-tools
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          target: ${{ matrix.target }}
       - uses: swatinem/rust-cache@v2
         with:
           prefix-key: v2-rust
@@ -110,7 +108,8 @@ jobs:
           cache-on-failure: true
           save-if: ${{ github.ref == 'refs/heads/master' }}
           cache-directories: ${{ runner.temp }}/wx-build
-      - name: Build
+      # Builds the release binary, then the portable zip and the installer.
+      - name: Build and package
         if: startsWith(matrix.name, 'windows')
         shell: pwsh
         env:
@@ -122,17 +121,18 @@ jobs:
           WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
         run: |
           $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
-          cargo build --release -p dictymus --target ${{ matrix.target }}
-      - name: Build
+          cargo xtask release
+      # Builds the release binary, then Dictymus.app, the DMG and the zip.
+      - name: Build and package
         if: startsWith(matrix.name, 'macos')
         env:
           WXWIDGETS_DIR: ${{ runner.temp }}/wx-build/source
           WXWIDGETS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxwidgets
           WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
-          # Must stay in sync with LSMinimumSystemVersion in the xtask
-          # Info.plist.
+          # Must stay in sync with LSMinimumSystemVersion in
+          # crates/dictymus/build/macos.rs.
           MACOSX_DEPLOYMENT_TARGET: "11.0"
-        run: cargo build --release -p dictymus --target ${{ matrix.target }}
+        run: cargo xtask release
       # The debug test build reuses the release build's wx directories.
       - name: Run UI tests
         if: matrix.name == 'windows-x64'
@@ -143,7 +143,7 @@ jobs:
           WXDRAGON_SYS_BUILD_DIR: ${{ runner.temp }}/wx-build/wxdragon-sys
         run: |
           $env:PATH = "$env:PATH;${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin;${{ steps.msys2.outputs.msys2-location }}\usr\bin"
-          cargo test -p dictymus --target ${{ matrix.target }} -- --ignored
+          cargo test -p dictymus -- --ignored
       # patois-build only warns when msgfmt is missing; fail hard instead of
       # shipping a release that silently lost its translations.
       - name: Assert translations were embedded
@@ -153,145 +153,21 @@ jobs:
             Write-Error "Dutch catalog missing - msgfmt was unavailable during the build"
             exit 1
           }
-      # Imports the Developer ID certificate into an ephemeral keychain and
-      # exports MACOS_SIGN_IDENTITY so dist-mac signs the bundle. Dormant
-      # until the signing secrets are configured.
-      - name: Import signing certificate
-        if: startsWith(matrix.name, 'macos') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MACOS_CERT == 'true'
-        env:
-          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-          MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
-        run: |
-          CERT_PATH="$RUNNER_TEMP/dictymus-signing.p12"
-          KEYCHAIN_PATH="$RUNNER_TEMP/dictymus-signing.keychain-db"
-          echo "$MACOS_CERTIFICATE_P12_BASE64" | base64 -D -o "$CERT_PATH"
-          security create-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed 's/"//g')
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | head -1 | sed -E 's/.*"(.*)"/\1/')
-          if [ -z "$IDENTITY" ]; then
-            echo "No Developer ID Application identity found in the imported certificate" >&2
-            exit 1
-          fi
-          echo "Found signing identity: $IDENTITY"
-          echo "MACOS_SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
-          echo "MACOS_KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
-          rm -f "$CERT_PATH"
-      - name: Package macOS bundle
-        if: startsWith(matrix.name, 'macos')
-        run: cargo xtask dist-mac --target ${{ matrix.target }}
       - name: Verify macOS bundle
         if: startsWith(matrix.name, 'macos')
         run: |
-          APP=target/dist-mac/Dictymus.app
+          APP=target/release/Dictymus.app
           test -f "$APP/Contents/MacOS/dictymus"
           test -x "$APP/Contents/MacOS/dictymus"
           test -f "$APP/Contents/Resources/dictymus.icns"
           plutil -lint "$APP/Contents/Info.plist"
-          hdiutil verify target/dictymus-macos.dmg
-          unzip -l target/dictymus-macos.zip | grep -q "Dictymus.app/Contents/MacOS/dictymus"
-      # Dormant until the App Store Connect API key secrets are configured.
-      - name: Notarize and staple DMG
-        if: startsWith(matrix.name, 'macos') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_NOTARY_KEY == 'true'
-        env:
-          APPSTORE_API_KEY_BASE64: ${{ secrets.APPSTORE_API_KEY_BASE64 }}
-          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-        run: |
-          # Secrets set from a file carry a trailing newline that notarytool
-          # rejects in --key-id/--issuer; strip whitespace defensively.
-          KEY_ID=$(printf '%s' "$APPSTORE_API_KEY_ID" | tr -d '[:space:]')
-          ISSUER_ID=$(printf '%s' "$APPSTORE_API_ISSUER_ID" | tr -d '[:space:]')
-          KEY_PATH="$RUNNER_TEMP/AppStoreConnectAPIKey.p8"
-          echo "$APPSTORE_API_KEY_BASE64" | base64 -D -o "$KEY_PATH"
-          set +e
-          xcrun notarytool submit target/dictymus-macos.dmg \
-            --key "$KEY_PATH" --key-id "$KEY_ID" --issuer "$ISSUER_ID" \
-            --wait --output-format json | tee notarization-result.json
-          SUBMIT_STATUS=$?
-          set -e
-          SUBMISSION_ID=$(jq -r '.id // empty' notarization-result.json)
-          SUBMIT_RESULT_STATUS=$(jq -r '.status // empty' notarization-result.json)
-          if [ "$SUBMIT_STATUS" -ne 0 ] || [ "$SUBMIT_RESULT_STATUS" != "Accepted" ]; then
-            echo "Notarization failed (exit $SUBMIT_STATUS, status '$SUBMIT_RESULT_STATUS'); fetching full log..."
-            if [ -n "$SUBMISSION_ID" ]; then
-              xcrun notarytool log "$SUBMISSION_ID" \
-                --key "$KEY_PATH" --key-id "$KEY_ID" --issuer "$ISSUER_ID"
-            fi
-            rm -f "$KEY_PATH"
-            exit 1
-          fi
-          xcrun stapler staple target/dictymus-macos.dmg
-          rm -f "$KEY_PATH"
-      - name: Sign updater zip
-        if: startsWith(matrix.name, 'macos') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
-        env:
-          MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
-          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
-        run: |
-          brew install minisign
-          KEY_PATH="$RUNNER_TEMP/dictymus.key"
-          printf '%s' "$MINISIGN_KEY" > "$KEY_PATH"
-          printf '%s\n' "$MINISIGN_PASSWORD" | minisign -S -s "$KEY_PATH" -m target/dictymus-macos.zip
-          rm -f "$KEY_PATH"
-      - name: Clean up signing keychain
-        if: always() && startsWith(matrix.name, 'macos') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus'
-        run: |
-          if [ -n "$MACOS_KEYCHAIN_PATH" ] && [ -f "$MACOS_KEYCHAIN_PATH" ]; then
-            security delete-keychain "$MACOS_KEYCHAIN_PATH" || true
-          fi
-      - uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact }}
-          retention-days: 30
-
-  installer:
-    name: Windows installer
-    needs: [build]
-    if: github.event_name != 'pull_request'
-    runs-on: windows-latest
-    env:
-      HAVE_MINISIGN_KEY: ${{ secrets.MINISIGN_KEY != '' }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-        with:
-          key: installer
-          save-if: ${{ github.ref == 'refs/heads/master' }}
-      - uses: actions/download-artifact@v8
-        with:
-          name: dictymus-windows-x64
-          path: target/dist/windows/x86_64
-      - uses: actions/download-artifact@v8
-        with:
-          name: dictymus-windows-arm64
-          path: target/dist/windows/aarch64
-      - name: Ensure Inno Setup
-        shell: pwsh
-        run: |
-          if (-not (Get-Command ISCC.exe -ErrorAction SilentlyContinue) -and
-              -not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
-            choco install innosetup -y --no-progress
-          }
-      - run: cargo xtask dist --staging target/dist
-      - name: Package updater assets
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force target/updater | Out-Null
-          Compress-Archive -Path target/dist/windows/x86_64/dictymus.exe -DestinationPath target/updater/dictymus-x64.zip
-          Compress-Archive -Path target/dist/windows/aarch64/dictymus.exe -DestinationPath target/updater/dictymus-arm64.zip
-          Copy-Item target/dictymus_setup-x64.exe, target/dictymus_setup-arm64.exe target/updater/
+          hdiutil verify target/release/dictymus-macos.dmg
+          unzip -l target/release/dictymus-macos.zip | grep -q "Dictymus.app/Contents/MacOS/dictymus"
       - name: Install minisign
-        if: github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
+        if: startsWith(matrix.name, 'windows') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
         run: choco install minisign -y --no-progress
       - name: Sign updater assets
-        if: github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
+        if: startsWith(matrix.name, 'windows') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
         shell: pwsh
         env:
           MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
@@ -301,20 +177,31 @@ jobs:
           [IO.File]::WriteAllText($keyPath, $env:MINISIGN_KEY)
           $pwPath = Join-Path $env:RUNNER_TEMP "dictymus.pw"
           [IO.File]::WriteAllText($pwPath, $env:MINISIGN_PASSWORD)
-          Get-Content $pwPath | minisign -S -s $keyPath -m target/updater/dictymus_setup-x64.exe
-          Get-Content $pwPath | minisign -S -s $keyPath -m target/updater/dictymus_setup-arm64.exe
-          Get-Content $pwPath | minisign -S -s $keyPath -m target/updater/dictymus-x64.zip
-          Get-Content $pwPath | minisign -S -s $keyPath -m target/updater/dictymus-arm64.zip
+          Get-Content $pwPath | minisign -S -s $keyPath -m target/release/dictymus_setup-${{ matrix.arch }}.exe
+          Get-Content $pwPath | minisign -S -s $keyPath -m target/release/dictymus-${{ matrix.arch }}.zip
           Remove-Item $keyPath, $pwPath
+      - name: Sign updater assets
+        if: startsWith(matrix.name, 'macos') && github.event_name == 'push' && github.repository == 'ProjectDidymus/dictymus' && env.HAVE_MINISIGN_KEY == 'true'
+        env:
+          MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+        run: |
+          brew install minisign
+          KEY_PATH="$RUNNER_TEMP/dictymus.key"
+          printf '%s' "$MINISIGN_KEY" > "$KEY_PATH"
+          printf '%s\n' "$MINISIGN_PASSWORD" | minisign -S -s "$KEY_PATH" -m target/release/dictymus-macos.dmg
+          printf '%s\n' "$MINISIGN_PASSWORD" | minisign -S -s "$KEY_PATH" -m target/release/dictymus-macos.zip
+          rm -f "$KEY_PATH"
       - uses: actions/upload-artifact@v7
         with:
-          name: dictymus-windows-setup
-          path: target/updater/*
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
           retention-days: 30
 
   dev-release:
     name: Dev release
-    needs: [build, installer]
+    needs: [build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'ProjectDidymus/dictymus'
     runs-on: ubuntu-latest
     permissions:
@@ -326,12 +213,9 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v8
         with:
-          name: dictymus-windows-setup
-          path: artifacts/windows-setup
-      - uses: actions/download-artifact@v8
-        with:
-          name: dictymus-macos
-          path: artifacts/macos
+          pattern: dictymus-*
+          path: artifacts
+          merge-multiple: true
       - name: Generate release notes
         id: notes
         run: |
@@ -355,23 +239,24 @@ jobs:
             ## Commits since last release
             ${{ steps.notes.outputs.commits }}
           files: |
-            artifacts/windows-setup/dictymus_setup-x64.exe
-            artifacts/windows-setup/dictymus_setup-x64.exe.minisig
-            artifacts/windows-setup/dictymus_setup-arm64.exe
-            artifacts/windows-setup/dictymus_setup-arm64.exe.minisig
-            artifacts/windows-setup/dictymus-x64.zip
-            artifacts/windows-setup/dictymus-x64.zip.minisig
-            artifacts/windows-setup/dictymus-arm64.zip
-            artifacts/windows-setup/dictymus-arm64.zip.minisig
-            artifacts/macos/dictymus-macos.dmg
-            artifacts/macos/dictymus-macos.zip
-            artifacts/macos/dictymus-macos.zip.minisig
+            artifacts/dictymus_setup-x64.exe
+            artifacts/dictymus_setup-x64.exe.minisig
+            artifacts/dictymus_setup-arm64.exe
+            artifacts/dictymus_setup-arm64.exe.minisig
+            artifacts/dictymus-x64.zip
+            artifacts/dictymus-x64.zip.minisig
+            artifacts/dictymus-arm64.zip
+            artifacts/dictymus-arm64.zip.minisig
+            artifacts/dictymus-macos.dmg
+            artifacts/dictymus-macos.dmg.minisig
+            artifacts/dictymus-macos.zip
+            artifacts/dictymus-macos.zip.minisig
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     name: Release
-    needs: [build, installer]
+    needs: [build]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
@@ -382,16 +267,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
-          name: dictymus-windows-setup
-          path: artifacts/windows-setup
-      - uses: actions/download-artifact@v8
-        with:
-          name: dictymus-macos
-          path: artifacts/macos
-      - name: Rename for release
-        run: |
-          cp artifacts/windows-setup/* .
-          cp artifacts/macos/* .
+          pattern: dictymus-*
+          path: artifacts
+          merge-multiple: true
       # The body is the CHANGELOG.md section for this version: everything
       # between its "## [X.Y.Z]" heading and the next "## [" heading.
       - name: Extract release notes from CHANGELOG.md
@@ -408,17 +286,18 @@ jobs:
       - uses: softprops/action-gh-release@v3
         with:
           files: |
-            dictymus_setup-x64.exe
-            dictymus_setup-x64.exe.minisig
-            dictymus_setup-arm64.exe
-            dictymus_setup-arm64.exe.minisig
-            dictymus-x64.zip
-            dictymus-x64.zip.minisig
-            dictymus-arm64.zip
-            dictymus-arm64.zip.minisig
-            dictymus-macos.dmg
-            dictymus-macos.zip
-            dictymus-macos.zip.minisig
+            artifacts/dictymus_setup-x64.exe
+            artifacts/dictymus_setup-x64.exe.minisig
+            artifacts/dictymus_setup-arm64.exe
+            artifacts/dictymus_setup-arm64.exe.minisig
+            artifacts/dictymus-x64.zip
+            artifacts/dictymus-x64.zip.minisig
+            artifacts/dictymus-arm64.zip
+            artifacts/dictymus-arm64.zip.minisig
+            artifacts/dictymus-macos.dmg
+            artifacts/dictymus-macos.dmg.minisig
+            artifacts/dictymus-macos.zip
+            artifacts/dictymus-macos.zip.minisig
           body_path: release_body.md
           name: ${{ github.ref_name }}
         env:

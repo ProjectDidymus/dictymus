@@ -1,36 +1,11 @@
 ; Dictymus — per-machine Windows installer, one native package per architecture.
 ;
-; Driven by `cargo xtask dist`, which passes:
-;   /DVERSION=<display>  /DVERSIONNUM=<x.y.z.0>  /DSTAGING=<dir>
-;   /DOUTDIR=<dir>  /DARCH=<x64|arm64>  /DICONFILE=<dictymus.ico>
-; STAGING contains windows\<rust arch>\dictymus.exe and MicrosoftEdgeWebView2Setup.exe.
-
-#ifndef VERSION
-	#define VERSION "0.0.0"
-#endif
-#ifndef VERSIONNUM
-	#define VERSIONNUM "0.0.0.0"
-#endif
-#ifndef STAGING
-	#error STAGING is required (cargo xtask dist passes /DSTAGING=<dir>)
-#endif
-#ifndef OUTDIR
-	#define OUTDIR "."
-#endif
-#ifndef ARCH
-	#define ARCH "x64"
-#endif
-#if ARCH == "arm64"
-	#define SRCDIR STAGING + "\windows\aarch64"
-	#define ARCH_ALLOWED "arm64"
-#else
-	#define SRCDIR STAGING + "\windows\x86_64"
-	#define ARCH_ALLOWED "x64compatible"
-#endif
+; The build script fills in the @NAME@ placeholders and writes dictymus.iss next to
+; dictymus.exe in target/release; `cargo xtask release` compiles it.
 
 [Setup]
 	AppName=Dictymus
-	AppVersion={#VERSION}
+	AppVersion=@PROJECT_VERSION@
 	AppPublisher=Project Didymus
 	AppPublisherURL=https://github.com/ProjectDidymus/dictymus
 	AppSupportURL=https://github.com/ProjectDidymus/dictymus/issues
@@ -39,20 +14,18 @@
 	DisableProgramGroupPage=yes
 	DisableDirPage=no
 	DisableWelcomePage=no
-	LicenseFile=license.txt
-	OutputDir={#OUTDIR}
-	OutputBaseFilename=dictymus_setup-{#ARCH}
+	LicenseFile=@LICENSE_FILE@
+	OutputDir=.
+	OutputBaseFilename=dictymus_setup-@ARCH_SUFFIX@
 	Compression=lzma2
 	SolidCompression=yes
 	WizardStyle=modern
 	UninstallDisplayIcon={app}\dictymus.exe
-	ArchitecturesAllowed={#ARCH_ALLOWED}
-	ArchitecturesInstallIn64BitMode={#ARCH_ALLOWED}
-	VersionInfoVersion={#VERSIONNUM}
+	ArchitecturesAllowed=@ARCH_ALLOWED@
+	ArchitecturesInstallIn64BitMode=@ARCH_MODE@
+	VersionInfoVersion=@VERSION_NUM@
 	ChangesAssociations=yes
-#ifdef ICONFILE
-	SetupIconFile={#ICONFILE}
-#endif
+	SetupIconFile=@SETUP_ICON@
 
 [Languages]
 	Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -79,8 +52,8 @@
 	dutch.WebView2ManualInstall=Woordenboekartikelen worden pas weergegeven nadat deze is geïnstalleerd vanaf:
 
 [Files]
-	Source: "{#SRCDIR}\dictymus.exe"; DestDir: "{app}"; Flags: ignoreversion
-	Source: "{#STAGING}\MicrosoftEdgeWebView2Setup.exe"; DestDir: "{tmp}"; Check: not WebView2Present
+	Source: "dictymus.exe"; DestDir: "{app}"; Flags: ignoreversion
+	Source: "MicrosoftEdgeWebView2Setup.exe"; DestDir: "{tmp}"; Check: not WebView2Present
 
 [Tasks]
 	Name: "startmenuicon"; Description: "{cm:StartMenuShortcut}"

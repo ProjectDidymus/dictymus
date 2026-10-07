@@ -23,6 +23,10 @@ Build and run:
 - `cargo run -p dictymus -- <path.ifo>` — run with a dictionary file
 - `cargo build` — build workspace
 - `cargo build -p dictymus` — build GUI only
+- `cargo xtask release` — release build plus packaging for this machine into
+  `target/release`: `dictymus_setup-<arch>.exe` and `dictymus-<arch>.zip` on
+  Windows (Inno Setup via shipfitter, downloaded when missing),
+  `Dictymus.app`, `dictymus-macos.dmg` and `dictymus-macos.zip` on macOS
 
 Tests:
 
@@ -51,9 +55,9 @@ Translations (need `xgettext`, `msgmerge` and `msgfmt` on `PATH` — MSYS2 UCRT6
 - `cargo build` only compiles `po/*.po` into the embedded
   `crates/dictymus/locale/<lang>/LC_MESSAGES/dictymus.mo` catalogs; it does not
   touch the pot
-- retiring a msgid needs a manual delete from `po/dictymus.pot`:
-  `patois-build` re-appends any entry the fresh scan misses, so that
-  dependency strings survive regeneration
+- a retired msgid leaves `po/dictymus.pot` on regeneration, but `msgmerge`
+  keeps it in each `po/*.po` as an obsolete `#~` entry; delete those by hand,
+  then rerun `cargo xtask translate` to confirm nothing changes
 - translatable literals must stay on one source line; `xgettext` reads the
   sources as C, so `xtask/src/sanitize_rust.rs` blanks lifetimes, raw strings
   and multi-line literals before they reach it, and `gen-pot` fails if a
@@ -100,6 +104,11 @@ Releasing:
 
 **dictymus** — wxdragon UI:
 
+- `build.rs` — only picks what runs; the modules in `build/` use shipfitter
+  (as paperback does): `version.rs` (`DICTYMUS_COMMIT_HASH`/`_SHORT_HASH`/
+  `_IS_DEV`, `1` or `0`), `windows.rs` (manifest, icon, version block),
+  `installer.rs` (fills `dictymus.iss.in` into `target/<profile>/dictymus.iss`),
+  `macos.rs` (lays out `Dictymus.app`), `translations.rs` (`po/*.po` → `.mo`)
 - `app.rs` — `App` struct, startup (CLI arg / reopen config), menu wiring
 - `menu.rs` — menu IDs + `create_menu_bar()`
 - `tabs.rs` — `TabManager` + `DictionaryTab` (panel, search `ComboBox`, list,
@@ -128,8 +137,8 @@ Releasing:
   test harness records these with `common::Notifications`
 - `fonts.rs` — SBL BibLit font loading
 - `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate
-  (GitHub Releases + minisign + silent Inno Setup handoff); channel defaults
-  follow the build type via `DICTYMUS_IS_DEV`, `DICTYMUS_NO_UPDATE_CHECK` skips
+  (GitHub Releases + minisign + silent Inno Setup handoff); the channel
+  defaults to stable, `DICTYMUS_NO_UPDATE_CHECK` skips
   the startup check; config keys `check_for_updates_on_startup` / `update_channel`
 
 **Article rendering:** `DictHandle::article_html()` returns raw HTML from
