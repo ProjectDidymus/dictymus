@@ -23,4 +23,9 @@ pub fn workspace_dir() -> PathBuf {
 		.to_path_buf()
 }
 
-pub use shipfitter::build::target_profile_dir;
+/// The profile directory the executable is linked into, such as `target/release`: three levels
+/// above the always absolute `OUT_DIR`.
+pub fn target_profile_dir() -> Option<PathBuf> {
+	let out_dir = PathBuf::from(env::var_os("OUT_DIR")?);
+	out_dir.ancestors().nth(3).map(Path::to_path_buf)
+}

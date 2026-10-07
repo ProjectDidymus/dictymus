@@ -1,7 +1,11 @@
 //! `cargo xtask release`: builds the app in release mode and packages `target/release` for this
 //! platform.
 
-use std::path::Path;
+use std::{
+	env,
+	ffi::OsStr,
+	path::{Path, PathBuf},
+};
 
 use shipfitter::{Result, package::cargo_build_release};
 
@@ -26,10 +30,16 @@ pub const MAC_DMG: &str = "dictymus-macos.dmg";
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub const MAC_ZIP: &str = "dictymus-macos.zip";
 
+/// Where Cargo links release binaries: `release` under `cargo_target_dir` resolved against `root`,
+/// or under `root/target` when it is unset.
+pub fn release_dir(root: &Path, cargo_target_dir: Option<&OsStr>) -> PathBuf {
+	cargo_target_dir.map_or_else(|| root.join("target"), |dir| root.join(dir)).join("release")
+}
+
 pub fn release() -> Result<()> {
 	let root = repo_root();
 	cargo_build_release(&root, &["dictymus"])?;
-	package(&root.join("target").join("release"))
+	package(&release_dir(&root, env::var_os("CARGO_TARGET_DIR").as_deref()))
 }
 
 /// Writes `dictymus-<arch>.zip`, then compiles the `dictymus.iss` the build script wrote into

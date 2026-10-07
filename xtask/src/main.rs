@@ -269,6 +269,21 @@ mod tests {
 	}
 
 	#[test]
+	fn release_dir_follows_cargo_target_dir() {
+		let root = Path::new("repo");
+		assert_eq!(release::release_dir(root, None), root.join("target").join("release"));
+		assert_eq!(
+			release::release_dir(root, Some("out".as_ref())),
+			root.join("out").join("release")
+		);
+		let absolute = std::env::temp_dir().join("dictymus-target");
+		assert_eq!(
+			release::release_dir(root, Some(absolute.as_os_str())),
+			absolute.join("release")
+		);
+	}
+
+	#[test]
 	fn mac_assets_match_the_updater_names() {
 		assert_eq!(release::MAC_DMG, "dictymus-macos.dmg");
 		assert_eq!(release::MAC_ZIP, "dictymus-macos.zip");
