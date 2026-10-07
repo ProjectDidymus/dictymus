@@ -23,6 +23,10 @@ Build and run:
 - `cargo run -p dictymus -- <path.ifo>` — run with a dictionary file
 - `cargo build` — build workspace
 - `cargo build -p dictymus` — build GUI only
+- `cargo xtask release` — release build plus packaging for this machine into
+  `target/release`: `dictymus_setup-<arch>.exe` and `dictymus-<arch>.zip` on
+  Windows (Inno Setup via shipfitter, downloaded when missing),
+  `Dictymus.app`, `dictymus-macos.dmg` and `dictymus-macos.zip` on macOS
 
 Tests:
 
@@ -100,6 +104,11 @@ Releasing:
 
 **dictymus** — wxdragon UI:
 
+- `build.rs` — only picks what runs; the modules in `build/` use shipfitter
+  (as paperback does): `version.rs` (`DICTYMUS_COMMIT_HASH`/`_SHORT_HASH`/
+  `_IS_DEV`, `1` or `0`), `windows.rs` (manifest, icon, version block),
+  `installer.rs` (fills `dictymus.iss.in` into `target/<profile>/dictymus.iss`),
+  `macos.rs` (lays out `Dictymus.app`), `translations.rs` (`po/*.po` → `.mo`)
 - `app.rs` — `App` struct, startup (CLI arg / reopen config), menu wiring
 - `menu.rs` — menu IDs + `create_menu_bar()`
 - `tabs.rs` — `TabManager` + `DictionaryTab` (panel, search `ComboBox`, list,

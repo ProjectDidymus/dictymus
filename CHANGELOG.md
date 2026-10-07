@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- On Windows, the file properties of `dictymus.exe` show Dictymus, Project
+  Didymus and the copyright notice
+
+### Fixed
+
+- Automatic updates on macOS find the new disk image again
+
 ## [0.4.0] - 2026-09-24
 
 ### Added

@@ -61,6 +61,18 @@ This produces the binary in `target/release/`. For a debug build of just the GUI
 cargo build -p dictymus
 ```
 
+To build the release binary and package it for the machine you are on:
+
+```sh
+cargo xtask release
+```
+
+On Windows this writes `dictymus_setup-<arch>.exe` (the installer) and
+`dictymus-<arch>.zip` (the portable copy) to `target/release/`, where `<arch>`
+is `x64` or `arm64`. Inno Setup is used if it is installed; otherwise a pinned
+Inno Setup 7 is downloaded once into `%LOCALAPPDATA%\shipfitter`. On macOS it
+writes `Dictymus.app`, `dictymus-macos.dmg` and `dictymus-macos.zip`.
+
 ## Running
 
 ```sh
@@ -194,18 +206,12 @@ what CI builds and publishes.
    built by CI, so no VS Developer Prompt is needed), bumps all three crate
    versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
    tags `X.Y.Z`, and pushes.
-3. The pushed tag triggers CI, which builds every target, signs the updater
-   assets with minisign, packages the Windows installers and the macOS app
-   bundle (`dictymus-macos.dmg` for people, `dictymus-macos.zip` for the
-   updater), and publishes the GitHub release with the changelog section as
-   its body.
-
-CI also carries dormant macOS code-signing and notarization steps. They
-activate as soon as these repository secrets exist, with no workflow change:
-`MACOS_CERTIFICATE_P12_BASE64`, `MACOS_CERTIFICATE_PASSWORD`,
-`MACOS_KEYCHAIN_PASSWORD` (Developer ID Application certificate), and
-`APPSTORE_API_KEY_BASE64`, `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`
-(App Store Connect API key for `notarytool`).
+3. The pushed tag triggers CI. Each build job (Windows x64, Windows arm64,
+   macOS) runs `cargo xtask release` and signs what it built with minisign:
+   the Windows installer and zip, or the macOS `dictymus-macos.dmg` (for
+   people and the updater) and `dictymus-macos.zip` (for the updater in
+   versions before 0.4.0). The release job then publishes the GitHub release
+   with the changelog section as its body.
 
 ## License
 
