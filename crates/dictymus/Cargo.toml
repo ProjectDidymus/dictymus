@@ -39,9 +39,8 @@ windows = { version = "0.62", features = [
 ] }
 
 [build-dependencies]
-embed-manifest = "1.5.1"
 patois-build = { workspace = true }
-winresource = "0.1"
+shipfitter = { version = "0.2.1", features = ["windows-resources"] }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 windows = { version = "0.62", features = [
