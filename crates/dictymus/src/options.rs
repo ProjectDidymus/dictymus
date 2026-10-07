@@ -49,15 +49,13 @@ pub fn show_options(
 		check
 	};
 	#[cfg(any(windows, target_os = "macos"))]
-	let channel_codes = ["", "stable", "dev"];
+	let channel_codes = ["stable", "dev"];
 	#[cfg(any(windows, target_os = "macos"))]
 	let (channel_label, channel_combo) = {
 		// TRANSLATORS: Label of the update channel selector in the Options dialog
 		let channel_label_text = t("Update &channel:");
 		let label = StaticText::builder(&dialog).with_label(&channel_label_text).build();
 		let combo = Choice::builder(&dialog).build();
-		// TRANSLATORS: Update channel entry: stable releases for release builds, development builds otherwise
-		combo.append(&t("Default for this build"));
 		// TRANSLATORS: Update channel entry: tagged releases only
 		combo.append(&t("Stable"));
 		// TRANSLATORS: Update channel entry: rolling development builds
@@ -150,7 +148,7 @@ pub fn show_options(
 				.get_selection()
 				.and_then(|index| usize::try_from(index).ok())
 				.unwrap_or(0);
-			cfg.update_channel = channel_codes.get(index).copied().unwrap_or("").to_string();
+			cfg.update_channel = channel_codes.get(index).copied().unwrap_or("stable").to_string();
 		}
 		let braille_changed = hebrew_braille != cfg.braille_languages.iter().any(|l| l == "he");
 		if braille_changed {

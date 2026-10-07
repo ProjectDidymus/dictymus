@@ -47,8 +47,7 @@ pub struct AppConfig {
 	pub log_level: String,
 	/// Check for updates when the app starts.
 	pub check_for_updates_on_startup: bool,
-	/// Auto-update stream: `"stable"`, `"dev"`, or empty to follow the build
-	/// type (release builds track stable, development builds track dev).
+	/// Auto-update stream: `"stable"` or `"dev"`; anything else tracks stable.
 	pub update_channel: String,
 	/// UI language code (e.g. `"en"`, `"nl"`), or empty to follow the system
 	/// language.
@@ -64,7 +63,7 @@ impl Default for AppConfig {
 			open_dictionaries: Vec::new(),
 			log_level: default_log_level(),
 			check_for_updates_on_startup: true,
-			update_channel: String::new(),
+			update_channel: "stable".into(),
 			language: String::new(),
 			braille_languages: Vec::new(),
 		}
@@ -76,9 +75,9 @@ impl AppConfig {
 		toml::to_string_pretty(self).unwrap_or_default()
 	}
 
-	/// The update channel to use: the configured value if it parses, otherwise `default`.
-	pub fn effective_update_channel(&self, default: UpdateChannel) -> UpdateChannel {
-		self.update_channel.parse().unwrap_or(default)
+	/// The update channel to use: the configured value if it parses, otherwise stable.
+	pub fn effective_update_channel(&self) -> UpdateChannel {
+		self.update_channel.parse().unwrap_or_default()
 	}
 
 	pub fn from_toml(s: &str) -> Result<Self, toml::de::Error> {
@@ -224,7 +223,7 @@ mod tests {
 		// Configs written before the update fields existed must still deserialize.
 		let cfg = AppConfig::from_toml("open_dictionaries = [\"/a/x.ifo\"]").unwrap();
 		assert!(cfg.check_for_updates_on_startup);
-		assert_eq!(cfg.update_channel, "");
+		assert_eq!(cfg.update_channel, "stable");
 	}
 
 	#[test]
@@ -242,20 +241,20 @@ mod tests {
 	#[test]
 	fn effective_update_channel_parses_explicit_values() {
 		let cfg = AppConfig { update_channel: "stable".into(), ..Default::default() };
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Dev), UpdateChannel::Stable);
+		assert_eq!(cfg.effective_update_channel(), UpdateChannel::Stable);
 		let cfg = AppConfig { update_channel: "dev".into(), ..Default::default() };
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Dev);
+		assert_eq!(cfg.effective_update_channel(), UpdateChannel::Dev);
 		let cfg = AppConfig { update_channel: "DEV".into(), ..Default::default() };
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Dev);
+		assert_eq!(cfg.effective_update_channel(), UpdateChannel::Dev);
 	}
 
 	#[test]
-	fn effective_update_channel_falls_back_to_passed_default() {
-		let cfg = AppConfig::default();
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Stable);
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Dev), UpdateChannel::Dev);
+	fn effective_update_channel_defaults_to_stable() {
+		assert_eq!(AppConfig::default().effective_update_channel(), UpdateChannel::Stable);
+		let cfg = AppConfig { update_channel: String::new(), ..Default::default() };
+		assert_eq!(cfg.effective_update_channel(), UpdateChannel::Stable);
 		let cfg = AppConfig { update_channel: "nightly".into(), ..Default::default() };
-		assert_eq!(cfg.effective_update_channel(UpdateChannel::Stable), UpdateChannel::Stable);
+		assert_eq!(cfg.effective_update_channel(), UpdateChannel::Stable);
 	}
 
 	#[test]

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 08:46+0200\n"
+"POT-Creation-Date: 2026-10-07 20:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -268,10 +268,6 @@ msgstr ""
 
 #. TRANSLATORS: Label of the update channel selector in the Options dialog
 msgid "Update &channel:"
-msgstr ""
-
-#. TRANSLATORS: Update channel entry: stable releases for release builds, development builds otherwise
-msgid "Default for this build"
 msgstr ""
 
 #. TRANSLATORS: Update channel entry: tagged releases only

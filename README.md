@@ -132,16 +132,15 @@ app in Applications is a manual step for now.
 
 Two release channels exist:
 
-- **stable** — tagged releases (the default for installer/release builds)
-- **dev** — a rolling prerelease rebuilt on every push to master (the default
-  for development builds)
+- **stable** — tagged releases (the default)
+- **dev** — a rolling prerelease rebuilt on every push to master
 
 Both behaviors are configurable in `%APPDATA%\dictymus\config.toml`
 (Windows) or `~/Library/Application Support/dictymus/config.toml` (macOS):
 
 ```toml
 check_for_updates_on_startup = true
-update_channel = ""   # "" = follow the build type, or pin "stable" / "dev"
+update_channel = "stable"   # or "dev"
 ```
 
 Setting the `DICTYMUS_NO_UPDATE_CHECK` environment variable suppresses the

@@ -137,8 +137,8 @@ Releasing:
   test harness records these with `common::Notifications`
 - `fonts.rs` — SBL BibLit font loading
 - `update.rs` (Windows only) — auto-update glue over the `ship-shape` crate
-  (GitHub Releases + minisign + silent Inno Setup handoff); channel defaults
-  follow the build type via `DICTYMUS_IS_DEV`, `DICTYMUS_NO_UPDATE_CHECK` skips
+  (GitHub Releases + minisign + silent Inno Setup handoff); the channel
+  defaults to stable, `DICTYMUS_NO_UPDATE_CHECK` skips
   the startup check; config keys `check_for_updates_on_startup` / `update_channel`
 
 **Article rendering:** `DictHandle::article_html()` returns raw HTML from

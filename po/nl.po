@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 08:46+0200\n"
+"POT-Creation-Date: 2026-10-07 20:49+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -266,10 +266,6 @@ msgstr "Bij het opstarten controleren op &updates"
 #. TRANSLATORS: Label of the update channel selector in the Options dialog
 msgid "Update &channel:"
 msgstr "Update&kanaal:"
-
-#. TRANSLATORS: Update channel entry: stable releases for release builds, development builds otherwise
-msgid "Default for this build"
-msgstr "Standaard voor deze build"
 
 #. TRANSLATORS: Update channel entry: tagged releases only
 msgid "Stable"

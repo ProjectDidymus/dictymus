@@ -20,17 +20,6 @@ const ASSET_SUFFIX: &str = "-arm64";
 #[cfg(target_os = "macos")]
 const ASSET_SUFFIX: &str = "-macos";
 
-/// The channel this build tracks when the config does not pin one: release
-/// builds (HEAD on a tag) follow stable, development builds follow dev.
-pub fn default_channel() -> UpdateChannel {
-	channel_for(env!("DICTYMUS_IS_DEV"))
-}
-
-/// The channel for a `DICTYMUS_IS_DEV` value: `1` on development builds.
-fn channel_for(is_dev: &str) -> UpdateChannel {
-	if is_dev == "1" { UpdateChannel::Dev } else { UpdateChannel::Stable }
-}
-
 /// Installed copies have the Inno Setup uninstaller next to the exe; portable
 /// unzips do not, and get an in-place zip swap instead of the installer.
 fn is_installer_distribution() -> bool {
@@ -64,15 +53,4 @@ pub fn run_update_check(frame: &Frame, channel: UpdateChannel, silent: bool) {
 	};
 	let trigger = if silent { CheckTrigger::Automatic } else { CheckTrigger::Manual };
 	ship_shape::ui::run_update_check(config, frame, ship_channel, trigger);
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn channel_follows_the_build_flag() {
-		assert_eq!(channel_for("1"), UpdateChannel::Dev);
-		assert_eq!(channel_for("0"), UpdateChannel::Stable);
-	}
 }

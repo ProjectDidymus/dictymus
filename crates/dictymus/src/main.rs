@@ -68,7 +68,7 @@ fn main() {
 		if config.check_for_updates_on_startup
 			&& std::env::var_os("DICTYMUS_NO_UPDATE_CHECK").is_none()
 		{
-			let channel = config.effective_update_channel(update::default_channel());
+			let channel = config.effective_update_channel();
 			update::run_update_check(&app.frame, channel, true);
 		}
 	}) {
