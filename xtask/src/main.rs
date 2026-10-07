@@ -3,7 +3,6 @@
 //!
 //! Usage:
 //!   cargo xtask release
-//!   cargo xtask dist-mac [--target <triple>]
 //!   cargo xtask gen-pot
 //!   cargo xtask translate
 
@@ -13,15 +12,11 @@ use std::process::{Command as Proc, ExitCode};
 mod release;
 mod sanitize_rust;
 
-const MAC_BIN: &str = "dictymus";
-
 /// The parsed subcommand.
 #[derive(Debug, PartialEq, Eq)]
 enum Command {
 	/// Build the app in release mode and package it for this platform.
 	Release,
-	/// Assemble Dictymus.app and package the DMG and updater zip.
-	DistMac { target: Option<String> },
 	/// Regenerate the pot from source.
 	GenPot,
 	/// Regenerate the pot from source and msgmerge it into every po file.
@@ -29,7 +24,7 @@ enum Command {
 }
 
 fn usage() -> String {
-	"usage: cargo xtask <release | dist-mac [--target <triple>] | gen-pot | translate>".to_string()
+	"usage: cargo xtask <release | gen-pot | translate>".to_string()
 }
 
 fn parse(args: &[String]) -> Result<Command, String> {
@@ -39,7 +34,6 @@ fn parse(args: &[String]) -> Result<Command, String> {
 			[] => Ok(Command::Release),
 			[other, ..] => Err(format!("unknown release option: {other}")),
 		},
-		"dist-mac" => parse_dist_mac(rest),
 		"gen-pot" => match rest {
 			[] => Ok(Command::GenPot),
 			[other, ..] => Err(format!("unknown gen-pot option: {other}")),
@@ -52,196 +46,12 @@ fn parse(args: &[String]) -> Result<Command, String> {
 	}
 }
 
-fn parse_dist_mac(rest: &[String]) -> Result<Command, String> {
-	let mut target = None;
-	let mut it = rest.iter();
-	while let Some(arg) = it.next() {
-		match arg.as_str() {
-			"--target" => {
-				let t = it.next().ok_or_else(|| "--target requires a value".to_string())?;
-				target = Some(t.clone());
-			}
-			other => return Err(format!("unknown dist-mac option: {other}")),
-		}
-	}
-	Ok(Command::DistMac { target })
-}
-
-/// The app version, read from crates/dictymus/Cargo.toml at run time.
-fn app_version(root: &Path) -> Result<String, String> {
-	let manifest = root.join("crates").join("dictymus").join("Cargo.toml");
-	let text = std::fs::read_to_string(&manifest)
-		.map_err(|e| format!("read {}: {e}", manifest.display()))?;
-	text.lines()
-		.find_map(|l| l.trim().strip_prefix("version = \"")?.strip_suffix('"').map(str::to_string))
-		.ok_or_else(|| format!("no version in {}", manifest.display()))
-}
-
-/// Copy `src` to `dst`, creating parent directories as needed.
-fn stage_copy(src: &Path, dst: &Path) -> Result<(), String> {
-	if let Some(parent) = dst.parent() {
-		std::fs::create_dir_all(parent).map_err(|e| format!("create {}: {e}", parent.display()))?;
-	}
-	std::fs::copy(src, dst)
-		.map_err(|e| format!("copy {} -> {}: {e}", src.display(), dst.display()))?;
-	Ok(())
-}
-
 /// The repository root, one level above this crate's manifest.
 fn repo_root() -> PathBuf {
 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 		.parent()
 		.expect("xtask manifest dir has a parent")
 		.to_path_buf()
-}
-
-/// The bundle version for the Info.plist keys: the core x.y.z with any
-/// prerelease/build metadata stripped ("0.2.0-rc.1" -> "0.2.0").
-fn bundle_version(version: &str) -> &str {
-	version.split(['-', '+']).next().unwrap_or(version)
-}
-
-/// The Dictymus.app Info.plist. LSMinimumSystemVersion must stay in sync
-/// with MACOSX_DEPLOYMENT_TARGET in the CI macOS job.
-fn info_plist(version: &str) -> String {
-	let version = bundle_version(version);
-	format!(
-		r#"<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>CFBundleName</key>
-	<string>Dictymus</string>
-	<key>CFBundleDisplayName</key>
-	<string>Dictymus</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.projectdidymus.dictymus</string>
-	<key>CFBundleExecutable</key>
-	<string>dictymus</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleVersion</key>
-	<string>{version}</string>
-	<key>CFBundleShortVersionString</key>
-	<string>{version}</string>
-	<key>CFBundleIconFile</key>
-	<string>dictymus</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>11.0</string>
-	<key>NSHighResolutionCapable</key>
-	<true/>
-</dict>
-</plist>
-"#
-	)
-}
-
-/// Run an external tool, failing with its name on spawn errors or a
-/// nonzero exit.
-fn run_tool(mut cmd: Proc) -> Result<(), String> {
-	let program = cmd.get_program().to_string_lossy().into_owned();
-	let status = cmd.status().map_err(|e| format!("failed to spawn {program}: {e}"))?;
-	if !status.success() {
-		return Err(format!("{program} failed"));
-	}
-	Ok(())
-}
-
-fn codesign(path: &Path, identity: &str) -> Result<(), String> {
-	let mut cmd = Proc::new("codesign");
-	cmd.args(["--force", "--timestamp", "--options", "runtime", "--sign", identity]).arg(path);
-	run_tool(cmd)
-}
-
-/// Sign the executable, then the bundle as a whole (deepest first), with
-/// the Developer ID Application identity named by `MACOS_SIGN_IDENTITY`.
-/// A no-op when that variable is unset.
-fn sign_mac_bundle(bundle: &Path, macos_dir: &Path) -> Result<(), String> {
-	let Ok(identity) = std::env::var("MACOS_SIGN_IDENTITY") else {
-		eprintln!("xtask: MACOS_SIGN_IDENTITY not set; skipping code signing");
-		return Ok(());
-	};
-	codesign(&macos_dir.join(MAC_BIN), &identity)?;
-	codesign(bundle, &identity)?;
-	eprintln!("xtask: signed {}", bundle.display());
-	Ok(())
-}
-
-/// Assemble `Dictymus.app` from the release binary, sign it when an
-/// identity is configured, and package `target/dictymus-macos.dmg`
-/// (drag-to-Applications layout) plus `target/dictymus-macos.zip` for the
-/// updater.
-fn run_dist_mac(target: Option<&str>) -> Result<(), String> {
-	if !cfg!(target_os = "macos") {
-		return Err("dist-mac requires macOS (codesign, hdiutil and ditto)".to_string());
-	}
-	let root = repo_root();
-	let release_dir = match target {
-		Some(t) => root.join("target").join(t).join("release"),
-		None => root.join("target").join("release"),
-	};
-	let exe = release_dir.join(MAC_BIN);
-	if !exe.is_file() {
-		return Err(format!(
-			"missing release binary: {} (run: cargo build --release -p dictymus{})",
-			exe.display(),
-			target.map(|t| format!(" --target {t}")).unwrap_or_default(),
-		));
-	}
-
-	let stage = root.join("target").join("dist-mac");
-	let _ = std::fs::remove_dir_all(&stage);
-	let bundle = stage.join("Dictymus.app");
-	let macos_dir = bundle.join("Contents").join("MacOS");
-	let resources_dir = bundle.join("Contents").join("Resources");
-
-	stage_copy(&exe, &macos_dir.join(MAC_BIN))?;
-	#[cfg(unix)]
-	{
-		use std::os::unix::fs::PermissionsExt;
-		std::fs::set_permissions(macos_dir.join(MAC_BIN), std::fs::Permissions::from_mode(0o755))
-			.map_err(|e| format!("chmod {}: {e}", macos_dir.join(MAC_BIN).display()))?;
-	}
-	stage_copy(
-		&root.join("assets").join("icon").join("dictymus.icns"),
-		&resources_dir.join("dictymus.icns"),
-	)?;
-	let plist = bundle.join("Contents").join("Info.plist");
-	std::fs::write(&plist, info_plist(&app_version(&root)?))
-		.map_err(|e| format!("write {}: {e}", plist.display()))?;
-
-	sign_mac_bundle(&bundle, &macos_dir)?;
-
-	// The DMG holds the bundle plus an /Applications symlink so Finder
-	// shows the standard drag-to-install layout.
-	let dmg_staging = stage.join("dmg-staging");
-	std::fs::create_dir_all(&dmg_staging)
-		.map_err(|e| format!("create {}: {e}", dmg_staging.display()))?;
-	let mut copy = Proc::new("ditto");
-	copy.arg(&bundle).arg(dmg_staging.join("Dictymus.app"));
-	run_tool(copy)?;
-	#[cfg(unix)]
-	std::os::unix::fs::symlink("/Applications", dmg_staging.join("Applications"))
-		.map_err(|e| format!("symlink /Applications: {e}"))?;
-
-	let dmg = root.join("target").join("dictymus-macos.dmg");
-	let mut hdiutil = Proc::new("hdiutil");
-	hdiutil
-		.args(["create", "-volname", "Dictymus", "-srcfolder"])
-		.arg(&dmg_staging)
-		.args(["-ov", "-format", "UDZO"])
-		.arg(&dmg);
-	run_tool(hdiutil)?;
-	eprintln!("xtask: wrote {}", dmg.display());
-
-	// ditto keeps the executable bit and xattrs a plain zip writer drops.
-	let zip = root.join("target").join("dictymus-macos.zip");
-	let _ = std::fs::remove_file(&zip);
-	let mut ditto = Proc::new("ditto");
-	ditto.args(["-c", "-k", "--keepParent"]).arg(&bundle).arg(&zip);
-	run_tool(ditto)?;
-	eprintln!("xtask: wrote {}", zip.display());
-	Ok(())
 }
 
 /// Regenerate `po/dictymus.pot` from every crate tagged
@@ -405,7 +215,6 @@ fn main() -> ExitCode {
 	};
 	let result = match cmd {
 		Command::Release => release::release().map_err(|e| e.to_string()),
-		Command::DistMac { target } => run_dist_mac(target.as_deref()),
 		Command::GenPot => run_gen_pot(),
 		Command::Translate => run_translate(),
 	};
@@ -439,40 +248,12 @@ mod tests {
 	}
 
 	#[test]
-	fn dist_mac_options_parse() {
-		assert_eq!(parse(&v(&["dist-mac"])).unwrap(), Command::DistMac { target: None });
-		assert_eq!(
-			parse(&v(&["dist-mac", "--target", "aarch64-apple-darwin"])).unwrap(),
-			Command::DistMac { target: Some("aarch64-apple-darwin".to_string()) },
-		);
-	}
-
-	#[test]
 	fn unknown_or_missing_command_errors() {
 		assert!(parse(&v(&["frobnicate"])).is_err());
 		assert!(parse(&v(&[])).is_err());
 		assert!(parse(&v(&["dist"])).is_err());
 		assert!(parse(&v(&["build-windows"])).is_err());
-		assert!(parse(&v(&["dist-mac", "--bogus"])).is_err());
-	}
-
-	#[test]
-	fn bundle_version_strips_prerelease() {
-		assert_eq!(bundle_version("0.2.0"), "0.2.0");
-		assert_eq!(bundle_version("0.2.0-rc.1"), "0.2.0");
-		assert_eq!(bundle_version("1.2.3+build.5"), "1.2.3");
-	}
-
-	#[test]
-	fn info_plist_carries_identity_and_version() {
-		let plist = info_plist("0.2.0-rc.1");
-		assert!(plist.contains(
-			"<key>CFBundleIdentifier</key>\n\t<string>com.projectdidymus.dictymus</string>"
-		));
-		assert!(plist.contains("<key>CFBundleExecutable</key>\n\t<string>dictymus</string>"));
-		assert!(plist.contains("<key>CFBundleVersion</key>\n\t<string>0.2.0</string>"));
-		assert!(plist.contains("<key>CFBundleShortVersionString</key>\n\t<string>0.2.0</string>"));
-		assert!(plist.contains("<key>LSMinimumSystemVersion</key>\n\t<string>11.0</string>"));
+		assert!(parse(&v(&["dist-mac"])).is_err());
 	}
 
 	#[test]
@@ -485,5 +266,11 @@ mod tests {
 	fn zip_name_carries_the_arch_suffix() {
 		assert_eq!(release::zip_name("x64"), "dictymus-x64.zip");
 		assert_eq!(release::zip_name("arm64"), "dictymus-arm64.zip");
+	}
+
+	#[test]
+	fn mac_assets_match_the_updater_names() {
+		assert_eq!(release::MAC_DMG, "dictymus-macos.dmg");
+		assert_eq!(release::MAC_ZIP, "dictymus-macos.zip");
 	}
 }

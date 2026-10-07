@@ -19,6 +19,13 @@ pub fn zip_name(arch_suffix: &str) -> String {
 	format!("dictymus-{arch_suffix}.zip")
 }
 
+/// The disk image the updater downloads on macOS.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+pub const MAC_DMG: &str = "dictymus-macos.dmg";
+/// The zip of `Dictymus.app` that versions before 0.4.0 download instead.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+pub const MAC_ZIP: &str = "dictymus-macos.zip";
+
 pub fn release() -> Result<()> {
 	let root = repo_root();
 	cargo_build_release(&root, &["dictymus"])?;
@@ -54,9 +61,39 @@ fn package(target_dir: &Path) -> Result<()> {
 	Ok(())
 }
 
-#[cfg(not(windows))]
+/// Copies the executable into the `Dictymus.app` the build script laid out, then writes the disk
+/// image and the zip of the bundle.
+#[cfg(target_os = "macos")]
+fn package(target_dir: &Path) -> Result<()> {
+	use std::{fs, process::Command};
+
+	let exe = target_dir.join("dictymus");
+	if !exe.is_file() {
+		return Err(format!("{} not found after the build", exe.display()).into());
+	}
+	let bundle = target_dir.join("Dictymus.app");
+	let macos_dir = bundle.join("Contents/MacOS");
+	fs::create_dir_all(&macos_dir)?;
+	fs::copy(&exe, macos_dir.join("dictymus"))?;
+
+	let dmg = target_dir.join(MAC_DMG);
+	shipfitter::macos::dmg(&bundle, &dmg)?;
+	eprintln!("xtask: wrote {}", dmg.display());
+
+	let zip = target_dir.join(MAC_ZIP);
+	let _ = fs::remove_file(&zip);
+	let status =
+		Command::new("ditto").args(["-c", "-k", "--keepParent"]).arg(&bundle).arg(&zip).status()?;
+	if !status.success() {
+		return Err("ditto failed to zip Dictymus.app".into());
+	}
+	eprintln!("xtask: wrote {}", zip.display());
+	Ok(())
+}
+
+#[cfg(not(any(windows, target_os = "macos")))]
 fn package(_target_dir: &Path) -> Result<()> {
-	Err("cargo xtask release packages on Windows; use cargo xtask dist-mac on macOS".into())
+	Err("cargo xtask release packages on Windows and macOS only".into())
 }
 
 /// Downloads the WebView2 Evergreen bootstrapper the installer carries into `dir`, unless it is
