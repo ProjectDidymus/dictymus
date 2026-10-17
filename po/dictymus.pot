@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: dictymus 0.4.0\n"
+"Project-Id-Version: dictymus 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 20:49+0200\n"
+"POT-Creation-Date: 2026-10-17 18:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,6 +109,14 @@ msgstr ""
 
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
 msgid "Bundled font unavailable; using system font"
+msgstr ""
+
+#. TRANSLATORS: Error shown when the user guide could not be prepared for the web browser
+msgid "Could not open the user guide."
+msgstr ""
+
+#. TRANSLATORS: Error shown when the web browser could not be started to show the user guide
+msgid "Could not start your web browser to show the user guide."
 msgstr ""
 
 #. TRANSLATORS: Title of the Licenses dialog
@@ -224,6 +232,14 @@ msgstr ""
 
 #. TRANSLATORS: Status bar help for the Exit menu item
 msgid "Exit"
+msgstr ""
+
+#. TRANSLATORS: Help menu item opening the user guide in the web browser; the text after the tab is the keyboard shortcut
+msgid "View Help in &Browser\tF1"
+msgstr ""
+
+#. TRANSLATORS: Status bar help for the View Help in Browser menu item
+msgid "Open the user guide in your web browser"
 msgstr ""
 
 #. TRANSLATORS: Help menu item

@@ -8,6 +8,7 @@ mod app;
 mod article_pane;
 mod dialogs;
 mod fonts;
+mod help;
 mod ipc;
 mod lemma_list;
 mod license_manager;

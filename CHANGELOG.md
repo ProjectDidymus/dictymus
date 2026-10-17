@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A user guide in English and Dutch.
+  Help → View Help in Browser (F1) opens it in your web browser, in the language of the interface.
+  It explains how to search, lists the keys of the Logos layout for Hebrew and Greek, and covers the braille view,
+  protected dictionaries, the options and updates
+
 ## [0.4.1] - 2026-10-17
 
 ### Changed

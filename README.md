@@ -4,50 +4,55 @@ Dictymus is a fast, native, fully accessible StarDict and MDict dictionary reade
 Its primary goal is to support dictionaries for the biblical languages — Hebrew and Greek.
 It is built from the ground up for blind and visually impaired users, with first-class screen reader support.
 
+This file is for people who work on Dictymus.
+To use it, see the [user guide](doc/readme.md) (in Dutch: [handleiding](doc/readme-nl.md)), or download it from
+[didymus.info](https://didymus.info/software/dictymus/).
+
 ## Features
 
-- Native desktop UI via [wxDragon](https://github.com/AllenDang/wxDragon) (wxWidgets), with full screen reader accessibility
+- Native desktop UI via [wxDragon](https://github.com/AllenDang/wxDragon) (wxWidgets), with full screen reader
+  accessibility
 - Reads StarDict and MDict dictionaries through [opendict-rs](https://github.com/callum-gander/opendict-rs);
   `.dict.dz` is read via random access (no full decompression, no side-by-side `.dict` file)
 - Tabbed interface for working with multiple dictionaries at once
-- Live, incremental lemma search with on-the-fly transliteration: type with the
-  Logos Biblical keyboard layout and get Hebrew or Greek glyphs
-- A per-tab history of visited entries in the search field: Down and Up step
-  back and forward through them, or pick one from its dropdown
-- Point-aware matching: an unpointed Hebrew or unaccented Greek query matches
-  every pointing of a lemma, while the points and accents you type narrow the
-  match
+- Live, incremental lemma search with on-the-fly transliteration: type with the Logos Biblical keyboard layout and get
+  [Hebrew](doc/readme.md#typing-hebrew) or [Greek](doc/readme.md#typing-greek) glyphs
+- A per-tab history of visited entries in the search field: Down and Up step back and forward through them, or pick
+  one from its dropdown
+- Point-aware matching: an unpointed Hebrew or unaccented Greek query matches every pointing of a lemma, while the
+  points and accents you type narrow the match
 - Automatic language detection per dictionary (Hebrew vs. Greek)
-- Optional ASCII braille view for Hebrew: lemmas and articles are shown in
-  International Hebrew Braille Code cells (Braille ASCII, lowercase), and the
-  search field takes ASCII braille input directly
+- Optional ASCII braille view for Hebrew: lemmas and articles are shown in International Hebrew Braille Code cells
+  (Braille ASCII, lowercase), and the search field takes ASCII braille input directly
 - Articles rendered in an embedded WebView with cross-reference links (`bword://` scheme)
 - Bundled SBL BibLit font covering Hebrew, Greek, and Latin in a single face
 - Remembers open dictionaries between sessions
-- Automatic updates on Windows and update notifications on macOS, with
-  minisign-verified downloads
-- A single-file `.dicty` container format for distributing dictionaries,
-  optionally sealed (encrypted) with per-user license files — see
-  [Protected dictionaries](#protected-dictionaries)
+- Automatic updates on Windows and update notifications on macOS, with minisign-verified downloads
+- A single-file `.dicty` container format for distributing dictionaries, optionally sealed (encrypted) with per-user
+  license files — see [Protected dictionaries](#protected-dictionaries)
+- A user guide in English and Dutch, embedded in the app and opened with Help → View Help in Browser (F1)
 
 ## Workspace layout
 
-This is a Cargo workspace. The main crates are:
+This is a Cargo workspace:
 
-| Crate | Description |
+| Path | Contents |
 | --- | --- |
-| `dictymus-core` | Pure logic: dictionary loading, language detection, normalization, transliteration, config |
-| `dictymus-container` | The `.dicty` container and `.dictykey` license formats, plus the publisher CLI |
-| `dictymus` | The GUI application (wxWidgets via wxDragon) |
+| `crates/dictymus-core` | Pure logic: dictionary loading, language detection, normalization, transliteration, config |
+| `crates/dictymus-container` | The `.dicty` container and `.dictykey` license formats, plus the publisher CLI |
+| `crates/dictymus` | The GUI application (wxWidgets via wxDragon) |
+| `xtask` | Packaging and translation tasks: `cargo xtask release`, `gen-pot` and `translate` |
+| `po/` | The translation template and the Dutch catalog |
+| `doc/` | The user guide in English and Dutch, compiled into the app and opened by Help → View Help in Browser |
 
 ## Requirements
 
-- Rust (stable, edition 2024). Install via [rustup](https://rustup.rs).
+- Rust (stable, edition 2024).
+  Install via [rustup](https://rustup.rs).
 - **MSVC toolchain** plus **CMake** and **Ninja** — required to compile wxWidgets via wxDragon.
 
-> **All `cargo` commands must run inside a Visual Studio Developer Command
-> Prompt** (or a shell where `vcvars64.bat` has been sourced), because
-> `wxdragon-sys` builds wxWidgets with MSVC and Ninja through CMake.
+> **All `cargo` commands must run inside a Visual Studio Developer Command Prompt** (or a shell where `vcvars64.bat`
+> has been sourced), because `wxdragon-sys` builds wxWidgets with MSVC and Ninja through CMake.
 
 ## Building
 
@@ -55,7 +60,8 @@ This is a Cargo workspace. The main crates are:
 cargo build --release
 ```
 
-This produces the binary in `target/release/`. For a debug build of just the GUI:
+This produces the binary in `target/release/`.
+For a debug build of just the GUI:
 
 ```sh
 cargo build -p dictymus
@@ -67,11 +73,11 @@ To build the release binary and package it for the machine you are on:
 cargo xtask release
 ```
 
-On Windows this writes `dictymus_setup-<arch>.exe` (the installer) and
-`dictymus-<arch>.zip` (the portable copy) to `target/release/`, where `<arch>`
-is `x64` or `arm64`. Inno Setup is used if it is installed; otherwise a pinned
-Inno Setup 7 is downloaded once into `%LOCALAPPDATA%\shipfitter`. On macOS it
-writes `Dictymus.app`, `dictymus-macos.dmg` and `dictymus-macos.zip`.
+On Windows this writes `dictymus_setup-<arch>.exe` (the installer) and `dictymus-<arch>.zip` (the portable copy) to
+`target/release/`, where `<arch>` is `x64` or `arm64`.
+Inno Setup is used if it is installed; otherwise a pinned Inno Setup 7 is downloaded once into
+`%LOCALAPPDATA%\shipfitter`.
+On macOS it writes `Dictymus.app`, `dictymus-macos.dmg` and `dictymus-macos.zip`.
 
 ## Running
 
@@ -86,6 +92,9 @@ cargo run -p dictymus -- <path/to/dictionary.ifo>
 cargo run -p dictymus -- <path/to/dictionary.mdx>
 ```
 
+To keep your own settings safe while you test, set `DICTYMUS_DATA_DIR` to another directory.
+Dictymus then keeps its settings, licenses and logs there.
+
 ## Testing
 
 ```sh
@@ -93,92 +102,86 @@ cargo test                      # all unit tests
 cargo test -p dictymus-core     # core logic only
 ```
 
-UI smoke test (requires the winapp CLI):
+On Windows, `crates/dictymus/tests` also contains UI tests.
+They start the app, press keys, and check what UI Automation reports, including what screen readers are told.
+These tests are skipped by default.
+To run them, close Dictymus, and then run the following command:
 
 ```sh
-pwsh winapp-tests/smoke.ps1 -Binary target/debug/dictymus.exe -Fixture <path/to/dictionary.ifo>
+cargo test -p dictymus -- --ignored
 ```
 
-## Installing on macOS
-
-Download `dictymus-macos.dmg` (Apple silicon, macOS 11 or later) from the
-[releases page](https://github.com/ProjectDidymus/dictymus/releases), open it,
-and drag **Dictymus** to the **Applications** folder.
-
-Builds are not yet signed with an Apple Developer ID, so Gatekeeper blocks the
-first launch. After the "Apple could not verify" dialog, open **System
-Settings → Privacy & Security**, scroll to the Security section, and press
-**Open Anyway** (macOS 15 removed the older right-click → Open shortcut). If
-you instead get *"Dictymus is damaged and can't be opened"*, clear the
-quarantine flag in Terminal:
-
-```sh
-xattr -d com.apple.quarantine /Applications/Dictymus.app
-```
-
-This is needed once per install from the DMG. Updates installed from the
-in-app update download are not quarantined and launch without any dialog.
+The UI tests take over the keyboard and focus, so don't use your computer until they finish.
 
 ## Automatic updates
 
-On Windows and macOS, Dictymus checks for updates silently at startup and on
-demand via **Help → Check for Updates**. Downloads are verified with a
-[minisign](https://jedisct1.github.io/minisign/) signature before anything is
-executed. On Windows, installed copies (via the setup program) update through
-a silent reinstall; portable copies swap the executable in place, which
-requires the executable to live in a user-writable folder. On macOS, the
-verified update is downloaded and Dictymus points you at it; replacing the
-app in Applications is a manual step for now.
+On Windows and macOS, Dictymus checks for updates silently at startup and on demand via **Help → Check for
+Updates**; the [user guide](doc/readme.md#updates) describes what users see.
+Downloads are verified with a [minisign](https://jedisct1.github.io/minisign/) signature before anything is executed.
+On Windows, installed copies (via the setup program) update through a silent reinstall; portable copies swap the
+executable in place, which requires the executable to live in a user-writable folder.
+On macOS, the verified update is downloaded and Dictymus points you at it; replacing the app in Applications is a
+manual step for now.
 
 Two release channels exist:
 
 - **stable** — tagged releases (the default)
 - **dev** — a rolling prerelease rebuilt on every push to master
 
-Both behaviors are configurable in `%APPDATA%\dictymus\config.toml`
-(Windows) or `~/Library/Application Support/dictymus/config.toml` (macOS):
+Both behaviors are configurable in `%APPDATA%\dictymus\config.toml` (Windows) or
+`~/Library/Application Support/dictymus/config.toml` (macOS):
 
 ```toml
 check_for_updates_on_startup = true
 update_channel = "stable"   # or "dev"
 ```
 
-Setting the `DICTYMUS_NO_UPDATE_CHECK` environment variable suppresses the
-startup check (used by the UI tests).
+Setting the `DICTYMUS_NO_UPDATE_CHECK` environment variable suppresses the startup check (used by the UI tests).
 
 ## Protected dictionaries
 
 Dictymus can read dictionaries packaged as single-file `.dicty` containers.
-A container wraps a normal StarDict fileset and is either **unsealed**
-(plain, openable by anyone) or **sealed**: the payload is encrypted with
-XChaCha20-Poly1305 under a per-container content key.
+A container wraps a normal StarDict fileset and is either **unsealed** (plain, openable by anyone) or **sealed**: the
+payload is encrypted with XChaCha20-Poly1305 under a per-container content key.
 
-Sealed dictionaries are unlocked by a `.dictykey` license file. A license
-names its owner, is Ed25519-signed by the publisher (verified offline
-against a key embedded in the app), and carries one or more *scope* keys.
-Each sealed container lists the scopes that can unlock it, so one suite
-license can open several dictionaries — including dictionaries published
-later under the same scope, without reissuing the license. Licenses are
-installed via File → Install License, or by placing the `.dictykey` next
-to the `.dicty` file.
+Sealed dictionaries are unlocked by a `.dictykey` license file.
+A license names its owner, is Ed25519-signed by the publisher (verified offline against a key embedded in the app),
+and carries one or more *scope* keys.
+Each sealed container lists the scopes that can unlock it, so one suite license can open several dictionaries —
+including dictionaries published later under the same scope, without reissuing the license.
+Licenses are installed via File → Licenses… (Ctrl+L) → Import…, which copies them into the app-data `licenses`
+folder, or by placing a `.dictykey` with the same name next to the `.dicty` file (`Lexicon.dictykey` next to
+`Lexicon.dicty`).
+The [user guide](doc/readme.md#protected-dictionaries) describes this for users.
 
-Containers and licenses are built with the `dictymus-container` CLI
-(`keygen`, `pack`, `seal`, `license`, `inspect`); run any subcommand with
-`--help` for usage.
+Containers and licenses are built with the `dictymus-container` CLI (`keygen`, `pack`, `seal`, `license`, `inspect`);
+run any subcommand with `--help` for usage.
 
-**Honest limits.** Dictymus is open source and decrypts on the user's
-machine, so a determined user can extract dictionary content — this
-protection cannot be stronger than the DRM on commercial e-books. What it
-provides rights holders is deterrence and traceability: content is
-unreadable to other tools, every license names its buyer, and altering
-that name breaks both the signature and the key unwrap. Scope keys are
-shared secrets by design; an extracted scope key unlocks every current and
-future dictionary in that scope, so scope granularity (per-dictionary vs.
-suite) bounds the blast radius.
+**Honest limits.**
+Dictymus is open source and decrypts on the user's machine, so a determined user can extract dictionary content —
+this protection cannot be stronger than the DRM on commercial e-books.
+What it provides rights holders is deterrence and traceability: content is unreadable to other tools, every license
+names its buyer, and altering that name breaks both the signature and the key unwrap.
+Scope keys are shared secrets by design; an extracted scope key unlocks every current and future dictionary in that
+scope, so scope granularity (per-dictionary vs. suite) bounds the blast radius.
+
+## Translations
+
+Dictymus uses gettext catalogs through [patois](https://github.com/trypsynth/patois).
+Strings marked with `t()` or `nt()` are collected into `po/dictymus.pot`.
+Each needs a `// TRANSLATORS:` comment just above it, which `tools/check_translators.py` checks in the pre-commit
+hooks.
+To update the template, run `cargo gen-pot`.
+`cargo xtask translate` does the same and then merges the template into every `po/<lang>.po` with `msgmerge`.
+Both need `xgettext` and `msgmerge` on your `PATH`.
+
+The Dutch strings are in `po/nl.po`.
+The Dutch user guide is `doc/readme-nl.md`, which is kept in step with `doc/readme.md` by hand.
 
 ## Pre-commit hooks
 
-This project uses [prek](https://github.com/j178/prek), a Rust-based pre-commit hook runner. Hooks are configured in `prek.toml`.
+This project uses [prek](https://github.com/j178/prek), a Rust-based pre-commit hook runner.
+Hooks are configured in `prek.toml`.
 
 Install prek and set up the hooks:
 
@@ -189,9 +192,8 @@ prek install
 
 ## Releasing
 
-Releases are driven by [cargo-release](https://github.com/crate-ci/cargo-release)
-(`cargo install cargo-release`). Nothing is published to crates.io; the tag is
-what CI builds and publishes.
+Releases are driven by [cargo-release](https://github.com/crate-ci/cargo-release) (`cargo install cargo-release`).
+Nothing is published to crates.io; the tag is what CI builds and publishes.
 
 1. Record notable changes under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 2. From a clean `master`, preview (dry run is the default), then execute:
@@ -201,31 +203,26 @@ what CI builds and publishes.
    cargo release patch --execute
    ```
 
-   cargo-release runs fmt, clippy, the non-GUI crates' tests and the UI tests
-   (these build the GUI crate, so run it from a VS Developer Prompt, and they
-   take over the desktop until they finish), bumps all three crate versions in
-   lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits, tags
-   `X.Y.Z`, and pushes.
-3. The pushed tag triggers CI. Each build job (Windows x64, Windows arm64,
-   macOS) runs `cargo xtask release` and signs what it built with minisign:
-   the Windows installer and zip, or the macOS `dictymus-macos.dmg` (for
-   people and the updater) and `dictymus-macos.zip` (for the updater in
-   versions before 0.4.0). The release job then publishes the GitHub release
-   with the changelog section as its body.
+   cargo-release runs fmt, clippy, the non-GUI crates' tests and the UI tests (these build the GUI crate, so run it
+   from a VS Developer Prompt, and they take over the desktop until they finish), bumps all three crate versions in
+   lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits, tags `X.Y.Z`, and pushes.
+3. The pushed tag triggers CI.
+   Each build job (Windows x64, Windows arm64, macOS) runs `cargo xtask release` and signs what it built with
+   minisign: the Windows installer and zip, or the macOS `dictymus-macos.dmg` (for people and the updater) and
+   `dictymus-macos.zip` (for the updater in versions before 0.4.0).
+   The release job then publishes the GitHub release with the changelog section as its body.
 
 ## License
 
 Dictymus is licensed under the [MIT License](LICENSE).
 
-The bundled SBL BibLit font is **not** covered by that license. It is
-distributed by the [Society of Biblical Literature](https://www.sbl-site.org/resources/fonts/)
-under the [SBL Font End User License Agreement](https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf),
+The bundled SBL BibLit font is **not** covered by that license.
+It is distributed by the [Society of Biblical Literature](https://www.sbl-site.org/resources/fonts/) under the
+[SBL Font End User License Agreement](https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf),
 which permits free non-commercial use and unmodified redistribution.
 Commercial use requires a separate license from SBL.
 
-The ASCII braille view links the [louis-rs](https://github.com/liblouis/louis-rs)
-braille translator and embeds Hebrew braille tables from
-[liblouis](https://github.com/liblouis/liblouis)
-(`crates/dictymus-core/assets/braille-tables/`). Both are licensed under the
-[GNU LGPL 2.1 or later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html);
-their source is available at the linked repositories.
+The ASCII braille view links the [louis-rs](https://github.com/liblouis/louis-rs) braille translator and embeds Hebrew
+braille tables from [liblouis](https://github.com/liblouis/liblouis) (`crates/dictymus-core/assets/braille-tables/`).
+Both are licensed under the [GNU LGPL 2.1 or later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html); their
+source is available at the linked repositories.

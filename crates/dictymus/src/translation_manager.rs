@@ -46,6 +46,10 @@ impl TranslationManager {
 		self.inner.set_language(language_code, WxStdCatalogLoader)
 	}
 
+	pub fn current_language(&self) -> String {
+		self.inner.current_language()
+	}
+
 	pub fn available_languages(&self) -> Vec<LanguageInfo> {
 		self.inner.available_languages()
 	}

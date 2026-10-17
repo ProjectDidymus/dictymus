@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 20:49+0200\n"
+"POT-Creation-Date: 2026-10-17 18:01+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -107,6 +107,14 @@ msgstr "Het meegeleverde lettertype kon niet worden geregistreerd; het systeemle
 #. TRANSLATORS: Status warning when the bundled SBL BibLit font cannot be loaded at all
 msgid "Bundled font unavailable; using system font"
 msgstr "Het meegeleverde lettertype is niet beschikbaar; het systeemlettertype wordt gebruikt"
+
+#. TRANSLATORS: Error shown when the user guide could not be prepared for the web browser
+msgid "Could not open the user guide."
+msgstr "Kan de handleiding niet openen."
+
+#. TRANSLATORS: Error shown when the web browser could not be started to show the user guide
+msgid "Could not start your web browser to show the user guide."
+msgstr "Kan je webbrowser niet starten om de handleiding te tonen."
 
 #. TRANSLATORS: Title of the Licenses dialog
 msgid "Licenses"
@@ -222,6 +230,14 @@ msgstr "A&fsluiten\tCtrl+Q"
 #. TRANSLATORS: Status bar help for the Exit menu item
 msgid "Exit"
 msgstr "Afsluiten"
+
+#. TRANSLATORS: Help menu item opening the user guide in the web browser; the text after the tab is the keyboard shortcut
+msgid "View Help in &Browser\tF1"
+msgstr "Help bekijken in &browser\tF1"
+
+#. TRANSLATORS: Status bar help for the View Help in Browser menu item
+msgid "Open the user guide in your web browser"
+msgstr "De handleiding openen in je webbrowser"
 
 #. TRANSLATORS: Help menu item
 msgid "Check for &Updates..."

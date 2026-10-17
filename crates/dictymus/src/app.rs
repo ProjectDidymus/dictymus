@@ -150,6 +150,9 @@ impl App {
 			menu::ids::OPTIONS => {
 				crate::options::show_options(&frame_for_menu, &config_for_menu, &tabs_for_menu);
 			}
+			menu::ids::VIEW_HELP => {
+				crate::help::view_help_in_browser(&frame_for_menu);
+			}
 			menu::ids::ABOUT => {
 				crate::dialogs::show_about(&frame_for_menu);
 			}

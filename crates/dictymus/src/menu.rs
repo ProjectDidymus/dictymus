@@ -11,6 +11,7 @@ pub mod ids {
 	pub const CHECK_UPDATES: i32 = 5006;
 	pub const OPTIONS: i32 = 5007;
 	pub const LICENSES: i32 = 5008;
+	pub const VIEW_HELP: i32 = 5009;
 }
 
 pub fn create_menu_bar() -> MenuBar {
@@ -49,7 +50,13 @@ pub fn create_menu_bar() -> MenuBar {
 		.append_item(ids::EXIT, &exit_label, &exit_help)
 		.build();
 
-	let help = Menu::builder();
+	// TRANSLATORS: Help menu item opening the user guide in the web browser; the text after the tab is the keyboard shortcut
+	let view_help_label = t("View Help in &Browser\tF1");
+	// TRANSLATORS: Status bar help for the View Help in Browser menu item
+	let view_help_help = t("Open the user guide in your web browser");
+	let help = Menu::builder()
+		.append_item(ids::VIEW_HELP, &view_help_label, &view_help_help)
+		.append_separator();
 	#[cfg(any(windows, target_os = "macos"))]
 	let help = {
 		// TRANSLATORS: Help menu item
