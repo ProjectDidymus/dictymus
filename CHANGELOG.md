@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   It explains how to search, lists the keys of the Logos layout for Hebrew and Greek, and covers the braille view,
   protected dictionaries, the options and updates
 
+### Fixed
+
+- In Hebrew and Greek dictionaries, Alt with a letter now opens its menu, such as Alt+H for Help.
+  Before, the search field typed the letter's Hebrew or Greek counterpart instead
+
 ## [0.4.1] - 2026-10-17
 
 ### Changed

@@ -21,18 +21,11 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 			};
 			if !tab.braille.get()
 				&& let WindowEventData::Keyboard(kbd) = &event
+				&& let Some(text) = logos_text(kbd.get_unicode_key(), kbd.alt_down(), lang)
 			{
-				// Use get_unicode_key for the actual typed character
-				if let Some(code) = kbd.get_unicode_key()
-					&& let Some(ch) = char::from_u32(code as u32)
-					&& ch.is_ascii()
-					&& !ch.is_control()
-					&& let Some(text) = transliterate(ch, lang)
-				{
-					tab.search.write_text(text);
-					kbd.event.skip(false);
-					return;
-				}
+				tab.search.write_text(text);
+				kbd.event.skip(false);
+				return;
 			}
 			event.skip(true);
 		});
@@ -67,6 +60,21 @@ pub fn wire(tab: &Rc<DictionaryTab>) {
 	});
 }
 
+/// What a typed key enters in a Hebrew or Greek tab: the Logos layout's text
+/// for it, or None to let the key through. Alt+letter is left alone so it
+/// still reaches the menu bar as a mnemonic; Ctrl chords arrive as control
+/// characters.
+fn logos_text(unicode_key: Option<i32>, alt_down: bool, lang: &str) -> Option<&'static str> {
+	if alt_down {
+		return None;
+	}
+	let ch = char::from_u32(unicode_key? as u32)?;
+	if !ch.is_ascii() || ch.is_control() {
+		return None;
+	}
+	transliterate(ch, lang)
+}
+
 /// Filter the lemma list by the field's text: the query's key (read as
 /// ASCII braille in braille mode) must be a prefix of the lemma's key, so
 /// typed points narrow the match and untyped ones match any pointing. The
@@ -95,4 +103,28 @@ pub fn apply_filter(tab: &DictionaryTab, exact: Option<usize>) -> bool {
 	let changed = count != tab.result_count.get();
 	tab.result_count.set(count);
 	changed
+}
+
+#[cfg(test)]
+mod tests {
+	use super::logos_text;
+
+	#[test]
+	fn a_typed_key_enters_its_logos_text() {
+		assert_eq!(logos_text(Some('h' as i32), false, "grc"), Some("η"));
+		assert_eq!(logos_text(Some('b' as i32), false, "he"), Some("ב"));
+	}
+
+	#[test]
+	fn alt_with_a_letter_is_left_for_the_menu_bar() {
+		assert_eq!(logos_text(Some('h' as i32), true, "grc"), None);
+		assert_eq!(logos_text(Some('f' as i32), true, "he"), None);
+	}
+
+	#[test]
+	fn control_characters_and_non_ascii_pass_through() {
+		assert_eq!(logos_text(Some(0x0f), false, "grc"), None);
+		assert_eq!(logos_text(Some('é' as i32), false, "grc"), None);
+		assert_eq!(logos_text(None, false, "grc"), None);
+	}
 }

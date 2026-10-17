@@ -17,11 +17,8 @@ use uiautomation::core::UIElement;
 #[test]
 #[ignore = "drives the real GUI via UI Automation; needs an interactive desktop"]
 fn help_menu_starts_with_view_help_in_browser() {
-	let app = common::launch_with(
-		"help-menu",
-		dictymus_core::testing::write_latin,
-		"language = \"en\"\n",
-	);
+	// A Greek tab: Alt+H must reach the menu bar, not the transliteration.
+	let app = common::launch("help-menu");
 	common::wait_for_search_focus(app.pid);
 
 	common::send_keys("{alt}h");
