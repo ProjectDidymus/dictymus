@@ -201,10 +201,11 @@ what CI builds and publishes.
    cargo release patch --execute
    ```
 
-   cargo-release runs fmt, clippy, and the non-GUI crates' tests (the GUI crate is
-   built by CI, so no VS Developer Prompt is needed), bumps all three crate
-   versions in lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits,
-   tags `X.Y.Z`, and pushes.
+   cargo-release runs fmt, clippy, the non-GUI crates' tests and the UI tests
+   (these build the GUI crate, so run it from a VS Developer Prompt, and they
+   take over the desktop until they finish), bumps all three crate versions in
+   lockstep, updates `Cargo.lock`, stamps `CHANGELOG.md`, commits, tags
+   `X.Y.Z`, and pushes.
 3. The pushed tag triggers CI. Each build job (Windows x64, Windows arm64,
    macOS) runs `cargo xtask release` and signs what it built with minisign:
    the Windows installer and zip, or the macOS `dictymus-macos.dmg` (for
