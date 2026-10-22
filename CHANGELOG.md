@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Errors while checking for or installing an update are shown in the language of the interface.
+  Before, their details were in English
+
+### Fixed
+
+- On Windows, Dictymus comes back in front of other windows after installing an update.
+  Before, it reopened behind whatever you were doing
+
 ## [0.5.0] - 2026-10-22
 
 ### Added

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 16:02+0200\n"
+"POT-Creation-Date: 2026-10-22 18:13+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -355,8 +355,62 @@ msgstr "Kan instellingen niet lezen ({}): {}"
 msgid "Settings file is invalid ({}): {}"
 msgstr "Instellingenbestand is ongeldig ({}): {}"
 
+msgid "Current version is not a valid semver."
+msgstr "De huidige versie is geen geldig semver-versienummer."
+
+msgid "Latest release tag is not a valid semver."
+msgstr "De tag van de nieuwste release is geen geldig semver-versienummer."
+
+msgid "Invalid public key"
+msgstr "Ongeldige openbare sleutel"
+
+msgid "Failed to read signature"
+msgstr "Handtekening lezen mislukt"
+
+msgid "Invalid signature"
+msgstr "Ongeldige handtekening"
+
+msgid "Failed to create private download directory"
+msgstr "Privédownloadmap aanmaken mislukt"
+
+msgid "Failed to create file"
+msgstr "Bestand aanmaken mislukt"
+
+msgid "Failed to write file"
+msgstr "Bestand schrijven mislukt"
+
+msgid "Failed to read file for verification"
+msgstr "Bestand lezen voor verificatie mislukt"
+
+msgid "Signature verification failed"
+msgstr "Verificatie van handtekening mislukt"
+
+msgid "Failed to rename verified file"
+msgstr "Geverifieerd bestand hernoemen mislukt"
+
+msgid "Failed to parse release JSON"
+msgstr "Release-JSON verwerken mislukt"
+
+msgid "Latest release does not include downloadable assets."
+msgstr "De nieuwste release bevat geen downloadbare bestanden."
+
+msgid "Update is available but no matching download asset or signature was found."
+msgstr "Er is een update beschikbaar, maar er is geen passend downloadbestand of passende handtekening gevonden."
+
 msgid "Not running from an AppImage; cannot self-update."
 msgstr "Draait niet vanuit een AppImage; zichzelf bijwerken is niet mogelijk."
+
+msgid "Failed to determine exe path"
+msgstr "Exe-pad bepalen mislukt"
+
+msgid "Failed to get exe directory"
+msgstr "Ophalen van exe-map mislukt"
+
+msgid "Could not determine a cache directory: neither XDG_CACHE_HOME nor HOME is set"
+msgstr "Er kon geen cachemap worden bepaald: XDG_CACHE_HOME en HOME zijn geen van beide ingesteld"
+
+msgid "Failed to create cache directory"
+msgstr "Cachemap aanmaken mislukt"
 
 msgid "Failed to get current exe path"
 msgstr "Ophalen van huidig exe-pad mislukt"
@@ -469,9 +523,6 @@ msgstr "%s-update"
 msgid "Downloading update..."
 msgstr "Update downloaden..."
 
-msgid "Update failed"
-msgstr "Update mislukt"
-
 msgid "Preparing update..."
 msgstr "Update voorbereiden..."
 
@@ -495,6 +546,12 @@ msgstr "Veiligheidsverificatie mislukt. Mogelijk is met de update geknoeid: %s"
 
 msgid "Security Error"
 msgstr "Veiligheidsfout"
+
+msgid "The update server returned HTTP error %s."
+msgstr "De updateserver antwoordde met HTTP-fout %s."
+
+msgid "Could not reach the update server: %s"
+msgstr "De updateserver kon niet worden bereikt: %s"
 
 #. TRANSLATORS: Duration segment for hours (for example, "1 hour" or "5 hours"). The %d placeholder is replaced with the count.
 msgid "%d hour"

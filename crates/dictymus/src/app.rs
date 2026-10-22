@@ -191,6 +191,8 @@ impl App {
 	pub fn show(&self) {
 		self.frame.show(true);
 		self.frame.centre();
+		#[cfg(any(windows, target_os = "macos"))]
+		crate::update::bring_to_front_after_update(&self.frame);
 		if !self.startup_errors.is_empty() {
 			crate::dialogs::show_error(&self.frame, &self.startup_errors.join("\n\n"));
 		}

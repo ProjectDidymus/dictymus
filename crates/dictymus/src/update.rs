@@ -1,4 +1,4 @@
-use std::{env, process, sync::Arc, thread, time::Duration};
+use std::{env, sync::Arc};
 
 use dictymus_core::config::UpdateChannel;
 use ship_shape::{InstallKind, UpdaterConfig, ui::CheckTrigger};
@@ -52,31 +52,16 @@ pub fn run_update_check(frame: &Frame, channel: UpdateChannel, silent: bool) {
 		UpdateChannel::Dev => ship_shape::UpdateChannel::Dev,
 	};
 	let trigger = if silent { CheckTrigger::Automatic } else { CheckTrigger::Manual };
-	ship_shape::ui::run_update_check_with_exit_handler(
-		config,
-		frame,
-		ship_channel,
-		trigger,
-		quit_for_update,
-	);
+	// Once the update is ready, ship-shape closes the frame, whose close
+	// handler saves the session, and ends the process if it is still running
+	// 15 seconds later.
+	ship_shape::ui::run_update_check(config, frame, ship_channel, trigger);
 }
 
-/// Called by ship-shape on the UI thread once the installer is ready. Closing
-/// the frame runs its close handler, which saves the session; ship-shape's
-/// default `process::exit` would skip it.
-fn quit_for_update() {
-	tracing::info!("quitting for update");
-	if let Some(app) = crate::app::app_from_ptr() {
-		app.frame.close(true);
+/// Windows opens a window that an update relaunched behind whatever the user
+/// was doing; bring the frame forward instead. Call once, after it is shown.
+pub fn bring_to_front_after_update(frame: &Frame) {
+	if ship_shape::ui::bring_to_front_after_update(frame) {
+		tracing::info!("relaunched after an update, brought the window to the front");
 	}
-	if let Some(wx_app) = wxdragon::app::get_app_instance() {
-		wx_app.exit_main_loop();
-	}
-	// The installer script waits for this process with no timeout, so a
-	// stalled shutdown would stall the update with it.
-	thread::spawn(|| {
-		thread::sleep(Duration::from_secs(10));
-		tracing::warn!("still running 10 seconds after quitting for an update, exiting");
-		process::exit(0);
-	});
 }
