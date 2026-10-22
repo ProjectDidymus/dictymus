@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Before, the search field typed the letter's Hebrew or Greek counterpart instead
 - The last entries of a dictionary, such as תֹּתַר in the Hebrew dictionary, show their article again.
   Since 0.4.0 they showed "Article unavailable."
+- Installing an update keeps the dictionaries you had open.
+  Before, Dictymus restarted with the dictionaries that were open when you last closed it
 
 ## [0.4.1] - 2026-10-17
 

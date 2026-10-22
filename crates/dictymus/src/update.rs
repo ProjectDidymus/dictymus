@@ -1,4 +1,4 @@
-use std::{env, sync::Arc};
+use std::{env, process, sync::Arc, thread, time::Duration};
 
 use dictymus_core::config::UpdateChannel;
 use ship_shape::{InstallKind, UpdaterConfig, ui::CheckTrigger};
@@ -52,5 +52,31 @@ pub fn run_update_check(frame: &Frame, channel: UpdateChannel, silent: bool) {
 		UpdateChannel::Dev => ship_shape::UpdateChannel::Dev,
 	};
 	let trigger = if silent { CheckTrigger::Automatic } else { CheckTrigger::Manual };
-	ship_shape::ui::run_update_check(config, frame, ship_channel, trigger);
+	ship_shape::ui::run_update_check_with_exit_handler(
+		config,
+		frame,
+		ship_channel,
+		trigger,
+		quit_for_update,
+	);
+}
+
+/// Called by ship-shape on the UI thread once the installer is ready. Closing
+/// the frame runs its close handler, which saves the session; ship-shape's
+/// default `process::exit` would skip it.
+fn quit_for_update() {
+	tracing::info!("quitting for update");
+	if let Some(app) = crate::app::app_from_ptr() {
+		app.frame.close(true);
+	}
+	if let Some(wx_app) = wxdragon::app::get_app_instance() {
+		wx_app.exit_main_loop();
+	}
+	// The installer script waits for this process with no timeout, so a
+	// stalled shutdown would stall the update with it.
+	thread::spawn(|| {
+		thread::sleep(Duration::from_secs(10));
+		tracing::warn!("still running 10 seconds after quitting for an update, exiting");
+		process::exit(0);
+	});
 }
