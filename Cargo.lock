@@ -426,9 +426,9 @@ dependencies = [
 
 [[package]]
 name = "crc32fast"
-version = "1.5.2"
+version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78"
+checksum = "0ba106e844045ddc02c20768ac4b0b7cb45f2cc2ecbd833ac9f5dacb183c2055"
 dependencies = [
  "cfg-if",
 ]
@@ -2307,24 +2307,26 @@ dependencies = [
 
 [[package]]
 name = "ship-shape"
-version = "0.3.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24d8d8a8c8427c40bf6c501aa42af704d1be34ffa35bd3f87dd569a4fff81899"
+checksum = "8b0b7c20aa2e52b4bc6836cae11b8ac863a0263139522d11f8b09ee123dcd3a4"
 dependencies = [
  "homeport",
  "minisign-verify",
  "patois",
  "pulldown-cmark",
  "serde",
+ "tempfile",
  "ureq",
+ "wx-utils",
  "wxdragon",
 ]
 
 [[package]]
 name = "shipfitter"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ca28cb1e794e450a34dde48c3766c99d35d9ed706653a05bd8a86f79728ded0"
+checksum = "b83e6e576eb2735a36051a15fec07c0fedede422d74d550ac46f4128182bd0d7"
 dependencies = [
  "embed-manifest",
  "finl_unicode",
@@ -3275,6 +3277,16 @@ name = "writeable"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
+
+[[package]]
+name = "wx-utils"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee31824ac70e91cf5de61fc01e82b850a8521158177c393204d877eb52349a7"
+dependencies = [
+ "patois",
+ "wxdragon",
+]
 
 [[package]]
 name = "wxdragon"

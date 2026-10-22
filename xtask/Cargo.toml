@@ -7,4 +7,4 @@ publish = false
 [dependencies]
 patois-build = { workspace = true }
 serde_json = { workspace = true }
-shipfitter = { version = "0.2.1", features = ["package"] }
+shipfitter = { version = "0.2.3", features = ["package"] }

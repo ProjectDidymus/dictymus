@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dictymus 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 18:01+0200\n"
+"POT-Creation-Date: 2026-10-22 16:02+0200\n"
 "PO-Revision-Date: 2026-08-14 21:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -300,6 +300,8 @@ msgid "Show Hebrew as ASCII &braille"
 msgstr "Hebreeuws als He&Braille tonen"
 
 #. TRANSLATORS: Label for the confirmation button
+#. TRANSLATORS: OK button in the Set Shortcut dialog that accepts the captured key combination.
+#. TRANSLATORS: OK button that saves the customized shortcuts in the Keyboard Shortcuts dialog.
 msgid "OK"
 msgstr "OK"
 
@@ -354,19 +356,88 @@ msgid "Settings file is invalid ({}): {}"
 msgstr "Instellingenbestand is ongeldig ({}): {}"
 
 msgid "Not running from an AppImage; cannot self-update."
-msgstr ""
+msgstr "Draait niet vanuit een AppImage; zichzelf bijwerken is niet mogelijk."
 
 msgid "Failed to get current exe path"
-msgstr "Kan het pad van het huidige uitvoerbare bestand niet bepalen"
+msgstr "Ophalen van huidig exe-pad mislukt"
 
 msgid "Failed to launch update script"
-msgstr "Kan het updatescript niet starten"
+msgstr "Updatescript starten mislukt"
+
+msgid "Failed to start installation"
+msgstr "Installatie starten mislukt"
+
+msgid "Failed to stage the application"
+msgstr "Applicatie voorbereiden mislukt"
+
+msgid "The update contains a different application."
+msgstr "De update bevat een andere applicatie."
+
+msgid "Could not determine the update log directory."
+msgstr "De map van het updatelogboek kon niet worden bepaald."
+
+msgid "Failed to launch update helper"
+msgstr "Updatehulpprogramma starten mislukt"
+
+msgid "The update helper did not start. See the log:"
+msgstr "Het updatehulpprogramma is niet gestart. Zie het logboek:"
+
+msgid "The application did not quit within 60 seconds. The current app was kept."
+msgstr "De applicatie is niet binnen 60 seconden afgesloten. De huidige applicatie is behouden."
+
+msgid "The installation changed while waiting. The current app was kept."
+msgstr "De installatie is tijdens het wachten gewijzigd. De huidige applicatie is behouden."
+
+msgid "Could not move the current application. The current app was kept."
+msgstr "De huidige applicatie kon niet worden verplaatst en is behouden."
+
+msgid "Could not install the update. The previous version was restored."
+msgstr "De update kon niet worden geïnstalleerd. De vorige versie is hersteld."
+
+msgid "Could not restore the previous version. Recover it from:"
+msgstr "De vorige versie kon niet worden hersteld. Herstel deze vanuit:"
+
+msgid "macOS could not launch the update. The previous version is preserved at:"
+msgstr "macOS kon de update niet starten. De vorige versie is bewaard in:"
+
+msgid "Application update failed"
+msgstr "Applicatie-update mislukt"
+
+msgid "Log:"
+msgstr "Logboek:"
+
+msgid "Update cancelled."
+msgstr "Update geannuleerd."
 
 msgid "Failed to open disk image"
-msgstr ""
+msgstr "Schijfkopie openen mislukt"
 
 msgid "The update has been downloaded and its disk image opened. Quit %s and drag the new version into Applications to finish installing."
-msgstr ""
+msgstr "De update is gedownload en de schijfkopie is geopend. Sluit %s af en sleep de nieuwe versie naar Programma's om de installatie te voltooien."
+
+msgid "Invalid application metadata"
+msgstr "Ongeldige metagegevens van applicatie"
+
+msgid "The disk image must contain exactly one matching application."
+msgstr "De schijfkopie moet precies één overeenkomende applicatie bevatten."
+
+msgid "The update must be signed by the application's developer team"
+msgstr "De update moet zijn ondertekend door het ontwikkelaarsteam van de applicatie"
+
+msgid "Invalid application executable."
+msgstr "Ongeldig uitvoerbaar bestand van applicatie."
+
+msgid "Invalid application executable"
+msgstr "Ongeldig uitvoerbaar bestand van applicatie"
+
+msgid "Application signature verification failed"
+msgstr "Verificatie van applicatiehandtekening mislukt"
+
+msgid "Failed to mount disk image"
+msgstr "Schijfkopie activeren mislukt"
+
+msgid "Failed to unmount disk image"
+msgstr "Schijfkopie deactiveren mislukt"
 
 msgid ""
 "Update downloaded to: %s\n"
@@ -379,31 +450,36 @@ msgid "Update to %s"
 msgstr "Bijwerken naar %s"
 
 msgid "A new version of %s is available. Here's what's new:"
-msgstr "Er is een nieuwe versie van %s beschikbaar. Dit is er nieuw:"
+msgstr "Een nieuwe versie van %s is beschikbaar. Dit is er nieuw:"
 
+#. TRANSLATORS: Label for the confirmation dialog "Yes" button
 msgid "&Yes"
 msgstr "&Ja"
 
+#. TRANSLATORS: Label for the confirmation dialog "No" button
 msgid "&No"
 msgstr "&Nee"
 
 msgid "No release notes provided."
-msgstr "Geen release-opmerkingen beschikbaar."
+msgstr "Geen releaseopmerkingen beschikbaar."
 
 msgid "%s Update"
 msgstr "%s-update"
 
 msgid "Downloading update..."
-msgstr "Update wordt gedownload..."
+msgstr "Update downloaden..."
 
 msgid "Update failed"
 msgstr "Update mislukt"
 
-msgid "Update Ready"
-msgstr "Update gereed"
+msgid "Preparing update..."
+msgstr "Update voorbereiden..."
 
 msgid "Error"
 msgstr "Fout"
+
+msgid "Update Ready"
+msgstr "Update gereed"
 
 msgid "No updates available."
 msgstr "Geen updates beschikbaar."
@@ -415,7 +491,136 @@ msgid "Info"
 msgstr "Info"
 
 msgid "Security verification failed. The update might have been tampered with: %s"
-msgstr "Beveiligingsverificatie mislukt. Er is mogelijk met de update geknoeid: %s"
+msgstr "Veiligheidsverificatie mislukt. Mogelijk is met de update geknoeid: %s"
 
 msgid "Security Error"
-msgstr "Beveiligingsfout"
+msgstr "Veiligheidsfout"
+
+#. TRANSLATORS: Duration segment for hours (for example, "1 hour" or "5 hours"). The %d placeholder is replaced with the count.
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d uur"
+msgstr[1] "%d uur"
+
+#. TRANSLATORS: Duration segment for minutes (for example, "1 minute" or "5 minutes"). The %d placeholder is replaced with the count.
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d minuut"
+msgstr[1] "%d minuten"
+
+#. TRANSLATORS: Duration segment for seconds (for example, "1 second" or "5 seconds"). The %d placeholder is replaced with the count.
+msgid "%d second"
+msgid_plural "%d seconds"
+msgstr[0] "%d seconde"
+msgstr[1] "%d seconden"
+
+#. TRANSLATORS: Title of the Set Shortcut dialog. The {} placeholder is replaced with the action's display name.
+msgid "Set Shortcut for {}"
+msgstr "Sneltoets instellen voor {}"
+
+#. TRANSLATORS: Instruction text in the Set Shortcut dialog. The {} placeholder is replaced with the action's display name.
+msgid "Configure shortcut for {}:"
+msgstr "Sneltoets configureren voor {}:"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Command modifier in the shortcut, on macOS.
+msgid "&Cmd"
+msgstr "&Cmd"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Option modifier in the shortcut, on macOS.
+msgid "&Option"
+msgstr "&Option"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Ctrl modifier in the shortcut.
+msgid "&Ctrl"
+msgstr "&Ctrl"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Alt modifier in the shortcut.
+msgid "&Alt"
+msgstr "&Alt"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Shift modifier in the shortcut.
+msgid "&Shift"
+msgstr "&Shift"
+
+#. TRANSLATORS: Checkbox in the Set Shortcut dialog that includes the Windows logo key in a system-wide shortcut.
+msgid "&Win"
+msgstr "&Win"
+
+#. TRANSLATORS: Label next to the key field in the Set Shortcut dialog.
+msgid "&Key:"
+msgstr "&Toets:"
+
+msgid "Tip: click in the key field and press the key combination you want."
+msgstr "Tip: klik in het toetsveld en druk op de gewenste toetsencombinatie."
+
+#. TRANSLATORS: Placeholder shown in the Set Shortcut dialog before any key combination has been captured
+msgid "Detected: (none)"
+msgstr "Gedetecteerd: (geen)"
+
+msgid "Detected: {}"
+msgstr "Gedetecteerd: {}"
+
+msgid "No key detected"
+msgstr "Geen toets gedetecteerd"
+
+#. TRANSLATORS: Button in the Set Shortcut dialog that clears the captured key combination.
+msgid "&Clear"
+msgstr "&Wissen"
+
+#. TRANSLATORS: Title of the Keyboard Shortcuts dialog.
+msgid "Customize Keyboard Shortcuts"
+msgstr "Toetsenbordsneltoetsen aanpassen"
+
+#. TRANSLATORS: Label above the list of shortcuts for a tab in the Keyboard Shortcuts dialog.
+msgid "&Shortcuts:"
+msgstr "&Sneltoetsen:"
+
+#. TRANSLATORS: Button in the Keyboard Shortcuts dialog that opens a prompt to assign a new shortcut to the selected action.
+msgid "&Set Shortcut..."
+msgstr "Sneltoets &instellen..."
+
+#. TRANSLATORS: Button in the Keyboard Shortcuts dialog that removes the shortcut assigned to the selected action.
+msgid "&Clear Shortcut"
+msgstr "Sneltoets &wissen"
+
+#. TRANSLATORS: Button in the Keyboard Shortcuts dialog that restores the selected action's shortcut to its default.
+msgid "&Reset to Default"
+msgstr "&Herstellen naar standaardwaarden"
+
+#. TRANSLATORS: Button in the Keyboard Shortcuts dialog that restores every action's shortcut to its default.
+msgid "Reset &All to Defaults"
+msgstr "&Alles herstellen naar standaardwaarden"
+
+msgid "A system-wide shortcut needs Ctrl, Alt, or Win, or it would take that key from every other program."
+msgstr "Een systeembrede sneltoets moet Ctrl, Alt of Win bevatten, anders kunnen alle andere programma's die toets niet meer gebruiken."
+
+#. TRANSLATORS: Title of the dialog refusing a shortcut that can't be used.
+msgid "Shortcut Not Allowed"
+msgstr "Sneltoets niet toegestaan"
+
+#. TRANSLATORS: the three {} are, in order: the key chord, the action it's currently assigned to, and the action being (re)assigned to it
+msgid "'{}' is already assigned to '{}'. Reassign it to '{}'?"
+msgstr "'{}' is al toegewezen aan '{}'. Opnieuw toewijzen aan '{}'?"
+
+#. TRANSLATORS: Title of the dialog warning that a shortcut is already taken
+msgid "Shortcut Conflict"
+msgstr "Sneltoetsconflict"
+
+#. TRANSLATORS: Confirmation prompt shown when resetting keyboard shortcuts that span more than one tab to their defaults.
+msgid "Reset all shortcuts to their default values?"
+msgstr "Alle sneltoetsen naar de standaardwaarden herstellen?"
+
+#. TRANSLATORS: Confirmation prompt shown when resetting the current tab's keyboard shortcuts to their defaults.
+msgid "Reset all shortcuts in this tab to their default values?"
+msgstr "Alle sneltoetsen op dit tabblad naar de standaardwaarden herstellen?"
+
+#. TRANSLATORS: Title of the confirmation dialog for resetting keyboard shortcuts to their defaults.
+msgid "Reset Shortcuts"
+msgstr "Sneltoetsen herstellen"
+
+msgid "None"
+msgstr "Geen"
+
+#. TRANSLATORS: A shortcut in the Customize Keyboard Shortcuts list whose key is not on the keyboard layout in use, so it cannot be pressed. The {} placeholder is replaced with the shortcut, for example "Ctrl+;".
+msgid "{} (not on this keyboard layout)"
+msgstr "{} (niet op deze toetsenbordindeling)"

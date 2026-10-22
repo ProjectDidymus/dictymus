@@ -23,7 +23,7 @@ tracing-appender = { workspace = true }
 live-region = "0.3.3"
 
 [target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
-ship-shape = "0.3.0"
+ship-shape = "0.4.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc = "0.2.7"
@@ -40,7 +40,7 @@ windows = { version = "0.62", features = [
 
 [build-dependencies]
 patois-build = { workspace = true }
-shipfitter = { version = "0.2.2", features = ["docs", "windows-resources"] }
+shipfitter = { version = "0.2.3", features = ["docs", "windows-resources"] }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 windows = { version = "0.62", features = [
