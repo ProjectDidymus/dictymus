@@ -1651,7 +1651,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 [[package]]
 name = "opendict-rs"
 version = "0.1.0"
-source = "git+https://github.com/leonardder/opendict-rs?branch=dictymus#edae0c6d7b3ad08201ebe7434434b8b04e8d3f40"
+source = "git+https://github.com/leonardder/opendict-rs?branch=dictymus#6869645536be05fdd976d4bd98fb7af1e504239f"
 dependencies = [
  "adler2",
  "encoding_rs",
